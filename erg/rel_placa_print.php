@@ -1,7 +1,10 @@
 <?
   session_start();
   require_once("../libs/php/funcoes.php");
-  require_once("../libs/php/conn.php");
+  //require_once("../libs/php/conn.php");
+
+echo "Sistema de impressão de relatório...";
+exit();
 
   $agora = now();
 
@@ -69,9 +72,7 @@ $sql = "SELECT
         <header class="panel-heading" style="height:60px">
           <h3 style="margin-top:0px"><small class='text-muted'><i>Placa do veículo:</small> <b><?=$_GET['placa'];?></b></i></h3>
           <div class="panel-actions">
-              <button id="bt_print" class='btn btn-sm btn-info'><i class='fa fa-print'></i> Imprimir relatório</button>
-              <a href="erg/rel_autuados.php"><button class='btn btn-sm btn-default loading'><i class='fa fa-mail-reply'></i> Voltar</button></a>
-
+              <a href="erg/rel_autuados.php"><button class='btn btn-sm btn-default loading'>Voltar</button></a>
           </div>
         </header>
 
@@ -187,11 +188,6 @@ $sql = "SELECT
         </div>
 </section>
 <script>
-$("#bt_print").click(function(){
-	var vw = window.open('erg/rel_placa_print.php?placa=<?=$_GET['placa'];?>',
-									     'popup',
-								 	     'width=800, height=600, top=10, left=10, scrollbars=no,location=no,status=no');
-});
 $(".loading").click(function(event){ $(this).addClass("disabled").html("<i class=\"fa fa-spinner fa-spin\"></i> <small>Aguarde</small>");});
 //$("#bt_refresh").click(function(){ $("#bt_refresh_icon").addClass('fa-spin'); $("#wrap").load("erg/rel_placa.php");});
 </script>
