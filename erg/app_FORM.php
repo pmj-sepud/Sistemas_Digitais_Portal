@@ -9,22 +9,22 @@
   {
 
       $sql   = "SELECT
-                  P.id    as parking_id,
-                  P.name  as parking_code,
-                	PT.type as parking_type,
-                	PT.time as parking_time,
-                  PT.time_warning as parking_time_warning,
+                  P.id            AS parking_id,
+                  P.name          AS parking_code,
+                	PT.type         AS parking_type,
+                	PT.time         AS parking_time,
+                  PT.time_warning AS parking_time_warning,
                 	U.NAME,
                 	U.id_company,
-                	C.NAME AS company_name,
-                	C.acron AS company_acron,
+                	C.NAME          AS company_name,
+                	C.acron         AS company_acron,
                 	SP.*
                 FROM
-                	sepud.eri_schedule_parking SP
-                	JOIN sepud.users U ON U.ID = SP.id_user
-                	JOIN sepud.company C ON C.ID = U.id_company
-                	JOIN sepud.eri_parking P ON P.id = SP.id_parking
-                	JOIN sepud.eri_parking_type PT ON PT.id = P.id_parking_type
+                	     sepud.eri_schedule_parking SP
+                	JOIN sepud.users                 U ON U.ID = SP.id_user
+                	JOIN sepud.company               C ON C.ID = U.id_company
+                	JOIN sepud.eri_parking           P ON P.id = SP.id_parking
+                	JOIN sepud.eri_parking_type     PT ON PT.id = P.id_parking_type
                   WHERE
                   	SP.id = '".$id."'";
       $res   = pg_query($conn_neogrid,$sql)or die("Error ".__LINE__);
@@ -251,22 +251,25 @@ echo "</div>";
 
                                         }
                               echo "<button type='button' class='btn btn-lg btn-block btn-default disabled' role='button' style='margin-bottom:5px'><span class='text-muted'>Guinchar</span></button>";
-                              echo "<a href='erg/app_FORM_sql.php?id=".$id."&acao=baixar'>   <button type='button' class='btn btn-lg btn-block btn-primary loading' role='button'                         >Baixar</button></a>";
+                              echo "<a href='erg/app_FORM_sql.php?id=".$id."&acao=baixar'><button type='button' class='btn btn-lg btn-block btn-primary loading' role='button'>Baixar</button></a>";
 
                             }else{
 
                               echo "<button type='button' class='btn btn-lg btn-block btn-default disabled' role='button' style='margin-bottom:5px'><span class='text-muted'>Notificar</span></button>";
-
-
-                                if($dados['notified'] == "t" && $dados['winch_timestamp'] == "")
+                                if($dados['notified'] == "t" && $dados['winch_timestamp'] == "" && $dados['closed'] != "t")
                                 {
                                   echo "<a href='erg/app_FORM_sql.php?id=".$id."&acao=guinchar'><button type='button' class='btn btn-lg btn-block  btn-dark  loading' role='button' style='margin-bottom:5px'>Guinchar</button></a>";
                                 }else {
                                   echo "<button type='button' class='btn btn-lg btn-block btn-default disabled' role='button' style='margin-bottom:5px'><span class='text-muted'>Guinchar</span></button>";
                                 }
 
+                              if($dados['closed'] == "t")
+                              {
+                                echo "<button type='button' class='btn btn-lg btn-block btn-default disabled' role='button'><span class='text-muted'>Baixar</span></button>";
+                              }else{
+                                echo "<a href='erg/app_FORM_sql.php?id=".$id."&acao=baixar'><button type='button' class='btn btn-lg btn-block btn-primary' role='button'>Baixar</button></a>";
+                              }
 
-                              echo "<button type='button' class='btn btn-lg btn-block btn-default disabled' role='button'                             ><span class='text-muted'>Baixar</span></button>";
                             }
 
 

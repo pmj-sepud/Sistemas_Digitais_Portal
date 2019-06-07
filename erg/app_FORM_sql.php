@@ -9,9 +9,7 @@
     if($acao == "inserir" && (($license_plate_letters && $license_plate_numbers != "") || $license_plate_numbers_mercosul != ""))
     {
 
-
       $agora     = now();
-
       //////////////////////////////////////////////////////////
       //Bloqueios de inserção após o horario final de operação//
       //Dia de semana após as 18:30
@@ -51,14 +49,14 @@
       if($multi_parking == "false") //Se a vaga não permite multiplos veiculos, baixa o anterior (caso exista)
       {
           $sql = "UPDATE sepud.eri_schedule_parking
-                  SET closed = true, closed_timestamp = '".$agora['datatimesrv']."'
+                  SET closed = true, closed_timestamp = '".$agora['datatimesrv']."', id_user_closed = '".$_SESSION['id']."', obs = obs || ' - BAIXADO: outro veículo nesta vaga.'
                   WHERE id_parking = '".$id_parking."' AND closed_timestamp is null AND timestamp >= '".$agora['datasrv']." 00:00:00'";
           pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
       }
 
       //Se a placa estiver ativa em outra vaga, também realiza a baixa
       $sql = "UPDATE sepud.eri_schedule_parking
-              SET closed = true, closed_timestamp = '".$agora['datatimesrv']."'
+              SET closed = true, closed_timestamp = '".$agora['datatimesrv']."', id_user_closed = '".$_SESSION['id']."', obs = obs || ' - BAIXADO: veiculo encontrado em outra vaga.'
               WHERE licence_plate = '".$placa."' AND id_parking != '".$id_parking."' AND closed_timestamp is null AND timestamp >= '".$agora['datasrv']." 00:00:00'";
       pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
 

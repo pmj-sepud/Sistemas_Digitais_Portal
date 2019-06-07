@@ -10,22 +10,23 @@ if($_GET['placa']!="")
 
 
 $sql = "SELECT
-        	U.NAME AS nome_registrou,
-          UN.NAME AS nome_notificou,
-          UW.NAME AS nome_guinchou,
-          UC.NAME AS nome_baixou,
-        	S.NAME AS logradouro,
-        	PT.TYPE AS tipo_vaga,
-        	PT.TIME AS tempo_permanencia,
-        	PT.observation AS tipo_desc,
-        	P.NAME AS vaga,
-        	P.description AS vaga_obs,
+        	U.NAME           AS nome_registrou,
+          UN.NAME          AS nome_notificou,
+          UW.NAME          AS nome_guinchou,
+          UC.NAME          AS nome_baixou,
+        	S.NAME           AS logradouro,
+        	PT.TYPE          AS tipo_vaga,
+        	PT.TIME          AS tempo_permanencia,
+        	PT.observation   AS tipo_desc,
+        	P.NAME           AS vaga,
+        	P.description    AS vaga_obs,
         	SP.licence_plate AS placa_veiculo,
-        	SP.ID AS id_registro,
+        	SP.ID            AS id_registro,
         	SP.TIMESTAMP,
         	SP.notified_timestamp,
         	SP.closed_timestamp,
-        	SP.winch_timestamp
+        	SP.winch_timestamp,
+          SP.obs
         FROM
         			      sepud.eri_schedule_parking SP
         	     JOIN sepud.eri_parking 					P ON  P.ID = SP.id_parking
@@ -76,6 +77,8 @@ $sql = "SELECT
           <div class="row">
             <div class="col-sm-12">
                       <?
+                        //echo "<pre>"; print_r($dados); echo "</pre>";
+
                         if(isset($res) && pg_num_rows($res)){
                               echo "<table class='table table-condensed'>";
 
@@ -133,15 +136,12 @@ $sql = "SELECT
                                   echo "<td colspan='2'>".$dados[$i]['nome_registrou']."</td>";
                                   echo "<td>".formataData($dados[$i]['timestamp'],1)."</td>";
                                   echo "<td>&nbsp;</td>";
-                                //  echo "<td>".$notified_timestamp_hour.$diff_notified."</td>";
-                                //  echo "<td>".$winch_timestamp_hour.$diff_winch."</td>";
-                                //  echo "<td>".$closed_timestamp_hour.$diff_closed."</td>";
                                 echo "</tr>";
 
                                 if($dados[$i]['notified_timestamp']!="")
                                 {
                                     echo "<tr><td colspan='2' class='text-right'>Notificação:</td>";
-                                      echo "<td colspan='2'>".($dados[$i]['nome_notificou']=!""?$dados[$i]['nome_notificou']:"- - - -")."</td>";
+                                      echo "<td colspan='2'>".($dados[$i]['nome_notificou']!=""?$dados[$i]['nome_notificou']:"<span class='text-muted'>- - - -</span>")."</td>";
                                       echo "<td>".formataData($dados[$i]['notified_timestamp'],1)."</td>";
                                       echo "<td>".$diff_notified." min.</td>";
                                     echo "</tr>";
@@ -150,7 +150,7 @@ $sql = "SELECT
                                 if($dados[$i]['winch_timestamp']!="")
                                 {
                                       echo "<tr><td colspan='2' class='text-right'>Guinchamento:</td>";
-                                        echo "<td colspan='2'>".($dados[$i]['nome_guinchou']=!""?$dados[$i]['nome_guinchou']:"- - - -")."</td>";
+                                        echo "<td colspan='2'>".($dados[$i]['nome_guinchou']!=""?$dados[$i]['nome_guinchou']:"<span class='text-muted'>- - - -</span>")."</td>";
                                         echo "<td>".formataData($dados[$i]['winch_timestamp'],1)."</td>";
                                         echo "<td>".$diff_winch." min.</td>";
                                       echo "</tr>";
@@ -159,22 +159,11 @@ $sql = "SELECT
                                 if($dados[$i]['closed_timestamp']!="")
                                 {
                                     echo "<tr><td colspan='2' class='text-right'>Baixa do registro:</td>";
-                                      echo "<td colspan='2'>".($dados[$i]['nome_baixou']=!""?$dados[$i]['nome_baixou']:"- - - -")."</td>";
+                                      echo "<td colspan='2'>".($dados[$i]['nome_baixou']!=""?$dados[$i]['nome_baixou']:"<span class='text-muted'>- - - -</span>")."</td>";
                                       echo "<td>".formataData($dados[$i]['closed_timestamp'],1)."</td>";
                                       echo "<td>".$diff_closed." min.</td>";
                                     echo "</tr>";
                                 }
-
-/*
-                                echo "<tr style='background-color:#FFFFF0'>";
-                                  echo "<td class='text-muted text-right'><small>Agente que realizou a ação:</small></td>";
-
-                                  echo "<td>".$dados[$i]['nome_notificou']."</td>";
-                                  echo "<td>".$dados[$i]['nome_guinchou']."</td>";
-                                  echo "<td>".$dados[$i]['nome_baixou']."</td>";
-                                echo "</tr>";
-*/
-                                //echo "<tr><td colspan='10'><hr></td></tr>";
 
                               }
 
