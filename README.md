@@ -11,4 +11,6 @@ http://jlle30.com.br/opendata
 
 ### Sistemas:
 
-- Sistema de gestão e controle de sincronização dos dados vindo da plataforma do Waze
+- Sistema de gestão e controle de sincronização dos dados vindo da plataforma do Waze.
+- ROTSS - Registro de Ocorrências de Trânsito, Segurança e Saúde.
+- SERP - Sistema de Estacionamento Rotativo Público.
