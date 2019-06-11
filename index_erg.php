@@ -11,6 +11,8 @@
 		<meta charset="UTF-8">
 
 		<title>SISTEMAS DIGITAIS</title>
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="keywords" content="GESTÃO CONTROLE CONVÊNIO" />
 		<meta name="description" content="SISTEMA DE GESTÃO INTERNO">
 		<meta name="author" content="">
@@ -202,6 +204,7 @@
 				return false;
 				}
 		});
+
 
 </script>
 

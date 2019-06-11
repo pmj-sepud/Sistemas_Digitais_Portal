@@ -15,7 +15,6 @@ if(isset($_POST['waze_filtro_data']))
 }
   $agora = now();
 
-  $filtro_data = mkt2date(date2mkt('01/05/2019'));
 
 
   $meses[1]['curto'] = "Jan";

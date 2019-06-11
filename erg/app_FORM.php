@@ -99,7 +99,7 @@
       }
       if($status_hist == "notificar")
       {
-          $hist_linhas_foot = "<tr><td class='danger'>&nbsp;</td><td colspan='4' class='text-danger'>Veículo irregular, já ocupou esta vaga.</td></tr>";
+          $hist_linhas_foot = "<tr><td class='danger'>&nbsp;</td><td colspan='6' class='text-danger'>Veículo irregular, já ocupou esta vaga.</td></tr>";
       }
 
 
@@ -133,7 +133,7 @@
 </style>
 <form id="form_eri" action="erg/app_FORM_sql.php" method="post">
 <section role="main" class="content-body">
-    <header class="page-header">
+    <header class="page-header" style="top:0px;left:0px">
       <?
           if($acao == "inserir")
           {
@@ -142,23 +142,23 @@
               echo "<h2>Registro n° ".str_pad($_GET['id'],3,"0",STR_PAD_LEFT)."</h2>";
           }
       ?>
-      <div class="pull-right" style='margin-top:9px; margin-right:20px'>
+      <div  style='position: absolute;top: 8px;right: 10px;'>
           <a href='auth/logout.php' ajax="false"><button type="button" class="btn btn-default">Sair</button></a>
       </div>
     </header>
 
     <section class="panel box_shadow">
 
-      <div class="panel-heading text-center" style="height:60px">
+      <div class="panel-heading text-center">
         <!--<h3 class='<?=$class;?>' style="margin-top:-10px"><strong><i><?=$dados['status'];?><br><small><?=$txtstatus;?></small></i></strong></h3>-->
-        <h3 class='<?=$class;?>'  style="margin-top:0px"><i><?=$dados['status'];?></i></h3>
+        <h3 class='<?=$class;?>'  style=""><i><?=$dados['status'];?></i></h3>
       </div>
 
 
       <div class="panel-body box_shadow">
 
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-12">
 
                     <div class="row">
                         <div class="col-sm-12">
@@ -184,7 +184,7 @@
 
 echo "<div class='alert ".$classalert." text-center'>";
   echo "<h4>Vaga nº <b>".$dados['parking_code']."</b>";
-  echo "<br><small style='color:black'>".$dados['parking_type'].", ".$dados['parking_time']." min</small>";
+  echo "<br><small style='color:black'>".$dados['parking_type']."<br>".$dados['parking_time']." min</small>";
   echo "<br>".$txtstatus;
   echo "</h4>";
 echo "</div>";
@@ -202,20 +202,22 @@ echo "</div>";
                               <input placeholder="XXX" type="text" id="license_plate_letters" name="license_plate_letters"  maxlength="3" class="form-control input-lg text-center" value="<?=substr($dados['licence_plate'],0,3);?>" />
                          </div>
                        </div>
-                       <div class="col-xs-4">
+                       <div class="col-xs-6" id='div_placa'>
                            <div class="form-group">
                                <label class="control-label" id='label_numbers'>Números:</label>
                                <label class="control-label" id='label_mercosul'  style="display:none;">Placa Mercosul:</label>
-                               <input placeholder="9999" type="number" pattern="\d*" id="license_plate_numbers" name="license_plate_numbers"           maxlength="4" size="4" class="form-control input-lg text-center" value="<?=substr($dados['licence_plate'],3);?>" />
+                               <input style="width:100%" placeholder="9999" type="number" pattern="\d*" id="license_plate_numbers" name="license_plate_numbers"           maxlength="4" size="4" class="form-control input-lg text-center" value="<?=substr($dados['licence_plate'],3);?>" />
                                <!--<input placeholder="9X99" type="text" id="license_plate_numbers_mercosul" name="license_plate_numbers_mercosul"  maxlength="4" size="4" class="form-control input-lg text-center" value="<?=substr($dados['licence_plate'],3);?>" style="display:none;" />-->
                                <input placeholder="XXXXXXX" type="text" id="license_plate_numbers_mercosul" name="license_plate_numbers_mercosul"  maxlength="7" size="4" class="form-control input-lg text-center" value="" style="display:none;" />
                           </div>
                         </div>
-                        <div class="col-xs-4">
-                            <? if($acao=="inserir"){ ?>
-                              <button type="button" class="btn btn-default" id="bt_mercosul" style="margin-top:22px"><span class="text-muted">Modelo<br>Mercosul</span></button>
-                            <? } ?>
-                         </div>
+                  </div>
+                  <div class='row'>
+                    <div class="col-xs-12 text-center">
+                        <? if($acao=="inserir"){ ?>
+                          <button type="button" class="btn bt-sm btn-default" id="bt_mercosul" style="margin-top:22px"><span class="text-muted">Modelo Mercosul</span></button>
+                        <? } ?>
+                     </div>
                   </div>
 <? }else {
     echo "<div class='row'>
@@ -283,9 +285,11 @@ echo "</div>";
 
 
             </div>
+          </div>
 
 
-            <div class="col-xs-6">
+          <div class="row">
+            <div class="col-xs-12">
 
               <?
                   if($acao=="atualizar")
@@ -461,12 +465,14 @@ $('#bt_mercosul').click(function(){
     if($('#license_plate_numbers_mercosul').is(":visible"))
     {
       $('#license_plate_numbers_mercosul').focus();
+      $('#div_placa').removeClass('col-xs-6').addClass('col-xs-12 text-center');
     }else{
       $('#license_plate_numbers').focus();
+      $('#div_placa').removeClass('col-xs-12').addClass('col-xs-6');
     }
 
 });
 
-$(".loading").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> <small>Aguarde</small>"); });
+$(".loading").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i>"); });
 
 </script>

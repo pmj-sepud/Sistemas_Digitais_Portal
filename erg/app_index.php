@@ -100,41 +100,29 @@
 
 
 <section role="main" class="content-body">
-  <header class="page-header">
+  <header class="page-header" style="top:0px;left:0px">
     <h2>SERP - Gestão de vagas</h2>
-    <div class="pull-right" style='margin-top:9px; margin-right:20px'>
+    <!--<div class="pull-right" style='margin-top:9px; margin-right:20px'>-->
+    <div style='position: absolute;top: 8px;right: 10px;'>
         <a href='auth/logout.php' ajax="false"><button type="button" class="btn btn-default">Sair</button></a>
     </div>
   </header>
 								<section class="panel box_shadow">
 
 									<div class="panel-body">
-                    <div class="row" style="margin-top:-10px;margin-bottom:10px">
+                    <div class="row" style="margin-bottom:10px">
 
-
-                      <div class="col-xs-2">
-                        <div class="form-group">
-                          <input type="number" pattern="\d*" class="form-control input-lg" id="pesquisa" placeholder="Vaga">
-                        </div>
-                      </div>
-
-                        <div class="col-xs-4">
-                          <div class="form-group">
-                            <input type="text" class="form-control input-lg" id="pesquisa_placa" placeholder="Placa">
-                          </div>
-                        </div>
-
-                        <div class="col-xs-6 text-right">
+                        <div class="col-xs-12 text-center">
 
                           <button id="bt_refresh" style='' type='button' class='btn btn-lg btn-primary'><i id="bt_refresh_icon" class='fa fa-refresh'></i></button>
 
                           <? if($_GET['filtro']=="todos"){
                                   echo "<a href='erg/app_index.php'>
-                                        <button  style='' type='button' class='btn btn-lg btn-info loading'><i class='fa fa-search'></i> Ver ativos</button>
+                                        <button  style='' type='button' class='btn btn-lg btn-info loading'><i class='fa fa-search'></i> Ativos</button>
                                         </a>";
                              }else{
                                   echo "<a href='erg/app_index.php?filtro=todos'>
-                                        <button  style='' type='button' class='btn btn-lg btn-info loading'><i class='fa fa-search'></i> Ver todos</button>
+                                        <button  style='' type='button' class='btn btn-lg btn-info loading'><i class='fa fa-search'></i> Todos</button>
                                         </a>";
                              }
                           ?>
@@ -146,7 +134,24 @@
 
 
                     </div>
-                    <div class="row" style="margin-bottom:10px">
+                    <div class='row'>
+
+                      <div class="col-xs-6">
+                        <div class="form-group">
+                          <input type="number" pattern="\d*" class="form-control input-lg" id="pesquisa" placeholder="Vaga">
+                        </div>
+                      </div>
+
+                        <div class="col-xs-6">
+                          <div class="form-group">
+                            <input type="text" class="form-control input-lg" id="pesquisa_placa" placeholder="Placa">
+                          </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="row" style="margin-bottom:10px;margin-top:10px">
 
                       <div class="col-xs-12">
 
@@ -239,7 +244,7 @@
                                          </thead>
                                          <tbody id='table_body'>
                                             <tr><td colspan='5' class='text-center'>
-                                                  <div class='alert alert-warning col-md-6 col-md-offset-3 text-center'><strong>Aviso: </strong> Nenhuma registro de estacionamento rotativo ativo para a data de hoje.</div>
+                                                  <div class='alert alert-warning col-md-6 col-md-offset-3 text-center'><strong>Aviso: </strong> Nenhuma registro <br>de estacionamento rotativo<br> ativo para a data<br> de hoje nesta rua.</div>
                                             </td></tr>
                                         </tbody>
                                       </table>

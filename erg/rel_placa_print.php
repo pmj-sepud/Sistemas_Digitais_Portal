@@ -1,10 +1,7 @@
 <?
   session_start();
   require_once("../libs/php/funcoes.php");
-  //require_once("../libs/php/conn.php");
-
-echo "Sistema de impressão de relatório...";
-exit();
+  require_once("../libs/php/conn.php");
 
   $agora = now();
 
@@ -50,45 +47,119 @@ $sql = "SELECT
     $dados[] = $d;
   }
 }
-  logger("Acesso","SERP - Relatório por placa de veículo");
+  logger("Acesso","SERP - Impressão do relatório por placa de veículo");
 ?>
-<section role="main" class="content-body">
-  <header class="page-header">
-    <h2>SERP - Sistema de Estacionamento Rotativo Público</h2>
-    <div class="right-wrapper pull-right" style='margin-right:15px;'>
-      <ol class="breadcrumbs">
-        <li><a href="index_sistema.php"><i class="fa fa-home"></i></a></li>
-        <li><a href="erg/rel_autuados.php">SERP - Veículos autuados</a></li>
-        <li><span>Placa de veículo</span></li>
-      </ol>
-      <!--<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>-->
-    </div>
-  </header>
+<!doctype html>
+<html class="fixed">
+	<head>
+
+		<!-- Basic -->
+		<meta charset="UTF-8">
+
+		<title>SISTEMAS DIGITAIS</title>
+		<meta name="keywords" content="GESTÃO CONTROLE CONVÊNIO" />
+		<meta name="description" content="SISTEMA DE GESTÃO INTERNO">
+		<meta name="author" content="">
+
+		<!-- Mobile Metas -->
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+		<!-- Web Fonts  -->
+		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800|Shadows+Into+Light" rel="stylesheet" type="text/css">
+
+		<!-- Vendor CSS -->
+		<link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.css" />
+
+		<link rel="stylesheet" href="../assets/vendor/font-awesome/css/font-awesome.css" />
+		<!--<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">-->
+		<link rel="stylesheet" href="../assets/vendor/magnific-popup/magnific-popup.css" />
+		<link rel="stylesheet" href="../assets/vendor/bootstrap-datepicker/css/datepicker3.css" />
+
+		<!-- Specific Page Vendor CSS -->
+
+		<link rel="stylesheet" href="../assets/vendor/jquery-ui/css/ui-lightness/jquery-ui-1.10.4.custom.css" />
+
+		<link rel="stylesheet" href="../assets/vendor/bootstrap-multiselect/bootstrap-multiselect.css" />
+
+		<link rel="stylesheet" href="../assets/vendor/morris/morris.css" />
+		<link rel="stylesheet" href="../assets/vendor/pnotify/pnotify.custom.css" />
+
+
+
+
+
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+			integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+			crossorigin=""/>
+
+			<script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+				integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+				crossorigin=""></script>
+
+		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+
+		<!-- Theme CSS -->
+		<link rel="stylesheet" href="../assets/stylesheets/theme.css" />
+
+		<!-- Skin CSS -->
+		<link rel="stylesheet" href="../assets/stylesheets/skins/default.css" />
+
+		<!-- Theme Custom CSS -->
+		<link rel="stylesheet" href="../assets/stylesheets/theme-custom.css">
+
+		<!-- Head Libs -->
+		<script src="../assets/vendor/modernizr/modernizr.js"></script>
+
+
+		<link  href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+
+
+		<style>
+			.box_shadow
+			{
+			  -webkit-box-shadow: 10px 10px 56px -12px rgba(0,0,0,0.3);
+			  -moz-box-shadow: 10px 10px 56px -12px rgba(0,0,0,0.3);
+			  box-shadow: 10px 10px 56px -12px rgba(0,0,0,0.3);
+			}
+		</style>
+	</head>
+	<body>
+
 
   <!-- start: page -->
   <div class="row">
     <div class="col-md-12 col-lg-12 col-xl-12">
-      <section class="panel box_shadow">
+      <section class="box_shadow">
+        <div class="row">
+            <div class='col-md-12 text-center'>
+                <table border='0' width='100%'>
+                    <tr>
+                        <td><img src="https://www.joinville.sc.gov.br/wp-content/uploads/2017/07/logoPMJ2x.png"></td>
+                        <td><h4>Secretaria de Proteção Civil e Segurança Pública<br>SEPROT - Departamento de Trânsito</h4></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class='row'>
+          <div class='col-md-12 text-center'>
+              <h4><b>SERP - Sistema de Estacionamento Rotativo Público<br>Relatório de utilização de vagas</b></h4>
+          </div>
+        </div>
         <header class="panel-heading" style="height:60px">
           <h3 style="margin-top:0px"><small class='text-muted'><i>Placa do veículo:</small> <b><?=$_GET['placa'];?></b></i></h3>
-          <div class="panel-actions">
-              <a href="erg/rel_autuados.php"><button class='btn btn-sm btn-default loading'>Voltar</button></a>
-          </div>
         </header>
 
         <div class="panel-body">
           <div class="row">
             <div class="col-sm-12">
                       <?
-                        //echo "<pre>"; print_r($dados); echo "</pre>";
-
                         if(isset($res) && pg_num_rows($res)){
                               echo "<table class='table table-condensed'>";
 
                               echo       "<thead><tr>
-                                               <th>Registro nº</th>
+                                               <th nowrap>Registro nº</th>
                                                <th>Placa</th>
-                                               <th>Vaga nº</th>
+                                               <th nowrap>Vaga nº</th>
                                                <th>Tipo</th>
                                                <th>Logradouro</th>
                                                <th class='text-right'>Status</th>
@@ -111,7 +182,7 @@ $sql = "SELECT
                                   echo "<td class='text-muted'><small>".$dados[$i]['id_registro']."</small></td>";
                                   echo "<td><b>".$dados[$i]['placa_veiculo']."</b></td>";
                                   echo "<td><b>".$dados[$i]['vaga']."</b></td>";
-                                  echo "<td>".$dados[$i]['tipo_vaga']." <sup><small>(".$dados[$i]['tempo_permanencia']." min.)</sup></small></td>";
+                                  echo "<td nowrap>".$dados[$i]['tipo_vaga']." <sup><small>(".$dados[$i]['tempo_permanencia']." min.)</sup></small></td>";
                                   echo "<td>".$dados[$i]['logradouro']."</td>";
 
                                   if($dados[$i]['notified_timestamp'] != "")
@@ -187,7 +258,97 @@ $sql = "SELECT
           </div>
         </div>
 </section>
+
+<!-- Vendor -->
+<script src="../assets/vendor/jquery/jquery.js"></script>
+
+<script src="../assets/vendor/jquery-browser-mobile/jquery.browser.mobile.js"></script>
+
+<script src="../assets/vendor/bootstrap/js/bootstrap.js"></script>
+
+<script src="../assets/vendor/nanoscroller/nanoscroller.js"></script>
+
+<script src="../assets/vendor/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+
+<script src="../assets/vendor/magnific-popup/magnific-popup.js"></script>
+
+<script src="../assets/vendor/jquery-placeholder/jquery.placeholder.js"></script>
+
+<!-- Specific Page Vendor -->
+
+<script src="../assets/vendor/jquery-ui/js/jquery-ui-1.10.4.custom.js"></script>
+
+<script src="../assets/vendor/jquery-ui-touch-punch/jquery.ui.touch-punch.js"></script>
+
+<script src="../assets/vendor/jquery-appear/jquery.appear.js"></script>
+
+<script src="../assets/vendor/bootstrap-multiselect/bootstrap-multiselect.js"></script>
+
+<script src="../assets/vendor/jquery-easypiechart/jquery.easypiechart.js"></script>
+
+<script src="../assets/vendor/flot/jquery.flot.js"></script>
+
+<script src="../assets/vendor/flot-tooltip/jquery.flot.tooltip.js"></script>
+
+<script src="../assets/vendor/flot/jquery.flot.pie.js"></script>
+
+<script src="../assets/vendor/flot/jquery.flot.categories.js"></script>
+
+<script src="../assets/vendor/flot/jquery.flot.resize.js"></script>
+
+<script src="../assets/vendor/jquery-sparkline/jquery.sparkline.js"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+<script src="../assets/vendor/gauge/gauge.js"></script>
+
+<script src="../assets/vendor/snap-svg/snap.svg.js"></script>
+
+<script src="../assets/vendor/liquid-meter/liquid.meter.js"></script>
+
+<script src="../assets/vendor/jqvmap/jquery.vmap.js"></script>
+
+<script src="../assets/vendor/jqvmap/data/jquery.vmap.sampledata.js"></script>
+
+<script src="../assets/vendor/jqvmap/maps/jquery.vmap.world.js"></script>
+
+<script src="../assets/vendor/jqvmap/maps/continents/jquery.vmap.africa.js"></script>
+
+<script src="../assets/vendor/jqvmap/maps/continents/jquery.vmap.asia.js"></script>
+
+<script src="../assets/vendor/jqvmap/maps/continents/jquery.vmap.australia.js"></script>
+
+<script src="../assets/vendor/jqvmap/maps/continents/jquery.vmap.europe.js"></script>
+
+<script src="../assets/vendor/jqvmap/maps/continents/jquery.vmap.north-america.js"></script>
+
+<script src="../assets/vendor/jqvmap/maps/continents/jquery.vmap.south-america.js"></script>
+<script src="../assets/vendor/pnotify/pnotify.custom.js"></script>
+<script src="../assets/vendor/intercooler/intercooler-0.4.8.js"></script>
+<script src="../assets/vendor/jquery-mockjax/jquery.mockjax.js"></script>
+<script src="../assets/vendor/gauge/gauge.js"></script>
+
+<script src="http://oss.maxcdn.com/jquery.form/3.50/jquery.form.min.js"></script>
+
+
+
+<!-- Theme Base, Components and Settings -->
+<script src="../assets/javascripts/theme.js"></script>
+
+<!-- Theme Custom -->
+<script src="../assets/javascripts/theme.custom.js"></script>
+
+<!-- Theme Initialization Files -->
+<script src="../assets/javascripts/theme.init.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+
+</body>
+</html>
 <script>
+window.print();
 $(".loading").click(function(event){ $(this).addClass("disabled").html("<i class=\"fa fa-spinner fa-spin\"></i> <small>Aguarde</small>");});
 //$("#bt_refresh").click(function(){ $("#bt_refresh_icon").addClass('fa-spin'); $("#wrap").load("erg/rel_placa.php");});
 </script>

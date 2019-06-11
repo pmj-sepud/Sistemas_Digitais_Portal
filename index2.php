@@ -50,6 +50,8 @@
 <html>
 <head>
 	<title>Portal Digital</title>
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
    <!--Made with love by Mutiullah Samim -->
 
@@ -230,5 +232,6 @@ text-decoration: none;
 </body>
 </html>
 <script>
+if(navigator.userAgent.match(/Android/i)){window.scrollTo(0,1);}
 $("#error").fadeOut(10000, "linear");
 </script>
