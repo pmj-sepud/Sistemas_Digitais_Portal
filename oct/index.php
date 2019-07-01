@@ -46,20 +46,6 @@
             $coordenacaoDados[] = $d;
           }
 
-          /*
-          (
-          [nome] => Administrador Geral do Sistema
-          [plate] => QHD7884
-          [model] => Lander
-          [brand] => Yamaha
-          [id_shift] => 33
-          [id_person] => 10
-          [id_fleet] => 2
-          [opened] => 2019-05-27 16:12:00
-          [closed] =>
-          [type] => Agente de campo
-          [is_driver] => t
-          */
         }
   }
 ?>

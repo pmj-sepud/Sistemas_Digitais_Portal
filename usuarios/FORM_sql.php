@@ -37,7 +37,8 @@
                       id_company,
                       observation,
                       phone,
-                      in_ativaction)
+                      in_ativaction,
+                      nickname)
               VALUES (
                      '".$name."',
                      '".$email."',
@@ -48,7 +49,8 @@
                     '".$id_company."',
                     '".$observation."',
                     '".$phone."',
-                    'f') RETURNING id";
+                    'f',
+                    '".$nickname."') RETURNING id";
        $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
        $aux = pg_fetch_assoc($res);
 
@@ -72,7 +74,8 @@
                         id_company  = '".$id_company."',
                         phone       = '".$phone."',
                         observation = '".$observation."',
-                        active      = '".$active."'
+                        active      = '".$active."',
+                        nickname    = '".$nickname."'
                   WHERE id = '".$id."'";
       pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
 

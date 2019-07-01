@@ -29,7 +29,9 @@
                      id_street,
                      street_number,
                      id_company,
-                     id_workshift)
+                     id_workshift,
+                     requester,
+                     requester_phone)
               VALUES ('".$datafinal."',
                       '".$description."',
                       '".$endereco."',
@@ -42,7 +44,9 @@
                       ".$id_street.",
                       ".$street_number.",
                       '".$_SESSION['id_company']."',
-                      ".$id_workshift.") returning id";
+                      ".$id_workshift.",
+                      '".$requester."',
+                      '".$requester_phone."') returning id";
 
         $res = pg_query($sql) or die("Erro ".__LINE__."SQL: ".$sql);
         $aux = pg_fetch_assoc($res);
@@ -78,7 +82,9 @@
                      status             = '".$status."',
                      victim_inform      = '".$victim_inform."',
                      id_street          = ".$id_street.",
-                     street_number      = ".$street_number."
+                     street_number      = ".$street_number.",
+                     requester          = '".$requester."',
+                     requester_phone    = '".$requester_phone."'
                WHERE id                 = '".$id."'";
 
         pg_query($sqlCond.$sql) or die("Erro ".__LINE__);

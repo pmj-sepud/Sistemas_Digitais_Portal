@@ -97,7 +97,7 @@ if(isset($_POST['waze_filtro_data']))
 <style>
 .flot-x-axis .flot-tick-label {
     white-space: nowrap;
-    transform: translate(-9px, 0) rotate(-60deg);
+    transform: translate(-30px, 0) rotate(-90deg);
     text-indent: -100%;
     transform-origin: top right;
     text-align: right !important;
@@ -258,19 +258,22 @@ $reports_tipo_str = implode(",",$vetaux);
           {
             switch($tipo)
             {
-               case "WEATHERHAZARD":                      $tipo = "Perigo";             break;
-               case "HAZARD_ON_ROAD":                     $tipo = "Perigo na via";      break;
-               case "HAZARD_ON_ROAD_CAR_STOPPED":         $tipo = "Veículo parado";     break;
-               case "HAZARD_ON_ROAD_CONSTRUCTION":        $tipo = "Via em construção";  break;
-               case "HAZARD_ON_ROAD_ICE":                 $tipo = "Gelo na via";        break;
-               case "HAZARD_ON_ROAD_OBJECT":              $tipo = "Objeto na via";      break;
+               case "WEATHERHAZARD":                      $tipo = "Perigo";                    break;
+               case "HAZARD_ON_ROAD":                     $tipo = "Perigo na via";             break;
+               case "HAZARD_ON_ROAD_CAR_STOPPED":         $tipo = "Veículo parado";            break;
+               case "HAZARD_ON_ROAD_CONSTRUCTION":        $tipo = "Via em construção";         break;
+               case "HAZARD_ON_ROAD_ICE":                 $tipo = "Gelo na via";               break;
+               case "HAZARD_ON_ROAD_OBJECT":              $tipo = "Objeto na via";             break;
                case "HAZARD_ON_ROAD_TRAFFIC_LIGHT_FAULT": $tipo = "Semáforo queimado";         break;
                case "HAZARD_WEATHER":                     $tipo = "Clima perigoso";            break;
                case "HAZARD_WEATHER_FLOOD":               $tipo = "Inundação";                 break;
                case "HAZARD_WEATHER_FOG":                 $tipo = "Neblina";                   break;
                case "HAZARD_ON_SHOULDER_MISSING_SIGN":    $tipo = "Sinalização perdida";       break;
-               case "HAZARD_ON_SHOULDER_CAR_STOPPED":     $tipo = "Veículo parado sobre a via";break;
+               case "HAZARD_ON_SHOULDER_CAR_STOPPED":     $tipo = "Veículo parado na via";     break;
                case "HAZARD_ON_SHOULDER_ANIMALS":         $tipo = "Animal na via";             break;
+               case "HAZARD_ON_SHOULDER":                 $tipo = "Resalto na via";            break;
+               case "HAZARD_ON_ROAD_ROAD_KILL":           $tipo = "Via perigosa";              break;
+               case "HAZARD_WEATHER_HAIL":                $tipo = "Granizo";                   break;
 
             }
             $vetaux[] = "['".$tipo."',".$qtd."]";

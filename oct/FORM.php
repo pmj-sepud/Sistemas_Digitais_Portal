@@ -174,6 +174,22 @@
 
 
             <div class="row">
+                  <div class="col-sm-8">
+                    <div class="form-group">
+                    <label class="control-label">Solicitante/Reclamante:</label>
+                        <input type="text" name="requester" class="form-control changefield" value="<?=$dados['requester'];?>">
+                   </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="form-group">
+                    <label class="control-label">Telefone:</label>
+                        <input type="text" name="requester_phone" class="form-control changefield" value="<?=$dados['requester_phone'];?>">
+                   </div>
+                  </div>
+             </div>
+
+
+            <div class="row">
 
 
               <div class="col-sm-6">

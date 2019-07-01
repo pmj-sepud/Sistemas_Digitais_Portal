@@ -196,7 +196,7 @@ echo "</div>";
 
 <? if($acao=="inserir"){ ?>
                     <div class="row">
-                      <div class="col-xs-4">
+                      <div class="col-xs-6">
                           <div class="form-group">
                               <label class="control-label" id='label_letters'>Placa:</label>
                               <input placeholder="XXX" type="text" id="license_plate_letters" name="license_plate_letters"  maxlength="3" class="form-control input-lg text-center" value="<?=substr($dados['licence_plate'],0,3);?>" />

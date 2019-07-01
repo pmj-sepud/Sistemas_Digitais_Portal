@@ -70,14 +70,12 @@
   <li class="nav-parent">
     <a><span>Sistema de gestão</span></a>
     <ul class="nav nav-children">
-        <li><a href="oct/index.php">Sistema</a></li>
-        <li><a href="oct/ocorrencias.php">Ocorrências</a></li>
-        <li><a href="oct/dashboard.php">Evolução mensal</a></li>
-        <li><hr></li>
-        <li><a href="#">Diário administrativo</a></li>
-        <li><a href="#">Turnos</a></li>
-        <li><a href="#">Evolução diária</a></li>
-        <li><a href="#">Configurações</a></li>
+        <li><a href="oct/index.php">1. Sistema</a></li>
+        <li><a href="oct/turnos_INDEX.php">2. Turnos</a></li>
+        <li><a href="oct/ocorrencias.php">3. Ocorrências</a></li>
+        <li><a href="oct/eventos_administrativos_INDEX.php">4. Diário administrativo</a></li>
+        <li><a href="oct/dashboard.php">5. Evolução mensal</a></li>
+
     </ul>
   </li>
 
