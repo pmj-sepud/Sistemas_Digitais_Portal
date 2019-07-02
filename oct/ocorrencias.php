@@ -56,6 +56,7 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
                EV.active,
                EV.address_reference,
                EV.id_street,
+               EV.id_workshift,
                C.id    as id_company,
                C.name  as company,
                C.acron as company_acron,
@@ -226,7 +227,7 @@ if(isset($dados) && count($dados))
 
     ?>
                           <tr>
-                              <td rowspan="2" style="vertical-align: middle;" class="text-center success"><?=$dados[$i]['id'];?></td>
+                              <td rowspan="2" style="vertical-align: middle;" class="text-center success"><?=$dados[$i]['id']; if($dados[$i]['id_workshift']!=""){ echo ".".$dados[$i]['id_workshift'];}?></td>
                               <td colspan="8"><b><?=$dados[$i]['event_type'];?></b></td>
                             </tr>
                             <tr>

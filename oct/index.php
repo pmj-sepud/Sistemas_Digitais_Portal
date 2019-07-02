@@ -8,7 +8,7 @@
   logger("Acesso","OCT", "Sistema - página inicial");
 
   $agora = now();
-  $sql   = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND closed is null";
+  $sql   = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
   $res   = pg_query($sql)or die("Erro ".__LINE__);
 
   if(pg_num_rows($res))

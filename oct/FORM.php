@@ -11,6 +11,7 @@
                     W.opened as workshift_opened,
                     W.closed as workshift_closed,
                     W.period as workshift_period,
+                    W.status as workshift_status,
                     EV.*
                 FROM
                           sepud.oct_events    EV
@@ -26,6 +27,7 @@
         $turno['opened'] = $dados['workshift_opened'];
         $turno['closed'] = $dados['workshift_closed'];
         $turno['period'] = $dados['workshift_period'];
+        $turno['status'] = $dados['workshift_status'];
       }
 
       $sql = "SELECT * FROM sepud.oct_rel_events_event_conditions WHERE id_events = '".$id."'";
@@ -54,7 +56,7 @@
       $dados['company']       = $_SESSION['company'];
       $agora = now();
       $txt_bread = "Nova ocorrência";
-      $sql        = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND closed is null";
+      $sql        = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
       $resTurno   = pg_query($sql)or die("Erro ".__LINE__);
       if(pg_num_rows($resTurno))
       {
@@ -94,7 +96,7 @@
                       if(isset($turno))
                       {
                         echo "<br><small class='text-muted'>Turno nº <b>".str_pad($turno['id'],5,"0",STR_PAD_LEFT)."</b> - ".$turno['period']. " - ";
-                        if($turno['closed']!=""){ echo " <span class='text-warning'>Turno fechado</span>";}else{ echo " <span class='text-success'>Turno aberto</span>";}
+                        if($turno['status']=="fechado"){ echo " <span class='text-warning'>Turno fechado</span>";}else{ echo " <span class='text-success'>Turno aberto</span>";}
                         echo "<br>Início: <b>".formataData($turno['opened'],1)."</b>";
                         if($turno['closed']!=""){echo ", fim: <b>".formataData($turno['closed'],1)."</b>";}
                         echo "</small>";
@@ -226,12 +228,41 @@
            </div>
 
            <div class="row">
-                 <div class="col-sm-12">
+                 <div class="col-sm-6">
                    <div class="form-group">
                    <label class="control-label">Complemento do endereço/pontos de referencia:</label>
                        <input type="text" name="endereco_complemento" class="form-control changefield" value="<?=$dados['address_complement'];?>">
                   </div>
                  </div>
+
+
+                 <div class="col-md-6">
+                                 <div class="form-group">
+                                 <label class="control-label">Agenda de Endereço:</label>
+                                 <select id="id_addressbook" name="id_addressbook" class="form-control select2 changefield">
+                                    <?
+                                          $sql = "SELECT * FROM sepud.oct_addressbook WHERE id_company = '".$_SESSION['id_company']."' ORDER BY name ASC";
+                                          $res = pg_query($sql)or die("Erro ".__LINE__);
+                                          while($d = pg_fetch_assoc($res))
+                                          {
+                                            $vet_livro_end[$d['neighborhood']][] = $d;
+                                          }
+                                           echo "<option value=''></option>";
+                                           foreach ($vet_livro_end as $bairro => $livro_end) {
+                                               echo "<optgroup label='".$bairro."'>";
+                                               for($i=0;$i<count($livro_end);$i++)
+                                               {
+
+                                                   if($dados['id_addressbook']==$livro_end[$i]["id"]){ $sel = "selected";}else{$sel="";}
+                                                   echo "<option value='".$livro_end[$i]["id"]."' ".$sel.">".$livro_end[$i]["name"]."</option>";
+                                               }
+                                               echo "</optgroup>";
+                                           }
+                                    ?>
+                                 </select>
+                                </div>
+               </div>
+
             </div>
 
            <div class="row">

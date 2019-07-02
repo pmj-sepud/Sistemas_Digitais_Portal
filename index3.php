@@ -1,6 +1,10 @@
 <?
 	session_start();
 	$error = $_SESSION['error'];
+	if($_SESSION['error']!="")
+	{
+		print_r($_SESSION['error']);
+	}
 	session_destroy();
 ?>
 <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
@@ -127,6 +131,8 @@ margin-top: 50px;
 							<a href="index2.php?param=dados" class="btn btn-outline-warning btn-lg btn-block">Acessar</a>
 						</div>
 				</div>
+
+
 
 
 

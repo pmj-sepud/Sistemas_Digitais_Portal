@@ -12,9 +12,10 @@
     if($acao == "inserir" && $userid != "" && $_SESSION['id_company'])
     {
 
-      if($id_street     == ""){ $id_street    ="Null"; }else{ $id_street     = "'".$id_street."'";     }
-      if($street_number == ""){ $street_number="Null"; }else{ $street_number = "'".$street_number."'"; }
-      if($id_workshift  == ""){ $id_workshift ="Null"; }else{ $id_workshift  = "'".$id_workshift."'";  }
+      if($id_street       == ""){ $id_street      ="Null"; }else{ $id_street       = "'".$id_street."'";     }
+      if($street_number   == ""){ $street_number  ="Null"; }else{ $street_number   = "'".$street_number."'"; }
+      if($id_workshift    == ""){ $id_workshift   ="Null"; }else{ $id_workshift    = "'".$id_workshift."'";  }
+      if($id_addressbook  == ""){ $id_addressbook ="Null"; }else{ $id_addressbook  = "'".$id_addressbook."'";}
 
         $sql = "INSERT INTO sepud.oct_events
                     (date,
@@ -31,7 +32,8 @@
                      id_company,
                      id_workshift,
                      requester,
-                     requester_phone)
+                     requester_phone,
+                     id_addressbook)
               VALUES ('".$datafinal."',
                       '".$description."',
                       '".$endereco."',
@@ -46,7 +48,8 @@
                       '".$_SESSION['id_company']."',
                       ".$id_workshift.",
                       '".$requester."',
-                      '".$requester_phone."') returning id";
+                      '".$requester_phone."',
+                      ".$id_addressbook.") returning id";
 
         $res = pg_query($sql) or die("Erro ".__LINE__."SQL: ".$sql);
         $aux = pg_fetch_assoc($res);
@@ -69,9 +72,9 @@
           }
         }
 
-        if($id_street == "")    { $id_street="Null";     }else{ $id_street     = "'".$id_street."'"; }
-        if($street_number == ""){ $street_number="Null"; }else{ $street_number = "'".$street_number."'"; }
-
+        if($id_street       == "")    { $id_street="Null";     }else{ $id_street     = "'".$id_street."'"; }
+        if($street_number   == ""){ $street_number="Null"; }else{ $street_number = "'".$street_number."'"; }
+        if($id_addressbook  == ""){ $id_addressbook ="Null"; }else{ $id_addressbook  = "'".$id_addressbook."'";}
         $sql = "UPDATE sepud.oct_events SET
                      date               = '".$datafinal."',
                      description        = '".$description."',
@@ -84,7 +87,8 @@
                      id_street          = ".$id_street.",
                      street_number      = ".$street_number.",
                      requester          = '".$requester."',
-                     requester_phone    = '".$requester_phone."'
+                     requester_phone    = '".$requester_phone."',
+                     id_addressbook     = ".$id_addressbook."
                WHERE id                 = '".$id."'";
 
         pg_query($sqlCond.$sql) or die("Erro ".__LINE__);

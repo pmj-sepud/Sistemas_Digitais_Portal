@@ -4,7 +4,7 @@
   require_once("../libs/php/conn.php");
 
   $agora = now();
-  $sql   = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND closed is null";
+  $sql   = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
   $res   = pg_query($sql)or die("Erro ".__LINE__);
 
   if(pg_num_rows($res))
@@ -22,7 +22,8 @@
             LEFT JOIN sepud.streets 				SAB ON SAB.id = A.id_street
             LEFT JOIN sepud.streets 				SAE ON SAE.id = AE.id_street
             LEFT JOIN sepud.users             U ON U.id   = AE.id_user
-            WHERE AE.id_workshift = '".$turno['id']."'";
+            WHERE AE.id_workshift = '".$turno['id']."'
+            ORDER BY AE.id DESC";
     $res = pg_query($sql)or die("Erro ".__LINE__);
   }else {
     $turnoFechado = true;
@@ -95,7 +96,7 @@
                               while($d = pg_fetch_assoc($res))
                               {
                                   echo "<tr>";
-                                    echo "<td class='text-muted'><small>".$d['id']."</small></td>";
+                                    echo "<td class='text-muted'><small><sup>".$d['id']."</sup></small></td>";
                                     echo "<td class='text-muted'>".$turno['id']."</td>";
                                     echo "<td>".formataData($d['opened_timestamp'],1)."</td>";
                                     echo "<td>".formataData($d['closed_timestamp'],1)."</td>";

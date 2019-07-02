@@ -67,7 +67,7 @@
                             <div class="col-sm-6">
                               <div class="form-group">
                               <label class="control-label">Data de fechamento:</label>
-                                  <input type="text" name="closed" class="form-control text-center" <?=($acao=="inserir"?"disabled":"");?> value="<?=$dados[''];?>">
+                                  <input type="text" name="closed" class="form-control text-center" value="<?=$agora['data'];?>">
                              </div>
                            </div>
                       </div>
@@ -82,10 +82,12 @@
                             <div class="col-sm-6">
                               <div class="form-group">
                               <label class="control-label">Hora de fechamento:</label>
-                                  <input type="text" name="closed_hour" class="form-control text-center" <?=($acao=="inserir"?"disabled":"");?> value="<?=$dados[''];?>">
+                                  <input type="text" name="closed_hour" class="form-control text-center" value="<?=$dados['closed_hour'];?>">
                              </div>
                            </div>
                       </div>
+
+                      <!--
                       <div class="row">
                             <div class="col-sm-12">
                               <div class="form-group">
@@ -99,6 +101,36 @@
                              </div>
                            </div>
                       </div>
+                      -->
+                      <div class="row">
+                            <div class="col-sm-6">
+                              <div class="form-group">
+                              <label class="control-label">Livro diário:</label>
+                                  <select name="period" class="form-control">
+                                      <option value="alfa"   <?=($dados['status']=="alfa"  ?"selected":"");?>>Alfa</option>
+                                      <option value="bravo"  <?=($dados['status']=="bravo" ?"selected":"");?>>Bravo</option>
+                                      <option value="charle" <?=($dados['status']=="charle"?"selected":"");?>>Charle</option>
+                                  </select>
+                             </div>
+                           </div>
+
+                           <div class="col-sm-6">
+                             <div class="form-group">
+                             <label class="control-label">Status do turno:</label>
+                                 <select name="status" class="form-control">
+                                   <? if($acao == "inserir")
+                                      {
+                                          echo "<option value='aberto'>Aberto</option>";
+                                      }else{
+                                          echo "<option value='aberto'>Aberto</option>";
+                                          echo "<option value='fechado'>Fechado</option>";
+                                      }
+                                   ?>
+                                 </select>
+                            </div>
+                          </div>
+                      </div>
+
                       <div class="row">
                             <div class="col-sm-12">
                               <div class="form-group">
@@ -113,7 +145,7 @@
                             <div class="col-sm-12">
                               <div class="form-group">
                               <label class="control-label">Observações:</label>
-                                  <textarea name="observation" class="form-control" rows="1"></textarea>
+                                  <textarea name="observation" class="form-control" rows="3"></textarea>
                              </div>
                            </div>
                       </div>
@@ -188,7 +220,7 @@
                                                      <div class="col-sm-6">
                                                        <div class="form-group">
                                                        <label class="control-label">Data de saída:</label>
-                                                           <input type="text" name="closed" class="form-control text-center" disabled value="<?=$dados[''];?>">
+                                                           <input type="text" name="closed" class="form-control text-center"  value="<?=$agora['data'];?>">
                                                       </div>
                                                     </div>
                                                </div>
@@ -196,14 +228,14 @@
                                                      <div class="col-sm-6">
                                                        <div class="form-group">
                                                        <label class="control-label">Hora de entrada:</label>
-                                                           <input type="text" name="opened_hour" class="form-control text-center" value="<?=$agora['hm'];?>">
+                                                           <input type="text" name="opened_hour" class="form-control text-center" value="">
                                                       </div>
                                                     </div>
 
                                                      <div class="col-sm-6">
                                                        <div class="form-group">
                                                        <label class="control-label">Hora de saída:</label>
-                                                           <input type="text" name="closed_hour" class="form-control text-center" disabled value="<?=$dados[''];?>">
+                                                           <input type="text" name="closed_hour" class="form-control text-center"  value="">
                                                       </div>
                                                     </div>
                                                </div>
@@ -252,6 +284,8 @@
                              													</div>
                                                    </div>
                                               </div>
+
+
                                               <div class="row">
                                                   <div class="col-sm-12 text-center">
                                                       <input type="hidden" name="acao" value="associar" />

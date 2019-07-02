@@ -10,7 +10,7 @@
   while($tmp = pg_fetch_assoc($rs))
   {
       $dados[] = $tmp;
-      if($tmp['closed'] == ""){ $turno_aberto = true; $id_turno = $tmp['id'];}
+      if($tmp['status'] == "aberto"){ $turno_aberto = true; $id_turno = $tmp['id'];}
 
   }
 
@@ -76,29 +76,18 @@
 												</thead>
 												<tbody>
 <?
+  if(!$turno_aberto)
+  {
+    echo "<tr class='warning'><td colspan='6'>Turno(s) fechado(s):</td></tr>";
+  }
   for($i=0; $i<count($dados);$i++)
   {
     $d = $dados[$i];
-    /*
-    echo "<tr><td><pre>";
-      print_r($d);
-    echo "</pre></td></tr>";
-    */
-    /*
-    Array
-    (
-        [id] => 60
-        [opened] => 2019-06-03 14:41:00
-        [closed] => 2019-06-17 16:27:27
-        [id_company] => 2
-        [observation] =>
-        [period] => matutino
-    )
 
-    */
-    if($d['closed'] == ""){
+    if($d['status'] == "aberto"){
       echo "<tr class='success'><td colspan='6'>Turno aberto:</td></tr>";
     }
+
 
     echo "<tr>";
     echo "<td class='text-muted'>".$d['id']."</td>";
@@ -109,14 +98,14 @@
 
     //echo "<td class='text-center'>".formataData($d['ultimo_acesso'],1)."</td>";
 
-    if($d['closed'] == ""){ $icon = "fa-cogs"; $href="oct/turno.php?id=".$d['id']; $disabled = ""; }
-    else                  { $icon = "fa-eye";  $href="#"; $disabled = "disabled";}
+    if($d['status'] == "aberto"){ $icon = "fa-cogs"; $href="oct/turno.php?id=".$d['id']; $disabled = ""; }
+    else                        { $icon = "fa-eye";  $href="#"; $disabled = "disabled";}
 
     echo "<td class='actions text-center'>
             <a href='".$href."' class='btn btn-xs btn-default loading2 ".$disabled."'><i class='fa ".$icon."'></i></a>
           </td>";
 
-    if($d['closed'] == ""){
+    if($d['status'] == "aberto"){
       echo "<tr class='warning'><td colspan='6'>Turno(s) fechado(s):</td></tr>";
     }
 

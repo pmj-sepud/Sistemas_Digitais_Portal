@@ -4,6 +4,7 @@
   require_once("../libs/php/conn.php");
 
   $agora = now();
+
   if($_GET['id']!="")
   {
     $sql   = "SELECT * FROM sepud.oct_administrative_events WHERE id = '".$_GET['id']."'";
@@ -65,7 +66,7 @@
                                                         <label class="control-label">Agenda de Endereço:</label>
                                                         <select id="id_addressbook" name="id_addressbook" class="form-control select2">
                                                            <?
-                                                                 $sql = "SELECT * FROM sepud.oct_addressbook ORDER BY name ASC";
+                                                                 $sql = "SELECT * FROM sepud.oct_addressbook WHERE id_company = '".$_SESSION['id_company']."' ORDER BY name ASC";
                                                                  $res = pg_query($sql)or die("Erro ".__LINE__);
                                                                  while($d = pg_fetch_assoc($res))
                                                                  {
@@ -120,13 +121,13 @@
                                     <div class="col-md-6">
                                       <div class="form-group">
                                        <label class="control-label">Entrada:</label>
-                                       <input id="opened_timestamp" name="opened_timestamp" type="datetime-local" class="form-control" value="<?=$dados['opened_timestamp'];?>">
+                                       <input id="opened_timestamp" name="opened_timestamp" type="datetime-local" class="form-control" value="<?=($dados['opened_timestamp']!=""?$dados['opened_timestamp']:substr(str_replace(" ","T",$agora['datatimesrv']),0,-3));?>">
                                       </div>
                                     </div>
                                     <div class="col-md-6">
                                       <div class="form-group">
                                        <label class="control-label">Saída:</label>
-                                       <input id="closed_timestamp" name="closed_timestamp" type="datetime-local" class="form-control" value="<?=$dados['closed_timestamp'];?>">
+                                       <input id="closed_timestamp" name="closed_timestamp" type="datetime-local" class="form-control" value="<?=($dados['closed_timestamp']!=""?$dados['closed_timestamp']:substr(str_replace(" ","T",$agora['datatimesrv']),0,-3));?>">
                                       </div>
                                     </div>
                                 </div>
@@ -163,14 +164,16 @@
                     <div class="row">
                       <div class="col-md-12 text-center" style="margin-top:15px">
                           <input type="hidden" id="id_workshift" name="id_workshift" value="<?=$_GET['turno'];?>">
+                          <input type="hidden" id="acao" name="acao" value="<?=$acao;?>">
                           <a href="oct/eventos_administrativos_INDEX.php" class="btn btn-default loading2">Voltar</a>
                           <?
                               if($acao=="Atualizar")
                               {
+                                echo "<input type='hidden' id='id' name='id' value='".$_GET['id']."'>";
                                 echo  "<a href='oct/eventos_administrativos_SQL.php?acao=Remover&id=".$_GET['id']."' class='btn btn-danger loading2'>Remover</a>";
                               }
                           ?>
-                          <button type="submit" class="btn btn-primary"><?=$acao;?></button>
+                          <button type="submit" class="btn btn-primary loading"><?=$acao;?></button>
                       </div>
                    </div>
 
@@ -182,5 +185,6 @@
 </section>
 <script>
 $('.select2').select2();
+$(".loading").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> Aguarde");});
 $(".loading2").click(function(){ $(this).addClass("disabled").html("<i class=\"fa fa-spinner fa-spin\"></i>");});
 </script>

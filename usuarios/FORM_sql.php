@@ -79,6 +79,9 @@
                   WHERE id = '".$id."'";
       pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
 
+      echo $sql;
+      exit();
+
       logger("Atualização","Usuário","Atualizou dados do usuário: [".$id."] - ".$name);
 
       header("Location: FORM.php?id=".$id);

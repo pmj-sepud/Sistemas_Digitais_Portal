@@ -72,6 +72,12 @@
 													</div>
 												</div>
 
+                        <div class="form-group">
+                          <label class="col-md-2 control-label" for="registration">Matricula</label>
+                          <div class="col-md-10">
+                            <input type="text" class="form-control" id="registration" name="registration" placeholder='' value="<?=$d['registration'];?>">
+                          </div>
+                        </div>
 
                         <div class="form-group">
                           <label class="col-md-2 control-label" for="cargo">Orgão</label>

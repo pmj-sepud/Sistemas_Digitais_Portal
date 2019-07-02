@@ -26,7 +26,6 @@ if(isset($username) && isset($password)){
 	}else{ $_SESSION['error'] = "E-mail ou senha podem estar errados.";}
 }else{   $_SESSION['error'] = "Usuário ou senha não podem estar em branco.";}
 
-
 if($_SESSION['auth']=="true"){
 		if($modulo == "ERG"){
 			header("Location: ../index_erg.php?modulo=".$modulo);
