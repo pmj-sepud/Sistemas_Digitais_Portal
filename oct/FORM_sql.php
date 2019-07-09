@@ -16,6 +16,7 @@
       if($street_number   == ""){ $street_number  ="Null"; }else{ $street_number   = "'".$street_number."'"; }
       if($id_workshift    == ""){ $id_workshift   ="Null"; }else{ $id_workshift    = "'".$id_workshift."'";  }
       if($id_addressbook  == ""){ $id_addressbook ="Null"; }else{ $id_addressbook  = "'".$id_addressbook."'";}
+      if($id_garrison     == ""){ $id_garrison    ="Null"; }else{ $id_garrison     = "'".$id_garrison."'";   }
 
         $sql = "INSERT INTO sepud.oct_events
                     (date,
@@ -33,7 +34,8 @@
                      id_workshift,
                      requester,
                      requester_phone,
-                     id_addressbook)
+                     id_addressbook,
+                     id_garrison)
               VALUES ('".$datafinal."',
                       '".$description."',
                       '".$endereco."',
@@ -49,7 +51,8 @@
                       ".$id_workshift.",
                       '".$requester."',
                       '".$requester_phone."',
-                      ".$id_addressbook.") returning id";
+                      ".$id_addressbook.",
+                      ".$id_garrison.") returning id";
 
         $res = pg_query($sql) or die("Erro ".__LINE__."SQL: ".$sql);
         $aux = pg_fetch_assoc($res);
@@ -72,9 +75,11 @@
           }
         }
 
-        if($id_street       == "")    { $id_street="Null";     }else{ $id_street     = "'".$id_street."'"; }
-        if($street_number   == ""){ $street_number="Null"; }else{ $street_number = "'".$street_number."'"; }
+        if($id_street       == "")    { $id_street="Null";   }else{ $id_street       = "'".$id_street."'";     }
+        if($street_number   == ""){ $street_number="Null";   }else{ $street_number   = "'".$street_number."'"; }
         if($id_addressbook  == ""){ $id_addressbook ="Null"; }else{ $id_addressbook  = "'".$id_addressbook."'";}
+        if($id_garrison     == ""){ $id_garrison    ="Null"; }else{ $id_garrison     = "'".$id_garrison."'";   }
+        
         $sql = "UPDATE sepud.oct_events SET
                      date               = '".$datafinal."',
                      description        = '".$description."',

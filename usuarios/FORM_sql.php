@@ -5,28 +5,12 @@
 
     extract($_POST);
 
-    if($acao=="inserir" && trim($email) != "" && trim($senha) != "" && ($senha == $senha_repete))
+    if($acao=="inserir")
     {
+      if($registration == ""){ $registration = "Null"; }else{ $registration = "'".$registration."'";}
+      if($senha != "nova_senha" && trim($senha) != "" && ($senha == $senha_repete)){ $senhasql1 =   "MD5('".$senha."')"; }else{ $senhasql1 = "Null"; }
+      if(trim($email) == ""){ $email = "Null"; }else{ $email = "'".$email."'";}
 
-/*
-
-      echo "<div class='text-center'>";
-        print_r_pre($_POST);
-      echo "</div>";
-
-
-
-    [name] => Anabela da Jesus
-    [phone] => 4791876457
-    [id_company] => 6
-    [area] => Administração
-    [job] => Gerente de triagem
-    [obs] => observacoes
-    [username] => ana@gmail.com.br
-    [senha] => 123
-    [senha_repete] => 123
-    [acao] => inserir
-*/
       $sql =  "INSERT INTO sepud.users(
                       name,
                       email,
@@ -38,11 +22,12 @@
                       observation,
                       phone,
                       in_ativaction,
-                      nickname)
+                      nickname,
+                      registration)
               VALUES (
                      '".$name."',
-                     '".$email."',
-                     MD5('".$senha."'),
+                     ".$email.",
+                     ".$senhasql1.",
                     '".$area."',
                     '".$job."',
                     't',
@@ -50,7 +35,8 @@
                     '".$observation."',
                     '".$phone."',
                     'f',
-                    '".$nickname."') RETURNING id";
+                    '".$nickname."',
+                    ".$registration.") RETURNING id";
        $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
        $aux = pg_fetch_assoc($res);
 
@@ -61,29 +47,27 @@
     }
 
 
-    if($acao=="atualizar" && trim($email) != "")
+    if($acao=="atualizar")
     {
-        if($senha != ""){ $senha =   "password    = MD5('".$senha."'),"; }
+        if($senha != "nova_senha" && $senha != "" && ($senha == $senha_repete)){ $senhasql =   "password    = MD5('".$senha."'),"; }
+        if($registration == ""){ $registration = "Null"; }else{ $registration = "'".$registration."'";}
+        if($email == ""){ $email = "Null"; }else{ $email = "'".$email."'";}
 
         $sql =  "UPDATE sepud.users SET
-                        name        = '".$name."',
-                        email       = '".$email."',
-                        ".$senha."
-                        area        = '".$area."',
-                        job         = '".$job."',
-                        id_company  = '".$id_company."',
-                        phone       = '".$phone."',
-                        observation = '".$observation."',
-                        active      = '".$active."',
-                        nickname    = '".$nickname."'
+                        name         = '".$name."',
+                        email        = ".$email.",
+                        ".$senhasql."
+                        area         = '".$area."',
+                        job          = '".$job."',
+                        id_company   = '".$id_company."',
+                        phone        = '".$phone."',
+                        observation  = '".$observation."',
+                        active       = '".$active."',
+                        nickname     = '".$nickname."',
+                        registration = ".$registration."
                   WHERE id = '".$id."'";
       pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
-
-      echo $sql;
-      exit();
-
       logger("Atualização","Usuário","Atualizou dados do usuário: [".$id."] - ".$name);
-
       header("Location: FORM.php?id=".$id);
       exit();
   }
@@ -99,6 +83,7 @@
       exit();
     }
 
-    header("Location: FORM_novo_usuario.php");
+    if($id != ""){ header("Location: FORM.php?id=".$id);      }
+             else{ header("Location: FORM_novo_usuario.php"); }
     exit();
 ?>

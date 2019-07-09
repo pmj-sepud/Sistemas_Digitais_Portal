@@ -20,7 +20,10 @@
                            state,
                            id_vehicle,
                            position_in_vehicle,
-                           refuse_help)
+                           refuse_help,
+                           rg,
+                           cpf,
+                           mother_name)
                   VALUES ('".$name."',
                           '".$id."',
                           ".$age.",
@@ -29,7 +32,10 @@
                           '".$state."',
                           ".$id_vehicle.",
                           '".$position_in_vehicle."',
-                          '".$refuse_help."')";
+                          '".$refuse_help."',
+                          '".$rg."',
+                          '".$cpf."',
+                          '".$mother_name."')";
       pg_query($sql)or die("Erro ".__LINE__);
 
       logger("Inserção","OCT - Vítima", "Ocorrência n.".$id);
@@ -55,7 +61,10 @@
                      state               = '".$state."',
                      id_vehicle          = ".$id_vehicle.",
                      position_in_vehicle = '".$position_in_vehicle."',
-                     refuse_help         = '".$refuse_help."'
+                     refuse_help         = '".$refuse_help."',
+                     rg                  = '".$rg."',
+                     cpf                 = '".$cpf."',
+                     mother_name         = '".$mother_name."'
               WHERE id = '".$victim_sel."'";
       pg_query($sql)or die("Erro ".__LINE__);
 

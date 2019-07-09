@@ -266,22 +266,66 @@
             </div>
 
            <div class="row">
-                 <div class="col-sm-4">
+
+
+             <div class="col-sm-6">
+               <div class="form-group">
+               <label class="control-label">Guarnição:</label>
+               <select class="form-control changefield" name="id_garrison">
+                  <option value=""></option>
+               <?
+                    if($turno['id'] != "")
+                    {
+                     $sql = "SELECT
+                              	U.name as user_name, U.registration, U.nickname as user_nickname,
+                              	G.*,
+                              	F.plate,
+                              	F.TYPE,
+                              	F.model,
+                              	F.brand,
+                              	F.nickname
+                              FROM
+                              	sepud.oct_garrison G
+                              JOIN sepud.oct_fleet F ON F.id = G.id_fleet
+                              JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = G.id AND GP.type = 'Motorista'
+                              JOIN sepud.users U ON U.id = GP.id_user
+                              WHERE
+                              	G.id_workshift = '".$turno['id']."'";
+                     $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);;
+                     if(pg_num_rows($res))
+                     {
+                       while($dg = pg_fetch_assoc($res))
+                       {
+                        if($dg['id']==$dados['id_garrison']){$sel = "selected"; }else{$sel="";}
+                         echo "<option value='".$dg['id']."' ".$sel.">".$dg['plate']." - [".$dg['user_nickname']."] ".$dg['user_name']." - Matrícula: ".$dg['registration']."</option>";
+
+                       }
+                     }else{
+                       echo "<option>Nenhuma guarnição configurada.</option>";
+                     }
+                    }
+               ?>
+             </select>
+              </div>
+             </div>
+
+
+                 <div class="col-sm-2">
                    <div class="form-group">
                    <label class="control-label">Data:</label>
                        <input type="text" name="data" class="form-control changefield" value="<?=($acao=="inserir"?$agora['data']:$data);?>">
                   </div>
                  </div>
-                 <div class="col-sm-4">
+                 <div class="col-sm-2">
                    <div class="form-group">
                    <label class="control-label">Hora:</label>
                        <input type="text" name="hora" class="form-control changefield" value="<?=($acao=="inserir"?$agora['hm']:$hora);?>">
                   </div>
                  </div>
 
-                 <div class="col-sm-4">
+                 <div class="col-sm-2">
                    <div class="form-group">
-                   <label class="control-label">Coordenadas Geográficas:</label>
+                   <label class="control-label">Coordenadas:</label>
                        <input type="text" id="coordenadas" name="coordenadas" class="form-control text-center changefield" value="<?=$dados['geoposition'];?>">
                   </div>
                  </div>

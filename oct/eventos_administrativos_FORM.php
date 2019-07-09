@@ -15,7 +15,14 @@
     if($dados['opened_timestamp']!=""){ $dados['opened_timestamp'] = str_replace(" ","T",$dados['opened_timestamp']);}
     if($dados['closed_timestamp']!=""){ $dados['closed_timestamp'] = str_replace(" ","T",$dados['closed_timestamp']);}
   }else{
-    $acao = "Inserir";
+    $acao            = "Inserir";
+    $dados['status'] = "Nova ocorrência administrativa";
+    $sql        = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
+    $resTurno   = pg_query($sql)or die("Erro ".__LINE__);
+    if(pg_num_rows($resTurno))
+    {
+        $turno = pg_fetch_assoc($resTurno);
+    }
   }
 ?>
 
@@ -37,6 +44,22 @@
 <div class="col-md-12">
 								<section class="panel box_shadow">
 									<header class="panel-heading">
+
+                    <h4><span class="text-muted">Status: </span><strong><i id='txt_status'><?=$dados['status'];?></i></strong>
+                              <?
+                                  if(isset($turno))
+                                  {
+                                    echo "<br><small class='text-muted'>Turno nº <b>".str_pad($turno['id'],5,"0",STR_PAD_LEFT)."</b> - ".$turno['period']. " - ";
+                                    if($turno['status']=="fechado"){ echo " <span class='text-warning'>Turno fechado</span>";}else{ echo " <span class='text-success'>Turno aberto</span>";}
+                                    echo "<br>Início: <b>".formataData($turno['opened'],1)."</b>";
+                                    if($turno['closed']!=""){echo ", fim: <b>".formataData($turno['closed'],1)."</b>";}
+                                    echo "</small>";
+                                  }else{
+                                    echo "<br><small class='text-danger'>Nenhum turno de trabalho aberto.</small>";
+                                  }
+                              ?>
+                    </h4>
+
                     <div class="panel-actions" style='margin-top:-12px'>
 									  </div>
                   </header>

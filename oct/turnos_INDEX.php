@@ -54,7 +54,7 @@
                         if(!$turno_aberto){
                       ?>
                       <a href='oct/turno.php?id=<?=$id_turno;?>'>
-                        <button type='button' class='mb-xs mt-xs mr-xs btn btn-sm btn-primary'><i class="fa fa-plus"></i> Abrir novo turno de trabalho</button>
+                        <button type='button' class='btn btn-primary'><i class="fa fa-plus"></i> Abrir novo turno de trabalho</button>
                       </a>
                     <? } ?>
                       <!--<a href="#" ic-get-from="sistema/logs.php" ic-target="#wrap" class="mb-xs mt-xs mr-xs btn btn-xs btn-primary"><i class="fa fa-user-plus"></i> Novo usuário !</a>-->
@@ -64,21 +64,21 @@
 										<div class="table-responsive">
 											<table class="table table-hover mb-none">
 												<thead>
-													<tr>
-														<th>Turno</th>
-                            <th>Período</th>
-                            <th>Abertura</th>
-                            <th>Fechamento</th>
-                            <th>Observações</th>
 
-                            <th class='text-center'><i class='fa fa-cogs'></i></th>
-													</tr>
 												</thead>
 												<tbody>
 <?
   if(!$turno_aberto)
   {
     echo "<tr class='warning'><td colspan='6'>Turno(s) fechado(s):</td></tr>";
+    echo "<tr>
+    <th><i>Turno</i></th>
+    <th><i>Período</i></th>
+    <th><i>Abertura</i></th>
+    <th><i>Fechamento</i></th>
+    <th><i>Observações</i></th>
+      <th class='text-center'><i class='fa fa-cogs'></i></th>
+    </tr>";
   }
   for($i=0; $i<count($dados);$i++)
   {
@@ -86,6 +86,14 @@
 
     if($d['status'] == "aberto"){
       echo "<tr class='success'><td colspan='6'>Turno aberto:</td></tr>";
+      echo "<tr>
+      <th><i>Turno</i></th>
+      <th><i>Período</i></th>
+      <th><i>Abertura</i></th>
+      <th><i>Fechamento</i></th>
+      <th><i>Observações</i></th>
+        <th class='text-center'><i class='fa fa-cogs'></i></th>
+      </tr>";
     }
 
 
@@ -107,6 +115,14 @@
 
     if($d['status'] == "aberto"){
       echo "<tr class='warning'><td colspan='6'>Turno(s) fechado(s):</td></tr>";
+      echo "<tr>
+        <th><i>Turno</i></th>
+        <th><i>Período</i></th>
+        <th><i>Abertura</i></th>
+        <th><i>Fechamento</i></th>
+        <th><i>Observações</i></th>
+        <th class='text-center'><i class='fa fa-cogs'></i></th>
+      </tr>";
     }
 
     echo "</tr>";

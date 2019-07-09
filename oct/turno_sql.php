@@ -18,11 +18,17 @@ if($_GET['acao'] == "fechar" && $_GET['id'] != "")
 if($_POST['acao'] == "inserir")
 {
   extract($_POST);
+
+  if($opened_hour == ""){ $opened_hour = "00:00"; }
+  if($closed_hour == ""){ $closed_hour = "23:59"; }
+
   $dt_abertura = $opened." ".$opened_hour.":00";
   $dt_abertura = formataData($dt_abertura,4);
 
   $dt_fechamento = $closed." ".$closed_hour.":00";
   $dt_fechamento = formataData($dt_fechamento,4);
+
+  $obs = pg_escape_string($observation);
 
   $sql = "INSERT INTO sepud.oct_workshift(
                       opened,
@@ -34,7 +40,7 @@ if($_POST['acao'] == "inserir")
           VALUES ('".$dt_abertura."',
                   '".$dt_fechamento."',
                      $id_company,
-                  '".$observation."',
+                  '".$obs."',
                   '".$period."',
                   'aberto')RETURNING id";
    $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
@@ -46,27 +52,31 @@ if($_POST['acao'] == "inserir")
 //Associar recurso ao turno ativo//
 if($_POST['acao'] == "associar")
 {
+
   extract($_POST);
+
+  if($opened_hour != ""){$_SESSION['user_opened_hour'] = $opened_hour;}
+  if($closed_hour != ""){$_SESSION['user_closed_hour'] = $closed_hour;}
+
+  if($opened!= ""){$_SESSION['user_opened'] = $opened;}
+  if($closed!= ""){$_SESSION['user_closed'] = $closed;}
+
+
   $dt_abertura   = $opened." ".$opened_hour;
   $dt_fechamento = ($closed    != ""                        ? "'".$closed." ".$closed_hour."'" : "Null");
-  $id_fleet      = ($id_fleet  != ""                        ? "'".$id_fleet."'":"Null");
-  $is_driver     = ($is_driver != "" && $id_fleet != "Null" ? "'".t."'" : "'".f."'");
+
 
   $sql = "INSERT INTO sepud.oct_rel_workshift_persona(
                       id_shift,
                       id_person,
-                      id_fleet,
                       opened,
                       closed,
-                      type,
-                      is_driver)
+                      type)
           VALUES ('".$id_workshift."',
                   '".$id_user."',
-                   ".$id_fleet.",
                   '".$dt_abertura."',
                   ".$dt_fechamento.",
-                  '".$type."',
-                  ".$is_driver.")";
+                  '".$type."')";
   pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
   header("location: turno.php?id=".$id_workshift);
 }

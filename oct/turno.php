@@ -75,14 +75,14 @@
                             <div class="col-sm-6">
                               <div class="form-group">
                               <label class="control-label">Hora de abertura:</label>
-                                  <input type="text" name="opened_hour" class="form-control text-center" value="<?=$agora['hm'];?>">
+                                  <input type="text" name="opened_hour" id="opened_hour" class="form-control text-center campo_hora" placeholder="00:00"  value="">
                              </div>
                            </div>
 
                             <div class="col-sm-6">
                               <div class="form-group">
                               <label class="control-label">Hora de fechamento:</label>
-                                  <input type="text" name="closed_hour" class="form-control text-center" value="<?=$dados['closed_hour'];?>">
+                                  <input type="text" name="closed_hour" class="form-control text-center campo_hora" placeholder="00:00" value="">
                              </div>
                            </div>
                       </div>
@@ -107,9 +107,9 @@
                               <div class="form-group">
                               <label class="control-label">Livro diário:</label>
                                   <select name="period" class="form-control">
-                                      <option value="alfa"   <?=($dados['status']=="alfa"  ?"selected":"");?>>Alfa</option>
-                                      <option value="bravo"  <?=($dados['status']=="bravo" ?"selected":"");?>>Bravo</option>
-                                      <option value="charle" <?=($dados['status']=="charle"?"selected":"");?>>Charle</option>
+                                      <option value="alfa"    <?=($dados['status']=="alfa"  ?"selected":"");?>>Alfa</option>
+                                      <option value="bravo"   <?=($dados['status']=="bravo" ?"selected":"");?>>Bravo</option>
+                                      <option value="charlie" <?=($dados['status']=="charlie"?"selected":"");?>>Charlie</option>
                                   </select>
                              </div>
                            </div>
@@ -145,7 +145,7 @@
                             <div class="col-sm-12">
                               <div class="form-group">
                               <label class="control-label">Observações:</label>
-                                  <textarea name="observation" class="form-control" rows="3"></textarea>
+                                  <textarea name="observation" class="form-control" rows="3"><?=$dados['observation'];?></textarea>
                              </div>
                            </div>
                       </div>
@@ -180,10 +180,11 @@
                                                 <div class="col-sm-12">
                                                   <div class="form-group">
                                                   <label class="control-label">Colaborador:</label>
-                                                      <select name="id_user" class="form-control">
+                                                      <select name="id_user" class="form-control select2">
                                                           <?
-                                                              //$sql = "SELECT * FROM sepud.users WHERE id_company = '".$_SESSION[company_id]."' ORDER BY name ASC";
+
                                                               //Lista os colaboradores que ainda não estão associados ao turno, evita que um mesmo colaborador seja associado a mais de uma função dentro do turno.
+                                                              /*
                                                               $sql = "SELECT
                                                                       	U.*
                                                                       FROM
@@ -191,13 +192,18 @@
                                                                       LEFT JOIN sepud.oct_rel_workshift_persona T ON T.id_person = U.id AND T.id_shift = '".$id."'
                                                                       WHERE
                                                                       	U.id_company = '".$_SESSION[id_company]."' AND T.id_shift is null";
-                                                              $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
+                                                              */
+                                                              //Libera para que um mesmo usuario possa receber mais de uma atribuição no turno, ex: coordenação e central de atendimento.
+                                                              $sql = "SELECT * FROM sepud.users WHERE id_company = '".$_SESSION['id_company']."' ORDER BY name ASC";
+                                                              $res = pg_query($sql)or die("<option>Erro ".__LINE__." - SQL: ".$sql."</option>");
 
                                                               if(pg_num_rows($res))
                                                               {
                                                                   while($u = pg_fetch_assoc($res))
                                                                   {
-                                                                    echo "<option value='".$u['id']."'>".$u['name']."</option>";
+                                                                    if($u['nickname']!=""){ $nick = "[".$u['nickname']."] ";}else{$nick="";}
+                                                                    if($u['registration']!=""){ $mat = " - Matrícula: ".$u['registration'];}else{$mat="";}
+                                                                    echo "<option value='".$u['id']."'>".$nick.$u['name'].$mat."</option>";
                                                                   }
                                                               }else{
                                                                     $bt_associar_recurso = "disabled";
@@ -213,14 +219,14 @@
                                                      <div class="col-sm-6">
                                                        <div class="form-group">
                                                        <label class="control-label">Data de entrada:</label>
-                                                           <input type="text" name="opened" class="form-control text-center" value="<?=$agora['data'];?>">
+                                                           <input type="text" name="opened" class="form-control text-center" value="<?=($_SESSION['user_opened']!=""?$_SESSION['user_opened']:$agora['data']);?>">
                                                       </div>
                                                     </div>
 
                                                      <div class="col-sm-6">
                                                        <div class="form-group">
                                                        <label class="control-label">Data de saída:</label>
-                                                           <input type="text" name="closed" class="form-control text-center"  value="<?=$agora['data'];?>">
+                                                           <input type="text" name="closed" class="form-control text-center" value="<?=($_SESSION['user_closed']!=""?$_SESSION['user_closed']:$agora['data']);?>">
                                                       </div>
                                                     </div>
                                                </div>
@@ -228,14 +234,14 @@
                                                      <div class="col-sm-6">
                                                        <div class="form-group">
                                                        <label class="control-label">Hora de entrada:</label>
-                                                           <input type="text" name="opened_hour" class="form-control text-center" value="">
+                                                           <input type="text" name="opened_hour" onclick="$(this).val('');" class="form-control text-center campo_hora" placeholder="00:00" value="<?=($_SESSION['user_opened_hour']!=""?$_SESSION['user_opened_hour']:"");?>">
                                                       </div>
                                                     </div>
 
                                                      <div class="col-sm-6">
                                                        <div class="form-group">
                                                        <label class="control-label">Hora de saída:</label>
-                                                           <input type="text" name="closed_hour" class="form-control text-center"  value="">
+                                                           <input type="text" name="closed_hour"  onclick="$(this).val('');" class="form-control text-center campo_hora" placeholder="00:00" value="<?=($_SESSION['user_closed_hour']!=""?$_SESSION['user_closed_hour']:"");?>">
                                                       </div>
                                                     </div>
                                                </div>
@@ -245,15 +251,14 @@
                                                        <div class="form-group">
                                                        <label class="control-label">Funcão:</label>
                                                            <select name="type" class="form-control">
-                                                               <option value="Central de atendimento">Central de atendimento</option>
-                                                               <option value="Agente de campo">Agente de campo</option>
-                                                               <option value="Coordenação">Coordenação</option>
-                                                               <option value="Direção">Direção</option>
+                                                               <option value="agente">Agente de campo</option>
+                                                               <option value="central">Central de atendimento</option>
+                                                               <option value="coordenacao">Coordenação</option>
                                                            </select>
                                                       </div>
                                                     </div>
                                               </div>
-
+<!--
                                               <div class="row">
                                                     <div class="col-sm-8">
                                                       <div class="form-group">
@@ -262,7 +267,7 @@
                                                             <option value="">- - -</option>
                                                             <?
                                                                 $sql = "SELECT * FROM sepud.oct_fleet WHERE id_company = '".$_SESSION['id_company']."' ORDER BY type ASC, brand ASC, model ASC";
-                                                                $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
+                                                                //$res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
                                                                 while($v = pg_fetch_assoc($res))
                                                                 {
                                                                   $veic[$v['type']][]=$v;
@@ -284,7 +289,7 @@
                              													</div>
                                                    </div>
                                               </div>
-
+-->
 
                                               <div class="row">
                                                   <div class="col-sm-12 text-center">
@@ -316,7 +321,7 @@
     <div class="col-md-12">
           <section class="panel box_shadow">
               <header class="panel-heading" style="height:70px">
-                  <?="<h4><i><span class='text-muted'>Recursos vinculados ao turno de trabalho <b>nº ".str_pad($id,5,"0",STR_PAD_LEFT)."</b></span></i></h4>";?>
+                  <?="<h4><i><span class='text-muted'>Agentes vinculados ao turno de trabalho <b>nº ".str_pad($id,5,"0",STR_PAD_LEFT)."</b></span></i></h4>";?>
                   <div class="panel-actions text-right"></div>
               </header>
               <div class="panel-body">
@@ -324,59 +329,45 @@
                     <div class="col-md-12">
                     <?
                             $sql = "SELECT
-                                      	U.name as nome,
-                                      	F.plate, F.model, F.brand,
+                                      	U.name as nome, U.nickname, U.registration,
                                       	WP.*
                                       FROM
                                       	        sepud.oct_rel_workshift_persona WP
                                            JOIN sepud.users                      U ON U.id = WP.id_person
-                                      LEFT JOIN sepud.oct_fleet                  F ON F.id = WP.id_fleet
                                       WHERE
-                                      	WP.id_shift =  '".$id."'";
+                                      	WP.id_shift =  '".$id."'
+                                      ORDER BY WP.opened ASC, U.name ASC";
                             $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
                             if(pg_num_rows($res))
                             {
+
+                              $traducao["agente"]      = "Agente de campo";
+                              $traducao["central"]     = "Central de atendimento";
+                              $traducao["coordenacao"] = "Coordenação";
+
                               while($d = pg_fetch_assoc($res))
                               {
-                                //echo "<pre>";
-                                //print_r($d);
-                                $recursosTurno[] = $d;
+                                  $agentes_dados[$d['type']][] = $d;
                               }
 
-                              //echo "<pre>";
-                            //  print_r($recursosTurno);
-                              //echo "</pre>";
-                              /*
-                              [nome] => Jonathan Canfield Sniecikoski
-                              [plate] => QHD7899
-                              [model] => Kombi
-                              [brand] => Volkswagen
-                              [id_shift] => 29
-                              [id_person] => 1
-                              [id_fleet] => 6
-                              [opened] => 2019-05-27 15:28:00
-                              [closed] =>
-                              [type] => Agente de campo
-                              [is_driver] => t
-                              */
-                              echo "<table class='table table-striped'>";
-                              echo "<thead><tr>
-                                    <th>Nome</th><th>Área</th><th>Data</th><th colspan='3' class='text-center'>Veículo</th>
-                                    </tr></thead>";
-                              echo "<tbody>";
-                              for($i=0;$i<count($recursosTurno);$i++)
+                                echo "<table class='table table-striped'>";
+                                echo "<thead><tr>
+                                      <th>Matrícula</th><th>Nome</th><th>Inicio</th><th>Fim</th>
+                                      </tr></thead>";
+                                echo "<tbody>";
+                              foreach($agentes_dados as $designacao => $agentes)
                               {
-                                echo "<tr>";
-                                  echo "<td>".$recursosTurno[$i]['nome']."</td>";
-                                  echo "<td>".$recursosTurno[$i]['type']."</td>";
-                                  echo "<td>".formataData($recursosTurno[$i]['opened'],1)."</td>";
-                                  if($recursosTurno[$i]['plate'] != "")
+                                  echo "<tr class='info'><td colspan='5'><b>".$traducao[$designacao]."</b></td></tr>";
+                                  for($i=0;$i<count($agentes);$i++)
                                   {
-                                    if($recursosTurno[$i]['is_driver']=='t'){ echo "<td>Motorista</td>"; }else{ echo "<td>Auxiliar</td>"; }
-                                    echo "<td>".$recursosTurno[$i]['brand']." ".$recursosTurno[$i]['model']."</td>";
-                                    echo "<td>".$recursosTurno[$i]['plate']."</td>";
-                                  }else{ echo "<td colspan='3' class='text-center text-muted'>- - - - -</td>"; }
-                                echo "</tr>";
+                                      $d = $agentes[$i];
+                                      echo "<tr>";
+                                        echo "<td>".$d['registration']."</td>";
+                                        echo "<td>".$d['nome']."</td>";
+                                        echo "<td>".formataData($d['opened'],1)."</td>";
+                                        echo "<td>".formataData($d['closed'],1)."</td>";
+                                      echo "</tr>";
+                                 }
                               }
                               echo "</tbody></table>";
                             }else{
@@ -399,6 +390,9 @@
 
 <script>
 
+$(".campo_hora").mask('00:00');
+
+$('.select2').select2();
 $(".loading").click(function(){
 
   var msg = "Aguarde";

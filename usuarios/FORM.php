@@ -13,6 +13,7 @@
   }
 
 ?>
+
 				<section role="main" class="content-body">
 					<header class="page-header">
 						<h2>Perfil do Usuário</h2>
@@ -46,8 +47,8 @@
 <div class="row">
   <div class="col-md-6 col-md-offset-3">
 
-										<form id="userform" name="userform" class="form-horizontal" method="post" action="usuarios/FORM_sql.php" debug='0'>
-
+										<form autocomplete="off" id="userform" name="userform" class="form-horizontal" method="post" action="usuarios/FORM_sql.php" debug='0'>
+                      <input autocomplete="off" name="hidden" type="text" style="display:none;">
 
                       <h4 class="mb-xlg">Informações Pessoais</h4>
 											<fieldset>
@@ -122,21 +123,20 @@
 											<hr class="dotted tall">
 											<h4 class="mb-xlg">Informações de acesso</h4>
 											<fieldset class="mb-xl">
-
 												<div class="form-group">
 													<label class="col-md-2 control-label" for="email">E-mail</label>
 													<div class="col-md-10">
-														<input type="text" class="form-control" id="email" name="email" placeholder='Endereço de e-mail' value="<?=$d['email'];?>">
+														<input type="text" class="form-control" onclick="$(this).val('');" name="email" id="email" placeholder='Endereço de e-mail' value="<?=($d['email']!=""?$d['email']:"Endereço de e-mail");?>">
 													</div>
 												</div>
 
 												<div class="form-group">
 													<label class="col-md-2 control-label" for="senha">Senha</label>
 													<div class="col-md-5">
-														<input type="password" class="form-control" id="senha" name="senha" placeholder='Nova senha' value="">
+														<input type="password"  onclick="$(this).val('');"  class="form-control" name="senha" id="senha" placeholder='Nova senha' value="nova_senha">
 													</div>
 													<div class="col-md-5">
-														<input type="password" class="form-control" id="senha_repete" name="senha_repete"  placeholder='Repita nova senha'>
+														<input type="password"  onclick="$(this).val('');"  class="form-control" name="senha_repete" id="senha_repete"  placeholder='Repita nova senha' value="nova_senha">
 													</div>
 												</div>
 
@@ -167,8 +167,9 @@
 }else {
               echo "<input type='hidden' name='acao' value='atualizar' />";
               echo "<input type='hidden' name='id' value='".$_GET['id']."' />";
-              echo "<a href='usuarios/index.php'><button type='button' class='btn btn-default loading'>Voltar</button></a>&nbsp;";
-              echo "<button type='submit' class='btn btn-primary loading'>Atualizar</button>";
+              echo " <a href='usuarios/index.php'><button type='button' class='btn btn-default loading'>Voltar</button></a>&nbsp;";
+              echo " <a href='usuarios/FORM_novo_usuario.php'><button type='button' class='btn btn-primary loading'><i class='fa fa-user-plus'></i> Novo usuário</button></a>";
+              echo " <button type='submit' class='btn btn-primary loading'>Atualizar</button>";
 }
 ?>
   												</div>
@@ -196,4 +197,10 @@
 				</section>
 <script>
 $(".loading").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> <small>Aguarde.</small>"); });
+$("#userform").on("submit", function(){
+  if($("#email").val()        == "Endereço de e-mail"){ $("#email").val('');}
+  if($("#senha").val()        == "nova_senha")        { $("#senha").val('');}
+  if($("#senha_repete").val() == "nova_senha")        { $("#senha_repete").val('');}
+
+});
 </script>

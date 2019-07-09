@@ -158,7 +158,7 @@
 
 		<!-- Examples -->
 		<!--<script src="assets/javascripts/dashboard/examples.dashboard.js"></script>-->
-
+		<script src="assets/javascripts/jquery.mask.min.js"></script>
 
 
 <script>

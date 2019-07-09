@@ -58,7 +58,7 @@ logger("Acesso","Logs");
 	$sql = "SELECT U.name, L.id_user, L.timestamp, L.ip, L.module, L.action, L.obs
 					FROM sepud.logs L
 					LEFT JOIN sepud.users U ON U.id = L.id_user
-					--WHERE id_user <> 1
+					--WHERE id_user = 110
 					--WHERE L.obs like '%Baixou o%'
 					ORDER BY L.timestamp DESC
 					LIMIT 250";

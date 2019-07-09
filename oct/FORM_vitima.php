@@ -54,6 +54,14 @@
                    </div>
                  </div>
             </div>
+            <div class="row">
+                  <div class="col-sm-12">
+                    <div class="form-group">
+                    <label class="control-label">Nome da mãe:</label>
+                        <input type="text" name="mother_name" placeholder="Nome completo" class="form-control" value="<?=$dados['mother_name'];?>">
+                   </div>
+                 </div>
+            </div>
 
           <div class="row">
                 <div class="col-sm-2">
@@ -72,9 +80,26 @@
                  <!--<input type="text" name="genre" class="form-control" value="<?=$dados['genre'];?>">-->
                 </div>
               </div>
+
               <div class="col-sm-4">
                 <div class="form-group">
-                <label class="control-label">Estado:</label>
+                <label class="control-label">RG:</label>
+                    <input type="text" name="rg" class="form-control" value="<?=$dados['rg'];?>">
+               </div>
+             </div>
+
+             <div class="col-sm-4">
+               <div class="form-group">
+               <label class="control-label">CPF:</label>
+                   <input type="text" name="cpf" class="form-control" value="<?=$dados['cpf'];?>">
+              </div>
+            </div>
+</div>
+
+<div class="row">
+              <div class="col-sm-4">
+                <div class="form-group">
+                <label class="control-label">Estado de saúde:</label>
                 <select id="state" name="state" class="form-control">
                     <option value="Nada"  <?=($dados['state']=="Nada"?"selected":"");?>>Nada consta</option>
                     <option value="Leve"  <?=($dados['state']=="Leve"?"selected":"");?>>Leve</option>
@@ -96,7 +121,6 @@
               </div>
             </div>
            </div>
-
            <div class="row">
              <div class="col-sm-8">
                    <div class="form-group">

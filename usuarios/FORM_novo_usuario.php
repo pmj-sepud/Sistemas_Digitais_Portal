@@ -49,14 +49,26 @@
 													<div class="col-md-10">
 														<input type="text" class="form-control" id="name" name="name" placeholder='Nome completo'>
 													</div>
-
 												</div>
+                        <div class="form-group">
+                          <label class="col-md-2 control-label" for="name">Apelido</label>
+                          <div class="col-md-10">
+                            <input type="text" class="form-control" id="nickname" name="nickname" placeholder='Nome de guerra' value="<?=$d['nickname'];?>">
+                          </div>
+                        </div>
 												<div class="form-group">
 													<label class="col-md-2 control-label" for="phone">Telefone</label>
 													<div class="col-md-10">
 														<input type="text" class="form-control" id="phone" name="phone" placeholder='(xx) xxxxx-xxxx'>
 													</div>
 												</div>
+
+                        <div class="form-group">
+                          <label class="col-md-2 control-label" for="registration">Matricula</label>
+                          <div class="col-md-10">
+                            <input type="text" class="form-control" id="registration" name="registration" placeholder='' value="<?=$d['registration'];?>">
+                          </div>
+                        </div>
 
 
                         <div class="form-group">
@@ -98,7 +110,7 @@
 												</div>
 
 
-                      
+
 
 
 											</fieldset>
@@ -110,17 +122,17 @@
 												<div class="form-group">
 													<label class="col-md-2 control-label" for="email">E-mail</label>
 													<div class="col-md-10">
-  														<input type="text" class="form-control" id="email" name="email" placeholder='Endereço de e-mail' value=" " onclick="$(this).val('');">
+  														<input type="text" class="form-control" onclick="$(this).val('');" name="email" id="email" placeholder='Endereço de e-mail' value="<?=($d['email']!=""?$d['email']:"Endereço de e-mail");?>">
 													</div>
 												</div>
 
 												<div class="form-group">
 													<label class="col-md-2 control-label" for="senha">Senha</label>
 													<div class="col-md-5">
-														<input type="password" class="form-control" id="senha" name="senha" placeholder='Nova senha' value="         " onclick="$(this).val('');">
+														<input type="password"  onclick="$(this).val('');"  class="form-control" name="senha" id="senha" placeholder='Nova senha' value="nova_senha">
 													</div>
 													<div class="col-md-5">
-														<input type="password" class="form-control" id="senha_repete" name="senha_repete"  placeholder='Repita nova senha' value="         " onclick="$(this).val('');">
+														<input type="password"  onclick="$(this).val('');"  class="form-control" name="senha_repete" id="senha_repete"  placeholder='Repita nova senha' value="nova_senha">
 													</div>
 												</div>
 
@@ -165,4 +177,10 @@
   //$("#senha").val('');
   //$("#senha_repete").val('');
   $(".loading").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> <small>Aguarde.</small>"); });
+
+  $("#userform").on("submit", function(){
+    if($("#email").val()        == "Endereço de e-mail"){ $("#email").val('');}
+    if($("#senha").val()        == "nova_senha")        { $("#senha").val('');}
+    if($("#senha_repete").val() == "nova_senha")        { $("#senha_repete").val('');}
+  });
 </script>
