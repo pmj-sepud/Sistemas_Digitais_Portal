@@ -76,7 +76,7 @@
       $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
       $aux = pg_fetch_assoc($res);
 
-      logger("Inserção","ERG - Registro","Novo registro, ID: ".$aux['id'].", Placa do veículo: ".$placa);
+      logger("Inserção","SERP - Registro","Novo registro, ID: ".$aux['id'].", Placa do veículo: ".$placa);
 
       header("Location: app_FORM.php?id=".$aux['id']);
       exit();
@@ -92,7 +92,7 @@
                 WHERE id = '".$id."'";
         pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
 
-        logger("Notificação","ERG - Registro","Registro ID: ".$id);
+        logger("Notificação","SERP - Registro","Registro ID: ".$id);
 
         header("Location: app_FORM.php?id=".$id);
         exit();
@@ -106,7 +106,7 @@
                 WHERE id = '".$id."'";
         pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
 
-        logger("Guinchamento","ERG - Registro","Registro ID: ".$id);
+        logger("Guinchamento","SERP - Registro","Registro ID: ".$id);
 
         header("Location: app_FORM.php?id=".$id);
         exit();
@@ -120,7 +120,7 @@
                 WHERE id = '".$id."'";
         pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
 
-        logger("Baixa","ERG - Registro","Registro ID: ".$id);
+        logger("Baixa","SERP - Registro","Registro ID: ".$id);
 
         header("Location: app_FORM.php?id=".$id);
         exit();

@@ -35,13 +35,13 @@ if($_POST['acao'] == "inserir")
                       closed,
                       id_company,
                       observation,
-                      period,
+                      workshift_group,
                       status)
           VALUES ('".$dt_abertura."',
                   '".$dt_fechamento."',
                      $id_company,
                   '".$obs."',
-                  '".$period."',
+                  '".$workshift_group."',
                   'aberto')RETURNING id";
    $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
    $id  = pg_fetch_assoc($res);
@@ -82,10 +82,40 @@ if($_POST['acao'] == "associar")
 }
 
 
-if($_POST['acao'] == "atualizar" && $_POST['id'] != "")
+if($_POST['acao'] == "atualizar" && $_POST['id_workshift'] != "")
 {
-  echo "<div class='text-center'>";
-    print_r($_POST);
-  echo "</div>";
+  extract($_POST);
+
+  if($opened_hour == ""){ $opened_hour = "00:00"; }
+  if($closed_hour == ""){ $closed_hour = "23:59"; }
+
+  $dt_abertura = $opened." ".$opened_hour.":00";
+  $dt_abertura = formataData($dt_abertura,4);
+
+  $dt_fechamento = $closed." ".$closed_hour.":00";
+  $dt_fechamento = formataData($dt_fechamento,4);
+
+  $obs = pg_escape_string($observation);
+
+  $sql = "UPDATE sepud.oct_workshift SET
+                      opened          = '".$dt_abertura."',
+                      closed          = '".$dt_fechamento."',
+                      observation     = '".$obs."',
+                      workshift_group = '".$workshift_group."',
+                      status          = '".$status."'
+          WHERE       id              = '".$id_workshift."'";
+
+   $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
+   $id  = pg_fetch_assoc($res);
+   header("location: turno.php?id=".$id_workshift);
+   exit();
+}
+
+if($_GET['acao']=="remover_associado" && $_GET['id']!="" && $_GET["id_workshift"]!="")
+{
+  $sql = "DELETE FROM sepud.oct_rel_workshift_persona WHERE id = '".$_GET[id]."'";
+  pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
+  header("location: turno.php?id=".$_GET['id_workshift']);
+  exit();
 }
 ?>

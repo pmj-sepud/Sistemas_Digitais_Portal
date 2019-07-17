@@ -5,6 +5,35 @@
 
     extract($_POST);
 
+    //echo "<pre>";
+    //print_r($_POST);
+    //echo  "</pre>";
+    //exit();
+
+/*
+    [name] => Daniel Alberti
+    [nickname] =>
+    [phone] => 47 996972456
+    [registration] =>
+    [id_company] => 3
+    [area] => Seprot
+    [job] => Agente de Transito
+    [observation] =>
+    [workshift_group_time_init] => 06:30
+    [workshift_group_time_finish] => 22:30
+    [workshift_subgroup] => Turno
+    [workshift_subgroup_time_init] => 08:00
+    [workshift_subgroup_time_finish] => 13:00
+    [workshift_group] => Alfa
+    [email] => daniel.alberti@joinville.sc.gov.br
+    [senha] =>
+    [senha_repete] =>
+    [active] => t
+    [acao] => atualizar
+    [id] => 69
+)
+*/
+
     if($acao=="inserir")
     {
       if($registration == ""){ $registration = "Null"; }else{ $registration = "'".$registration."'";}
@@ -53,7 +82,21 @@
         if($registration == ""){ $registration = "Null"; }else{ $registration = "'".$registration."'";}
         if($email == ""){ $email = "Null"; }else{ $email = "'".$email."'";}
 
+        $workshift_group_time_init      = ($workshift_group_time_init      != "" ? "'".$workshift_group_time_init.":00'"     :"Null");
+        $workshift_group_time_finish    = ($workshift_group_time_finish    != "" ? "'".$workshift_group_time_finish.":00'"   :"Null");
+        $workshift_group                = ($workshift_group                != "" ? "'".$workshift_group."'"                  :"Null");
+        $workshift_subgroup_time_init   = ($workshift_subgroup_time_init   != "" ? "'".$workshift_subgroup_time_init.":00'"  :"Null");
+        $workshift_subgroup_time_finish = ($workshift_subgroup_time_finish != "" ? "'".$workshift_subgroup_time_finish.":00'":"Null");
+        $workshift_subgroup             = ($workshift_subgroup             != "" ? "'".$workshift_subgroup."'"               :"Null");
+
+
         $sql =  "UPDATE sepud.users SET
+                        workshift_group_time_init      = ".$workshift_group_time_init.",
+                        workshift_group_time_finish    =  ".$workshift_group_time_finish.",
+                        workshift_group                = ".$workshift_group.",
+                        workshift_subgroup_time_init   = ".$workshift_subgroup_time_init.",
+                        workshift_subgroup_time_finish = ".$workshift_subgroup_time_finish.",
+                        workshift_subgroup             = ".$workshift_subgroup.",
                         name         = '".$name."',
                         email        = ".$email.",
                         ".$senhasql."

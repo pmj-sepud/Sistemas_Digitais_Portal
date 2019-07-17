@@ -75,14 +75,14 @@
                             <div class="col-sm-6">
                               <div class="form-group">
                               <label class="control-label">Hora de abertura:</label>
-                                  <input type="text" name="opened_hour" id="opened_hour" class="form-control text-center campo_hora" placeholder="00:00"  value="">
+                                  <input type="text" name="opened_hour" class="form-control text-center campo_hora" placeholder="00:00"  value="<?=($dados['opened']!=""?substr($dados['opened'],11,5):"");?>">
                              </div>
                            </div>
 
                             <div class="col-sm-6">
                               <div class="form-group">
                               <label class="control-label">Hora de fechamento:</label>
-                                  <input type="text" name="closed_hour" class="form-control text-center campo_hora" placeholder="00:00" value="">
+                                  <input type="text" name="closed_hour" class="form-control text-center campo_hora" placeholder="00:00" value="<?=($dados['closed']!=""?substr($dados['closed'],11,5):"");?>">
                              </div>
                            </div>
                       </div>
@@ -106,10 +106,24 @@
                             <div class="col-sm-6">
                               <div class="form-group">
                               <label class="control-label">Livro diário:</label>
-                                  <select name="period" class="form-control">
-                                      <option value="alfa"    <?=($dados['status']=="alfa"  ?"selected":"");?>>Alfa</option>
-                                      <option value="bravo"   <?=($dados['status']=="bravo" ?"selected":"");?>>Bravo</option>
-                                      <option value="charlie" <?=($dados['status']=="charlie"?"selected":"");?>>Charlie</option>
+                                  <select name="workshift_group" class="form-control">
+                                    <?
+                                          $sql = "SELECT workshift_groups FROM sepud.company WHERE id = '".$_SESSION['id_company']."'";
+                                          $res = pg_query($sql)or die("<option>SQL Error: ".__LINE__."</option>");
+                                          if(pg_num_rows($res))
+                                          {
+                                            $wg = pg_fetch_assoc($res);
+                                            $workshift_groups = json_decode($wg['workshift_groups']);
+
+                                            for($i = 0; $i<count($workshift_groups);$i++)
+                                            {
+                                              if($dados['workshift_group'] == $workshift_groups[$i]){ $sel = "selected"; }else{$sel="";}
+                                              echo "<option value='".$workshift_groups[$i]."' ".$sel.">".$workshift_groups[$i]."</option>";
+                                            }
+                                          }else{
+                                              echo "<option value=''>Nenhum horário de turno configurado</option>";
+                                          }
+                                      ?>
                                   </select>
                              </div>
                            </div>
@@ -158,6 +172,7 @@
                               </a>
                               <? if($acao=="atualizar"){ ?>
                                   <a href='oct/turno_sql.php?id=<?=$id;?>&acao=fechar'><button id='bt_fechar_turno'    type='button' class='mb-xs mt-xs mr-xs btn btn-warning loading'>Fechar turno</button></a>
+                                  <input type="hidden" name="id_workshift" value="<?=$id?>" />
                               <? } ?>
                               <button type='submit' class='mb-xs mt-xs mr-xs btn btn-primary loading'><?=$bt_enviar_txt;?></button>
                            </div>
@@ -296,6 +311,13 @@
                                                       <input type="hidden" name="acao" value="associar" />
                                                       <input type="hidden" name="id_workshift" value="<?=$id?>" />
                                                       <button type='submit' class='mb-xs mt-xs mr-xs btn btn-primary loading' data-loading-msg="Aguarde, processando informação." <?=$bt_associar_recurso;?>>Associar ao turno corrente</button>
+
+                                                      <? if($dados['is_populate']=='f'){ ?>
+                                                        <a class='mb-xs mt-xs mr-xs btn btn-primary loading' href="oct/turno_gerar_associacao_automatica.php?data=<?=urlencode($dados['opened']);?>&id_workshift=<?=$_GET['id'];?>&workshift_group=<?=$dados['workshift_group'];?>">Popular turno baseado no cadastro do funcionário</a>
+                                                      <? }else {
+                                                          echo "<button class='mb-xs mt-xs mr-xs btn btn-primary' disabled>Turno já populado</a>";
+                                                      }
+                                                      ?>
                                                   </div>
                                             </div>
 
@@ -366,6 +388,7 @@
                                         echo "<td>".$d['nome']."</td>";
                                         echo "<td>".formataData($d['opened'],1)."</td>";
                                         echo "<td>".formataData($d['closed'],1)."</td>";
+                                        echo "<td><a href='oct/turno_sql.php?id_workshift=".$_GET['id']."&acao=remover_associado&id=".$d['id']."' class='btn btn-sm btn-danger'><i class='fa fa-trash'></i></a></td>";
                                       echo "</tr>";
                                  }
                               }

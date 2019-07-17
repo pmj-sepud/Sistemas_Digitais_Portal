@@ -8,7 +8,7 @@ $agora = now();
 
 foreach ($_POST as $var => $val)
 {
-  if($var != "acao" && $var != "id")
+  if($var != "acao" && $var != "id" && $var != "id_workshift")
   {
       if($val ==  ""){ $_POST[$var] = "Null";      }
       else{            $_POST[$var] = "'".$val."'";}
@@ -16,11 +16,56 @@ foreach ($_POST as $var => $val)
 }
 
 extract($_POST);
+extract($_GET);
 //echo "<div class='row'><div class='col-sm-6 col-sm-offset-3'><pre>";
-//print_r($_POST);
+//  if($acao == "Atualizar"){  print_r($_POST);  exit();  }
 
+if($acao=="remover" && $id!="")
+{
+  $sql = "DELETE FROM sepud.oct_rel_garrison_persona WHERE id_garrison = '".$id."';
+          DELETE FROM sepud";
+  pg_query($sql)or die("Error ".__LINE__."<br>".$sql);
+  header("Location: index.php");
+}
 
+if($acao=="Atualizar" && $id != "")
+{
+  $sql = "UPDATE sepud.oct_garrison
+          SET
+            opened       = ".$opened.",
+            closed       = ".$closed.",
+            initial_fuel = ".$initial_fuel.",
+            final_fuel   = ".$final_fuel.",
+            initial_km   = ".$initial_km.",
+            final_km     = ".$final_km.",
+            observation  = ".$observation."
+          WHERE id = '".$id."'";
+  $res = pg_query($sql)or die("Error ".__LINE__."<br>".$sql);
+  $aux = pg_fetch_assoc($res);
+  header("Location: veiculo_turno_FORM.php?id_garrison=".$id."&turno=".$id_workshift);
+  exit();
+}
 /*
+
+Array
+(
+    [id_fleet] => '9'
+    [id_user] => '123'
+    [opened] => '2019-07-16T06:30:00'
+    [closed] => Null
+    [initial_fuel] => '100'
+    [final_fuel] => Null
+    [initial_km] => '50530'
+    [final_km] => Null
+    [observation] => 'teste de inserção....'
+    [id_workshift] => '118'
+    [acao] => Atualizar
+    [id_garrison] => '43'
+)
+
+
+
+
 Array
 (
     [id_fleet] => 19

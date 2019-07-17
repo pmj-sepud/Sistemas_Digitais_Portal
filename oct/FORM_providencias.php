@@ -76,6 +76,54 @@
 
            </div>
 
+<div class="row">
+  <div class="col-sm-12">
+    <div class="form-group">
+    <label class="control-label">Guarnição:</label>
+    <select class="form-control" name="id_garrison">
+    <?
+         if($_GET['turno'] != "")
+         {
+          $sql = "SELECT
+                     U.name as user_name, U.registration, U.nickname as user_nickname,
+                     G.*,
+                     F.plate,
+                     F.TYPE,
+                     F.model,
+                     F.brand,
+                     F.nickname
+                   FROM
+                     sepud.oct_garrison G
+                   JOIN sepud.oct_fleet F ON F.id = G.id_fleet
+                   JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = G.id AND GP.type = 'Motorista'
+                   JOIN sepud.users U ON U.id = GP.id_user
+                   WHERE
+                     G.id_workshift = '".$_GET['turno']."'";
+          $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);;
+
+
+          if(pg_num_rows($res))
+          {
+            echo "<option value=''></option>";
+            echo "<optgroup label='Guarnições montadas no turno ativo:'>";
+            while($dg = pg_fetch_assoc($res))
+            {
+              echo "<option value='".$dg['id']."'>".$dg['plate']." - [".$dg['user_nickname']."] ".$dg['user_name']." - Matrícula: ".$dg['registration']."</option>";
+            }
+            echo "</optgroup>";
+          }else{
+            echo "<option value=''>Nenhuma guarnição empenhada.</option>";
+          }
+        }else {
+          echo "<option value=''>Nenhum turno aberto ou ID do turno não informado.</option>";
+        }
+    ?>
+  </select>
+   </div>
+  </div>
+</div>
+
+
            <div class="row">
              <div class="col-sm-6">
 
@@ -222,9 +270,10 @@
 
             <div class="row">
                   <div class="col-sm-12 text-center" style="margin-top:28px">
-                      <input type="hidden" name="id"          value="<?=$id;?>">
-                      <input type="hidden" name="victim_sel"  value="<?=$victim_sel;?>">
-                      <input type="hidden" name="acao" value="<?=$acao?>">
+                      <input type="hidden" name="id"                            value="<?=$id;?>">
+                      <input type="hidden" name="turno"                          value="<?=$_GET['turno'];?>">
+                      <input type="hidden" name="victim_sel"                     value="<?=$victim_sel;?>">
+                      <input type="hidden" name="acao"                           value="<?=$acao?>">
                       <input type="hidden" name="retorno_acao" id="retorno_acao" value="">
                       <a class="btn btn-default loading" href='oct/FORM.php?id=<?=$_GET['id']?>'>Voltar</a>
 
@@ -320,7 +369,7 @@
                                                                     }
                                                                     echo "</table>";
 
-                                                            echo "<td class='text-center' width='50px'><a href='oct/FORM_providencias_sql.php?id=".$id."&id_providence=".$p['id']."&acao=remover'><button type='button' class='mb-xs mt-xs mr-xs btn btn-xs btn-danger'><i class='fa fa-trash'></i></button></a></td>";
+                                                            echo "<td class='text-center' width='50px'><a href='oct/FORM_providencias_sql.php?turno=".$_GET['turno']."&id=".$id."&id_providence=".$p['id']."&acao=remover'><button type='button' class='mb-xs mt-xs mr-xs btn btn-xs btn-danger'><i class='fa fa-trash'></i></button></a></td>";
 
                                                         echo "</td>";
                                                       echo "</tr>";

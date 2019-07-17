@@ -83,6 +83,7 @@
                             if(isset($qtd_agentes) && $qtd_agentes > 0)
                             {
                               echo " <a href='oct/veiculo_turno_FORM.php?turno=".$turno['id']."'><button id='bt_atualizar_veiculo' type='button' class='btn btn-sm btn-info'><i class='fa fa-cab'></i> Inserir guarnições</button></a>";
+                              echo " <a href='oct/veiculo_registros_FORM.php?turno=".$turno['id']."'><button id='bt_atualizar_veiculo' type='button' class='btn btn-sm btn-success'><i class='fa fa-cab'></i> Registros da VTR</button></a>";
                             }else {
                               echo " <button type='button' class='btn btn-sm btn-info disabled'><i class='fa fa-cab'></i> Inserir guarnições</button>";
                             }
@@ -99,21 +100,8 @@
                                   <?
                                       if(pg_num_rows($res))
                                       {
-                                          switch ($turno['period']) {
-                                            case 'alfa':
-                                              $livro_class="success";
-                                              break;
-                                            case 'bravo':
-                                              $livro_class="warning";
-                                              break;
-                                            case 'charlie':
-                                              $livro_class="danger";
-                                              break;
 
-                                            default:
-                                              $livro_class = "";
-                                              break;
-                                          }
+                                            $livro_class="success";
                                       ?>
                                       <section class='panel panel-horizontal'>
                              <header class='panel-heading bg-success' style='width:150px'>
@@ -123,13 +111,14 @@
                              </header>
 
                              <div class='panel-body p-lg'>
+<div class="table-responsive">
                                     <table class='table table-condensed'>
                                       <thead>
                                           <tr>
                                             <th>Turno</th>
                                             <th>Período</th>
                                             <th>Total</th>
-                                            <th>Livro</th>
+                                            <th>Grupo</th>
                                           </tr>
                                       </thead>
 
@@ -138,7 +127,7 @@
                                                   <td><b><?=str_pad($turno['id'],5,"0",STR_PAD_LEFT);?></b></td>
                                                   <td><?=formataData($turno['opened'],1)." a ".formataData($turno['closed'],1);?></td>
                                                   <td><?=$qtd_agentes;?> Agentes</td>
-                                                  <td class="<?=$livro_class;?>"><?="<b>".strtoupper($turno['period'])."</b>";?></td>
+                                                  <td class="<?=$livro_class;?>"><?="<b>".strtoupper($turno['workshift_group'])."</b>";?></td>
                                               <tr>
                                               <tr><td colspan='4'><b>Observações:</b></td></tr>
                                               <tr><td colspan='4'><?=($turno['observation']==""?"<span class='text-muted'><small>Nenhuma observação.</small></span>":$turno['observation']);?></td></tr>
@@ -193,6 +182,7 @@
                                       </tfoot>
 -->
                                     </table>
+</div>
 
                              </div>
                            </section>
@@ -220,6 +210,7 @@
                               </header>
 
                               <div class='panel-body p-lg'>
+<div class="table-responsive">
 
                                 <table class='table table-condensed'>
                                 <thead><tr><th>Central de atendimento</th></tr></thead>
@@ -273,7 +264,7 @@
                                   </tr>
                                 </tbody>
                                 </table>
-
+</div>
                               </div>
                               </section>
                 </div>
@@ -289,8 +280,8 @@
                                 </header>
 
                                 <div class='panel-body p-lg'>
-
-                                      <table class='table table-condensed'>
+<div class="table-responsive">
+                                    <table class='table table-condensed'>
                                       <thead><tr><th>Agentes designados</th></tr></thead>
                                       <tbody>
                                         <tr>
@@ -340,7 +331,7 @@
                                         </tr>
                                       </tbody>
                                       </table>
-
+</div>
                                 </div>
                                 </section>
                 </div>
@@ -359,7 +350,7 @@
                                 </header>
 
                                 <div class='panel-body p-lg'>
-
+<div class="table-responsive">
                                   <table class='table table-condensed'>
                                   <thead><tr><th>Guarnições</th></tr></thead>
                                   <tbody>
@@ -389,6 +380,7 @@
                                                               </tr>
                                                               <tr>
                                                                 <th>#</th>
+                                                                <th>Apelido</th>
                                                                 <th>Placa</th>
                                                                 <th>Veículo</th>
                                                                 <th class='text-center'>Inicial</th>
@@ -397,12 +389,14 @@
                                                                 <th class='text-center'>Final</th>
                                                                 <th class='text-center'>Inicial</th>
                                                                 <th class='text-center'>Final</th>
-                                                                <th class='text-center'>Status</th>";
+                                                                <th class='text-center'>Status</th>
+                                                                <th class='text-center'><i class='fa fa-cogs'></i></th>";
                                                         echo "<tbody>";
                                                         while($d = pg_fetch_assoc($res))
                                                         {
                                                             echo "<tr class='".($d['closed']==""?"success":"warning")."'>";
                                                               echo "<td>".$d['id']."</td>";
+                                                              echo "<td>".$d['nickname']."</td>";
                                                               echo "<td>".$d['plate']."</td>";
                                                               echo "<td>".$d['brand']." ".$d['model']."</td>";
                                                               echo "<td class='text-center'>".$d['initial_km']."</td>";
@@ -412,12 +406,15 @@
                                                               echo "<td class='text-center'>".formataData($d['opened'],1)."</td>";
                                                               echo "<td class='text-center'>".formataData($d['closed'],1)."</td>";
                                                               echo "<td class='text-center ".($d['closed']==""?"success":"warning")."'>".($d['closed']==""?"Em uso":"Baixado")."</td>";
+                                                              echo "<td class='text-center'>";
+                                                                echo "<a href='oct/veiculo_turno_FORM.php?id_garrison=".$d['id']."&turno=".$turno['id']."' class='btn btn-xs btn-default'><i class='fa fa-cab'></i> Atualizar</a>";
+                                                              echo "</td>";
                                                             echo "</tr>";
-                                                            echo "<tr><td colspan='10'><b>Observações:<b></td></tr>";
-                                                            echo "<tr><td colspan='10'>".$d['observation']."</td></tr>";
+                                                            echo "<tr><td colspan='12'><b>Observações:<b></td></tr>";
+                                                            echo "<tr><td colspan='12'>".$d['observation']."</td></tr>";
 
 
-                                                            echo "<tr><td colspan='10'>";
+                                                            echo "<tr><td colspan='12'>";
                                                             //Seleciona os Integrantes da guarnição//
                                                             $sqlGP = "SELECT
                                                                           GP.type,
@@ -460,7 +457,7 @@
                                     </tr>
                                 </tbody>
                             </table>
-
+</div>
                                 </div>
                                 </section>
                 </div>

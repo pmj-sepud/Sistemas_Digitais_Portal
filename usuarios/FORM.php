@@ -6,11 +6,54 @@
   if($_GET['id'] != "")
   {
     $acao = "atualizar";
-    $sql  = "SELECT * FROM sepud.users WHERE id = '".$_GET['id']."'";
+    $sql  = "SELECT C.name AS name_company,
+            			  C.acron AS acron_company,
+            			  C.workshift_groups_repetition,
+            			  C.workshift_groups,
+                    C.workshift_subgroups_repetition,
+            			  C.workshift_subgroups,
+			              U.*
+             FROM sepud.users U
+	           JOIN sepud.company C ON C.id = U.id_company
+             WHERE
+              	U.id = '".$_GET['id']."'";
     $res  = pg_query($sql)or die("Erro ".__LINE__);
     $d    = pg_fetch_assoc($res);
     logger("Acesso","Perfil de usuário", "Acesso aos dados: [".$_GET["id"]."] - ".$d['name']);
   }
+  /*
+  Array
+(
+[name_company] => Departamento de Trânsito
+[acron_company] => DETRANS
+[workshift_groups_repetition] => 1
+[workshift_groups] => ["Turno"]
+[workshift_subgroups_repetition] => 4
+[workshift_subgroups] => ["Alfa","Bravo","Charlie","Delta"]
+[id] => 88
+[name] => Cristiano Luis Bergmann
+[email] => cristiano.bergmann@joinville.sc.gov.br
+[password] => b59a51a3c0bf9c5228fde841714f523a
+[nickname] =>
+[area] => Seprot
+[job] => Agente de Transito
+[active] => t
+[in_ativaction] => f
+[company_acron] =>
+[id_company] => 3
+[phone] => 47 99760-1693
+[observation] =>
+[cpf] =>
+[date_of_birth] =>
+[registration] =>
+[workshift_group_time_init] =>
+[workshift_group_time_finish] =>
+[workshift_group] =>
+[workshift_subgroup_time_init] =>
+[workshift_subgroup_time_finish] =>
+[workshift_subgroup] =>
+)
+  */
 
 ?>
 
@@ -48,7 +91,6 @@
   <div class="col-md-6 col-md-offset-3">
 
 										<form autocomplete="off" id="userform" name="userform" class="form-horizontal" method="post" action="usuarios/FORM_sql.php" debug='0'>
-                      <input autocomplete="off" name="hidden" type="text" style="display:none;">
 
                       <h4 class="mb-xlg">Informações Pessoais</h4>
 											<fieldset>
@@ -120,7 +162,88 @@
 												</div>
 											</fieldset>
 
-											<hr class="dotted tall">
+                      <hr class="dotted">
+                      <h4 class="mb-xlg">Turno de trabalho</h4>
+                      <fieldset class="mb-xl">
+                        <div class="form-group">
+													<label class="col-md-2 control-label" for="work_time_init">Horário</label>
+													<div class="col-md-2">
+														<input type="text" class="form-control campo_hora" name="workshift_group_time_init" id="workshift_group_time_init" placeholder="Inicio" value="<?=$d['workshift_group_time_init'];?>" <?=($d['workshift_groups']==""?"disabled":"");?>>
+													</div>
+                          <div class="col-md-2">
+														<input type="text" class="form-control campo_hora" name="workshift_group_time_finish" id="workshift_group_time_finish" placeholder="Fim" value="<?=$d['workshift_group_time_finish'];?>" <?=($d['workshift_groups']==""?"disabled":"");?>>
+													</div>
+
+													<!--<label class="col-md-2 control-label" for="workshift_group">Grupo</label>-->
+													<div class="col-md-6">
+                            <?
+
+                                if($d['workshift_groups']!="")
+                                {
+                                  echo "<select name='workshift_group' class='form-control'>";
+                                  echo "<option value=''></option>";
+                                  $grupos = json_decode($d['workshift_groups']);
+                                  for($i=0;$i<count($grupos);$i++)
+                                  {
+                                    if($d['workshift_group'] == $grupos[$i]){ $sel = "selected"; }else{ $sel = "";}
+                                    echo "<option value='".$grupos[$i]."' ".$sel.">".$grupos[$i]."</option>";
+                                  }
+                                  echo "</select>";
+                                }else {
+                                  echo "<select name='workshift_subgroup' class='form-control' disabled>";
+                                  echo "<option value=''>Informações do turno não configuradas.</option>'";
+                                  echo "</select>";
+                                }
+
+
+
+                            ?>
+												  </div>
+												</div>
+                      </fieldset>
+
+                      <hr class="dotted">
+                      <h4 class="mb-xlg">Turno de trabalho (Sub-grupo)</h4>
+                      <fieldset class="mb-xl">
+                        <div class="form-group">
+													<label class="col-md-2 control-label" for="work_time_init">Horário</label>
+													<div class="col-md-2">
+														<input type="text" class="form-control campo_hora" name="workshift_subgroup_time_init" id="workshift_subgroup_time_init" placeholder="Inicio" value="<?=$d['workshift_subgroup_time_init'];?>" <?=($d['workshift_subgroups']==""?"disabled":"");?>>
+													</div>
+                          <div class="col-md-2">
+														<input type="text" class="form-control campo_hora" name="workshift_subgroup_time_finish" id="workshift_subgroup_time_finish" placeholder="Fim" value="<?=$d['workshift_subgroup_time_finish'];?>" <?=($d['workshift_subgroups']==""?"disabled":"");?>>
+													</div>
+
+
+													<div class="col-md-6">
+                            <?
+
+                                if($d['workshift_subgroups']!="")
+                                {
+                                  echo "<select name='workshift_subgroup' class='form-control'>";
+                                  echo "<option value=''></option>";
+                                  $subgrupos = json_decode($d['workshift_subgroups']);
+                                  for($i=0;$i<count($subgrupos);$i++)
+                                  {
+                                    if($d['workshift_subgroup'] == $subgrupos[$i]){ $sel = "selected"; }else{ $sel = "";}
+                                    echo "<option value='".$subgrupos[$i]."' ".$sel.">".$subgrupos[$i]."</option>";
+                                  }
+                                  echo "</select>";
+                                }else {
+                                  echo "<select name='workshift_group' class='form-control' disabled>";
+                                  echo "<option value=''>Informações do turno não configuradas.</option>'";
+                                  echo "</select>";
+                                }
+
+
+
+                            ?>
+												  </div>
+												</div>
+                      </fieldset>
+
+
+											<hr class="dotted">
 											<h4 class="mb-xlg">Informações de acesso</h4>
 											<fieldset class="mb-xl">
 												<div class="form-group">
@@ -196,6 +319,7 @@
 					<!-- end: page -->
 				</section>
 <script>
+$(".campo_hora").mask('00:00');
 $(".loading").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> <small>Aguarde.</small>"); });
 $("#userform").on("submit", function(){
   if($("#email").val()        == "Endereço de e-mail"){ $("#email").val('');}

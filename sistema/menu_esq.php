@@ -66,22 +66,20 @@
               <li><a href="oct/ocorrencias.php">Ocorrências de Trânsito</a></li>
 
 
-<?  if($_SESSION['id']==1 || $_SESSION['id']==108 || $_SESSION['id']==109||$_SESSION['id']==110){ ?>
+
   <li class="nav-parent">
     <a><span>Sistema de gestão</span></a>
     <ul class="nav nav-children">
         <li><a href="oct/index.php">1. Sistema</a></li>
         <li><a href="oct/turnos_INDEX.php">2. Turnos</a></li>
-        <li><a href="oct/ocorrencias.php">3. Ocorrências</a></li>
-        <li><a href="oct/eventos_administrativos_INDEX.php">4. Diário administrativo</a></li>
-        <li><a href="oct/dashboard.php">5. Evolução mensal</a></li>
+        <li><a href="oct/minhas_ocorrencias.php">3. Minhas ocorrências</a></li>
+        <li><a href="oct/ocorrencias.php">4. Todas ocorrências</a></li>
+        <li><a href="oct/eventos_administrativos_INDEX.php">5. Diário administrativo</a></li>
+        <li><a href="oct/dashboard.php">6. Evolução mensal</a></li>
 
     </ul>
   </li>
 
-
-
-<?  } ?>
 <li class="nav-parent">
   <a><span>SERP</span></a>
   <ul class="nav nav-children">

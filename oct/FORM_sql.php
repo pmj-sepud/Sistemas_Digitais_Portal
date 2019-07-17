@@ -79,7 +79,8 @@
         if($street_number   == ""){ $street_number="Null";   }else{ $street_number   = "'".$street_number."'"; }
         if($id_addressbook  == ""){ $id_addressbook ="Null"; }else{ $id_addressbook  = "'".$id_addressbook."'";}
         if($id_garrison     == ""){ $id_garrison    ="Null"; }else{ $id_garrison     = "'".$id_garrison."'";   }
-        
+        if($id_workshift    == ""){ $id_workshift   ="Null"; }else{ $id_workshift    = "'".$id_workshift."'";  }
+
         $sql = "UPDATE sepud.oct_events SET
                      date               = '".$datafinal."',
                      description        = '".$description."',
@@ -93,10 +94,12 @@
                      street_number      = ".$street_number.",
                      requester          = '".$requester."',
                      requester_phone    = '".$requester_phone."',
-                     id_addressbook     = ".$id_addressbook."
+                     id_addressbook     = ".$id_addressbook.",
+                     id_garrison        = ".$id_garrison.",
+                     id_workshift       = ".$id_workshift."
                WHERE id                 = '".$id."'";
 
-        pg_query($sqlCond.$sql) or die("Erro ".__LINE__);
+        pg_query($sqlCond.$sql) or die("Erro ".__LINE__."<br>SQL: ".$sql);
 
         logger("Atualização","OCT", "Ocorrência n.".$id);
 

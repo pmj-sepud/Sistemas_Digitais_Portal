@@ -8,26 +8,41 @@
   if($id != "")
   {
       $sql   = "SELECT
+                    F.plate, F.brand, F.model, F.nickname as fleet_nickname,
+                    UG.name as user_name_garrison, UG.nickname as nickname_garrison, UG.registration as registration_garrison,
                     W.opened as workshift_opened,
                     W.closed as workshift_closed,
-                    W.period as workshift_period,
+                    W.workshift_group as workshift_period,
                     W.status as workshift_status,
+                    U.NAME AS user_name, C.name AS company_name,
                     EV.*
+
                 FROM
                           sepud.oct_events    EV
                      JOIN sepud.users         U  ON U.ID = EV.id_user
+                     JOIN sepud.company       C ON C.id = U.id_company
                 LEFT JOIN sepud.oct_workshift W  ON W.id = EV.id_workshift
+                LEFT JOIN sepud.oct_garrison  G ON G.ID = EV.id_garrison
+              	LEFT JOIN sepud.oct_fleet     F ON F.id = G.id_fleet
+              	LEFT JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = EV.id_garrison AND GP.type = 'Motorista'
+              	LEFT JOIN sepud.users        UG ON UG.id = GP.id_user
                 WHERE EV.ID =  '".$id."'";
+
+if($_SESSION['id']==1)
+{
+  //echo $sql;
+}
+
       $res   = pg_query($conn_neogrid,$sql)or die("Error ".__LINE__);
       $dados = pg_fetch_assoc($res);
 
       if($dados['id_workshift']!="")
       {
-        $turno['id']     = $dados['id_workshift'];
-        $turno['opened'] = $dados['workshift_opened'];
-        $turno['closed'] = $dados['workshift_closed'];
-        $turno['period'] = $dados['workshift_period'];
-        $turno['status'] = $dados['workshift_status'];
+        $turno_oc['id']     = $dados['id_workshift'];
+        $turno_oc['opened'] = $dados['workshift_opened'];
+        $turno_oc['closed'] = $dados['workshift_closed'];
+        $turno_oc['period'] = $dados['workshift_period'];
+        $turno_oc['status'] = $dados['workshift_status'];
       }
 
       $sql = "SELECT * FROM sepud.oct_rel_events_event_conditions WHERE id_events = '".$id."'";
@@ -37,6 +52,12 @@
         $dadosCondicoes[] = $d['id_event_conditions'];
       }
 
+      $sql        = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
+      $resTurno   = pg_query($sql)or die("Erro ".__LINE__);
+      if(pg_num_rows($resTurno))
+      {
+          $turno_aberto = pg_fetch_assoc($resTurno);
+      }
 
       $acao  = "atualizar";
 
@@ -53,14 +74,15 @@
       $acao                   = "inserir";
       $dados['status']        = "Nova ocorrência";
       $dados['company_acron'] = $_SESSION['company_acron'];
-      $dados['company']       = $_SESSION['company'];
+      $dados['company_name']  = $_SESSION['company_name'];
+      $dados['user_name']     = $_SESSION['name'];
       $agora = now();
       $txt_bread = "Nova ocorrência";
       $sql        = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
       $resTurno   = pg_query($sql)or die("Erro ".__LINE__);
       if(pg_num_rows($resTurno))
       {
-          $turno = pg_fetch_assoc($resTurno);
+          $turno_aberto = pg_fetch_assoc($resTurno);
       }
   }
 
@@ -93,21 +115,36 @@
       <header class="panel-heading">
         <h4><span class="text-muted">Status: </span><strong><i id='txt_status'><?=$dados['status'];?></i></strong>
                   <?
-                      if(isset($turno))
+
+                    if(isset($turno_oc))
+                    {
+                      echo "<br><small class='text-muted'>Turno nº <b>".str_pad($turno_oc['id'],5,"0",STR_PAD_LEFT)."</b> - ".$turno_oc['period']. " - ";
+                      if($turno_oc['status']=="fechado"){ echo " <span class='text-warning'>Turno fechado</span>";}else{ echo " <span class='text-success'>Turno aberto</span>";}
+                      echo "<br>Início: <b>".formataData($turno_oc['opened'],1)."</b>";
+                      if($turno_oc['closed']!=""){echo ", fim: <b>".formataData($turno_oc['closed'],1)."</b>";}
+                      echo "</small>";
+                      echo "<input type='hidden' name='id_workshift' value='".$turno_oc['id']."' />";
+                    }else {
+                      if(isset($turno_aberto))
                       {
-                        echo "<br><small class='text-muted'>Turno nº <b>".str_pad($turno['id'],5,"0",STR_PAD_LEFT)."</b> - ".$turno['period']. " - ";
-                        if($turno['status']=="fechado"){ echo " <span class='text-warning'>Turno fechado</span>";}else{ echo " <span class='text-success'>Turno aberto</span>";}
-                        echo "<br>Início: <b>".formataData($turno['opened'],1)."</b>";
-                        if($turno['closed']!=""){echo ", fim: <b>".formataData($turno['closed'],1)."</b>";}
+                        echo "<br><small class='text-muted'>Turno nº <b>".str_pad($turno_aberto['id'],5,"0",STR_PAD_LEFT)."</b> - ".$turno_aberto['period']. " - ";
+                        if($turno_aberto['status']=="fechado"){ echo " <span class='text-warning'>Turno fechado</span>";}else{ echo " <span class='text-success'>Turno aberto</span>";}
+                        echo "<br>Início: <b>".formataData($turno_aberto['opened'],1)."</b>";
+                        if($turno_aberto['closed']!=""){echo ", fim: <b>".formataData($turno_aberto['closed'],1)."</b>";}
                         echo "</small>";
-                        echo "<input type='hidden' name='id_workshift' value='".$turno['id']."' />";
+                        echo "<input type='hidden' name='id_workshift' value='".$turno_aberto['id']."' />";
                       }else{
                         echo "<br><small class='text-danger'>Nenhum turno de trabalho aberto.</small>";
                       }
+                    }
+
                   ?>
        </h4>
         <input type="hidden" id="status" name="status" value="<?=$dados['status'];?>" >
-        <div class="panel-actions"><h4 class="text-right"><span class="text-muted"></span><strong><i><?=$dados['company_acron'];?></i><br><small><?=$dados['company'];?></small></strong></h4></div>
+        <div class="panel-actions">
+          <h4 class="text-right"><small class='text-muted'><sup>Responsável:</sup></small><br><strong><i><?=$dados['user_name'];?></i>
+                                 <br><small><?=$dados['company_name'];?></small></strong>
+        </div>
       </header>
       <div class="panel-body">
         <div class="row">
@@ -160,7 +197,7 @@
 
                   <div class="col-sm-2">
                         <div class="form-group">
-                          <label class="control-label" for="victim_inform">Vítima(s) info.:</label>
+                          <label class="control-label" for="victim_inform">Qtd. Envolvidos:</label>
                                 <select id="victim_inform" name="victim_inform" class="form-control changefield">
                                   <?
                                     for($i = 0; $i <= 100; $i++)
@@ -274,7 +311,12 @@
                <select class="form-control changefield" name="id_garrison">
                   <option value=""></option>
                <?
-                    if($turno['id'] != "")
+                  if($dados['id_garrison']!="")
+                  {
+                    echo "<option value='".$dados['id_garrison']."' selected>".$dados['fleet_nickname']." - ".$dados['plate']." - [".$dados['nickname_garrison']."] ".$dados['user_name_garrison']." - Matricula: ".$dados['registration_garrison']."</option>";
+                  }
+
+                    if($turno_aberto['id'] != "")
                     {
                      $sql = "SELECT
                               	U.name as user_name, U.registration, U.nickname as user_nickname,
@@ -290,18 +332,19 @@
                               JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = G.id AND GP.type = 'Motorista'
                               JOIN sepud.users U ON U.id = GP.id_user
                               WHERE
-                              	G.id_workshift = '".$turno['id']."'";
+                              	  G.id_workshift = '".$turno_aberto['id']."'
+                              AND G.closed is null";
                      $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);;
                      if(pg_num_rows($res))
                      {
+                       echo "<optgroup label='Guarnições montadas no turno ativo:'>";
                        while($dg = pg_fetch_assoc($res))
                        {
-                        if($dg['id']==$dados['id_garrison']){$sel = "selected"; }else{$sel="";}
-                         echo "<option value='".$dg['id']."' ".$sel.">".$dg['plate']." - [".$dg['user_nickname']."] ".$dg['user_name']." - Matrícula: ".$dg['registration']."</option>";
-
+                         echo "<option value='".$dg['id']."'>".$dg['nickname']." - ".$dg['plate']." - [".$dg['user_nickname']."] ".$dg['user_name']." - Matrícula: ".$dg['registration']."</option>";
                        }
+                       echo "</optgroup>";
                      }else{
-                       echo "<option>Nenhuma guarnição configurada.</option>";
+                       echo "<option>Nenhuma guarnição empenhada.</option>";
                      }
                     }
                ?>
@@ -855,7 +898,7 @@ function bloqueio()
 
 $(".changefield").change(function(){ bloqueio(); });
 
-$("#bt_add_prov").click(function(){ $("#wrap").load("oct/FORM_providencias.php?id=<?=$id;?>"); })
+$("#bt_add_prov").click(function(){ $("#wrap").load("oct/FORM_providencias.php?turno=<?=$turno_oc['id'];?>&id=<?=$id;?>"); })
 $("#bt_add_veic").click(function(){ $("#wrap").load("oct/FORM_veiculo.php?id=<?=$id;?>"); })
 $("#bt_add_vit").click(function(){ $("#wrap").load("oct/FORM_vitima.php?id=<?=$id;?>"); })
 

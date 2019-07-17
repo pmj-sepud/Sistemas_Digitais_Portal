@@ -63,10 +63,22 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
                S.name  as street_name,
                (SELECT COUNT(*) FROM sepud.oct_victim                WHERE id_events = EV.ID) as vitimas_encontradas,
                (SELECT COUNT(*) FROM sepud.oct_rel_events_providence WHERE id_event  = EV.id) as qtd_providencias,
-               (SELECT COUNT(*) FROM sepud.oct_rel_events_images     WHERE id_events = EV.id) as qtd_fotos
+               (SELECT COUNT(*) FROM sepud.oct_rel_events_images     WHERE id_events = EV.id) as qtd_fotos,
+               U.NAME AS user_name,
+
+               UG.name as user_name_garrison,
+	             F.plate, F.brand, F.model
          FROM
                sepud.oct_events     AS  EV
-         JOIN  sepud.oct_event_type AS EVT ON EV.id_event_type = EVT.id
+
+
+        LEFT JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = EV.id_garrison AND GP.type = 'Motorista'
+       	LEFT JOIN sepud.users 									 UG ON UG.id = GP.id_user
+
+       	LEFT JOIN sepud.oct_garrison 							G ON G.id  = EV.id_garrison
+       	LEFT JOIN sepud.oct_fleet                 F ON F.id  = G.id_fleet
+             JOIN  sepud.oct_event_type AS EVT ON EV.id_event_type = EVT.id
+             JOIN  sepud.users          AS   U ON U.id = EV.id_user
         --JOIN  sepud.users          AS   U ON U.id = EV.id_user AND U.id_company = '".$_SESSION['id_company']."'
          JOIN  sepud.company        AS   C ON C.id = EV.id_company
          LEFT JOIN sepud.streets    AS   S ON S.id = EV.id_street
@@ -79,6 +91,15 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
            $sql .= " (EV.id_company = '".$_SESSION['id_company']."' AND EV.date BETWEEN '".$data_db." 00:00:00' AND '".$data_db." 23:59:59')".$filtro_ativo;
          }
          $sql .= " ORDER BY EV.id DESC";
+
+
+  if($_SESSION['id']==1)
+  {
+    echo "<div class='row'><div class='col-sm-6 col-sm-offset-3>'";
+    echo $sql;
+    echo "</div></div>";
+  }
+
 
  $rs  = pg_query($conn_neogrid,$sql);
  $total_oc = 0;
@@ -227,8 +248,8 @@ if(isset($dados) && count($dados))
 
     ?>
                           <tr>
-                              <td rowspan="2" style="vertical-align: middle;" class="text-center success"><?=$dados[$i]['id']; if($dados[$i]['id_workshift']!=""){ echo ".".$dados[$i]['id_workshift'];}?></td>
-                              <td colspan="8"><b><?=$dados[$i]['event_type'];?></b></td>
+                              <td rowspan="3" style="vertical-align: middle;" class="text-center success"><?=$dados[$i]['id']; if($dados[$i]['id_workshift']!=""){ echo ".".$dados[$i]['id_workshift'];}?></td>
+                              <td colspan="8" style="background-color:#e2fee2"><b><?=$dados[$i]['event_type'];?></b></td>
                             </tr>
                             <tr>
                               <td><small><i class="text-muted">Logradouro:</i></small><br><?=$dados[$i]['street_name'];?></td>
@@ -240,6 +261,10 @@ if(isset($dados) && count($dados))
                               <td style="vertical-align: middle;" class="text-center"><?=$prov_gui;?></td>
                               <td style="vertical-align: middle;" class="text-center"><?=$qtd_fotos;?></td>
                               <td style="vertical-align: middle;" class="text-center"><a href='oct/FORM.php?id=<?=$dados[$i]['id'];?>' class='mb-xs mt-xs mr-xs btn btn-default loading2'><i class='fa fa-pencil'></i></a></td>
+                            </tr>
+                            <tr>
+                              <td colspan='2'><small><i class="text-muted">Responsável:</i></small><br><?=$dados[$i]['user_name'];?></td>
+                              <td colspan='6'><small><i class="text-muted">Guarnição empenhada:</i></small><br><?="<b>".$dados[$i]['plate']."</b> - ".$dados[$i]['brand']." ".$dados[$i]['brand']." - ".$dados[$i]['user_name_garrison'];?></td>
                             </tr>
     <? }
 }else {
@@ -272,7 +297,7 @@ if(isset($dados_baixados) && count($dados_baixados))
 
       ?>
       <tr>
-          <td rowspan="2" style="vertical-align: middle;" class="text-center warning"><?=$dados[$i]['id'];?></td>
+          <td rowspan="3" style="vertical-align: middle;" class="text-center warning"><?=$dados[$i]['id']; if($dados[$i]['id_workshift']!=""){ echo ".".$dados[$i]['id_workshift'];}?></td>
           <td colspan="8"><b><?=$dados[$i]['event_type'];?></b></td>
         </tr>
         <tr>
@@ -285,6 +310,10 @@ if(isset($dados_baixados) && count($dados_baixados))
           <td style="vertical-align: middle;" class="text-center"><?=$prov_gui;?></td>
           <td style="vertical-align: middle;" class="text-center"><?=$qtd_fotos;?></td>
           <td style="vertical-align: middle;" class="text-center"><a href='oct/FORM.php?id=<?=$dados[$i]['id'];?>' class='mb-xs mt-xs mr-xs btn btn-default loading2'><i class='fa fa-pencil'></i></a></td>
+        </tr>
+        <tr>
+          <td colspan='2'><small><i class="text-muted">Responsável:</i></small><br><?=$dados[$i]['user_name'];?></td>
+          <td colspan='6'><small><i class="text-muted">Guarnição empenhada:</i></small><br><?="<b>".$dados[$i]['plate']."</b> - ".$dados[$i]['brand']." ".$dados[$i]['brand']." - ".$dados[$i]['user_name_garrison'];?></td>
         </tr>
 
       <? }
