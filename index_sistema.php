@@ -66,6 +66,7 @@
 
 
 		<style>
+			.select2-container { width: 100% !important;}
 			.select2-selection__rendered {line-height: 32px !important;	}
 			.select2-selection 					 {height: 34px !important;		  }
 			.box_shadow

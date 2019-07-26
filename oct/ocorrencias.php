@@ -46,7 +46,7 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
 
 
   $sql = "SELECT
-               EVT.name AS event_type,
+               EVT.name as event_type,
                EV.id,
                EV.date,
                EV.arrival,
@@ -57,6 +57,7 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
                EV.address_reference,
                EV.id_street,
                EV.id_workshift,
+               EV.id_garrison,
                C.id    as id_company,
                C.name  as company,
                C.acron as company_acron,
@@ -64,14 +65,12 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
                (SELECT COUNT(*) FROM sepud.oct_victim                WHERE id_events = EV.ID) as vitimas_encontradas,
                (SELECT COUNT(*) FROM sepud.oct_rel_events_providence WHERE id_event  = EV.id) as qtd_providencias,
                (SELECT COUNT(*) FROM sepud.oct_rel_events_images     WHERE id_events = EV.id) as qtd_fotos,
-               U.NAME AS user_name,
-
-               UG.name as user_name_garrison,
-	             F.plate, F.brand, F.model
+               U.NAME  as user_name,
+               UG.name as user_name_garrison, UG.nickname as nickname_garrison,
+	             F.plate, F.brand, F.model,
+               AB.name  as addressbook_name
          FROM
                sepud.oct_events     AS  EV
-
-
         LEFT JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = EV.id_garrison AND GP.type = 'Motorista'
        	LEFT JOIN sepud.users 									 UG ON UG.id = GP.id_user
 
@@ -79,9 +78,9 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
        	LEFT JOIN sepud.oct_fleet                 F ON F.id  = G.id_fleet
              JOIN  sepud.oct_event_type AS EVT ON EV.id_event_type = EVT.id
              JOIN  sepud.users          AS   U ON U.id = EV.id_user
-        --JOIN  sepud.users          AS   U ON U.id = EV.id_user AND U.id_company = '".$_SESSION['id_company']."'
          JOIN  sepud.company        AS   C ON C.id = EV.id_company
          LEFT JOIN sepud.streets    AS   S ON S.id = EV.id_street
+         LEFT JOIN sepud.oct_addressbook AB ON AB.id = EV.id_addressbook
          WHERE ";
 
          if($filtro_placa != "")
@@ -93,14 +92,6 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
          $sql .= " ORDER BY EV.id DESC";
 
 
-  if($_SESSION['id']==1)
-  {
-    echo "<div class='row'><div class='col-sm-6 col-sm-offset-3>'";
-    echo $sql;
-    echo "</div></div>";
-  }
-
-
  $rs  = pg_query($conn_neogrid,$sql);
  $total_oc = 0;
  while($d = pg_fetch_assoc($rs))
@@ -110,9 +101,35 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
      if($d['active']=='t'){ $dados[]          = $d; }
      else {                 $dados_baixados[] = $d; }
 
+     if($d['id_garrison']!=""){ $garrison_passenger[] = $d['id_garrison'];}
+
      $total_oc++;
  }
 
+ if(isset($garrison_passenger) && count($garrison_passenger))
+ {
+   $garrison_passenger = array_values(array_unique($garrison_passenger));
+   $sqlGP = "SELECT
+            	GP.*, U.name, U.nickname
+            FROM
+            	   sepud.oct_rel_garrison_persona GP
+            JOIN sepud.users U ON U.id = GP.id_user
+            WHERE
+                GP.type = 'Passageiro'
+            AND GP.id_garrison IN (".implode(",",$garrison_passenger).")";
+    $resGP = pg_query($sqlGP)or die("SQL Error ".__LINE__);
+    while($dGP = pg_fetch_assoc($resGP))
+    {
+      $dados_garrison_passenger[$dGP['id_garrison']][] = $dGP['nickname'];
+    }
+ }
+
+ if($_SESSION['id']==1)
+ {
+   //echo "<div class='row'><div class='col-sm-6 col-sm-offset-3'>";
+   //print_r_pre($dados_garrison_passenger);
+   //echo "</div></div>";
+ }
 //if($_SESSION['id']=="109"){ echo "<div class='' style='width:800px;margin-left:200px'>".$sql."</div>";}
 
  if(isset($eventos_com_providencia) && count($eventos_com_providencia))
@@ -252,7 +269,19 @@ if(isset($dados) && count($dados))
                               <td colspan="8" style="background-color:#e2fee2"><b><?=$dados[$i]['event_type'];?></b></td>
                             </tr>
                             <tr>
-                              <td><small><i class="text-muted">Logradouro:</i></small><br><?=$dados[$i]['street_name'];?></td>
+
+                              <?
+                                  $local = "";
+                                  if($dados[$i]["addressbook_name"]!=""){$local = $dados[$i]['addressbook_name'];}
+                                  if($dados[$i]["addressbook_name"] != "")
+                                  {
+                                    if($dados[$i]["street_name"]!=""){$local .= " - ".$dados[$i]['street_name'];}
+                                  }else {
+                                    if($dados[$i]["street_name"]!=""){$local = $dados[$i]['street_name'];}
+                                  }
+                              ?>
+
+                              <td><small><i class="text-muted">Logradouro:</i></small><br><?=$local;?></td>
                               <td><small><i class="text-muted">Data de abertura:</i></small><br><?=$dt_abertura;?></td>
                               <td><small><i class="text-muted">Origem:</i></small><br><?=$dados[$i]['company_acron'];?></td>
                               <td><small><i class="text-muted">Status:</i></small><br><?=$dados[$i]['status'];?></td>
@@ -264,7 +293,23 @@ if(isset($dados) && count($dados))
                             </tr>
                             <tr>
                               <td colspan='2'><small><i class="text-muted">Responsável:</i></small><br><?=$dados[$i]['user_name'];?></td>
-                              <td colspan='6'><small><i class="text-muted">Guarnição empenhada:</i></small><br><?="<b>".$dados[$i]['plate']."</b> - ".$dados[$i]['brand']." ".$dados[$i]['brand']." - ".$dados[$i]['user_name_garrison'];?></td>
+                              <td colspan='6'>
+                                <? unset($passenger, $garrison_txt);
+                                  if($dados[$i]['id_garrison']!="")
+                                  {
+
+                                   if(isset($dados_garrison_passenger[$dados[$i]['id_garrison']]) && count($dados_garrison_passenger[$dados[$i]['id_garrison']]))
+                                   {
+                                     $passenger = "<i class='text-muted'>, Passageiro(s): </i><b>".implode(" | ",$dados_garrison_passenger[$dados[$i]['id_garrison']])."</b>";
+                                   }
+                                   $garrison_txt  = "<br><b>".$dados[$i]['plate']."</b> - ".$dados[$i]['brand']." ".$dados[$i]['brand'];
+                                   $garrison_txt .= "<br><i class='text-muted'>Motorista: </i><b>".$dados[$i]['nickname_garrison']."</b>".$passenger;
+                                 }else{
+                                   $garrison_txt = "<br><i class='text-muted'>Nenhuma guarnição empenhada.</i>";
+                                 }
+                                ?>
+                                <small><i class="text-muted">Guarnição empenhada:</i></small><?=$garrison_txt;?>
+                              </td>
                             </tr>
     <? }
 }else {
@@ -301,7 +346,17 @@ if(isset($dados_baixados) && count($dados_baixados))
           <td colspan="8"><b><?=$dados[$i]['event_type'];?></b></td>
         </tr>
         <tr>
-          <td><small><i class="text-muted">Logradouro:</i></small><br><?=$dados[$i]['street_name'];?></td>
+          <?
+              $local = "";
+              if($dados[$i]["addressbook_name"]!=""){$local = $dados[$i]['addressbook_name'];}
+              if($dados[$i]["addressbook_name"] != "")
+              {
+                if($dados[$i]["street_name"]!=""){$local .= " - ".$dados[$i]['street_name'];}
+              }else {
+                if($dados[$i]["street_name"]!=""){$local = $dados[$i]['street_name'];}
+              }
+          ?>
+          <td><small><i class="text-muted">Logradouro:</i></small><br><?=$local;?></td>
           <td><small><i class="text-muted">Data de abertura:</i></small><br><?=$dt_abertura;?></td>
           <td><small><i class="text-muted">Origem:</i></small><br><?=$dados[$i]['company_acron'];?></td>
           <td><small><i class="text-muted">Status:</i></small><br><?=$dados[$i]['status'];?></td>
@@ -313,7 +368,23 @@ if(isset($dados_baixados) && count($dados_baixados))
         </tr>
         <tr>
           <td colspan='2'><small><i class="text-muted">Responsável:</i></small><br><?=$dados[$i]['user_name'];?></td>
-          <td colspan='6'><small><i class="text-muted">Guarnição empenhada:</i></small><br><?="<b>".$dados[$i]['plate']."</b> - ".$dados[$i]['brand']." ".$dados[$i]['brand']." - ".$dados[$i]['user_name_garrison'];?></td>
+          <td colspan='6'>
+            <? unset($passenger, $garrison_txt);
+              if($dados[$i]['id_garrison']!="")
+              {
+
+               if(isset($dados_garrison_passenger[$dados[$i]['id_garrison']]) && count($dados_garrison_passenger[$dados[$i]['id_garrison']]))
+               {
+                 $passenger = "<i class='text-muted'>, Passageiro(s): </i><b>".implode(" | ",$dados_garrison_passenger[$dados[$i]['id_garrison']])."</b>";
+               }
+               $garrison_txt  = "<br><b>".$dados[$i]['plate']."</b> - ".$dados[$i]['brand']." ".$dados[$i]['brand'];
+               $garrison_txt .= "<br><i class='text-muted'>Motorista: </i><b>".$dados[$i]['nickname_garrison']."</b>".$passenger;
+             }else{
+               $garrison_txt = "<br><i class='text-muted'>Nenhuma guarnição empenhada.</i>";
+             }
+            ?>
+            <small><i class="text-muted">Guarnição empenhada:</i></small><?=$garrison_txt;?>
+          </td>
         </tr>
 
       <? }

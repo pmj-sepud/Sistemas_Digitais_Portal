@@ -55,7 +55,7 @@
                                     if($turno['closed']!=""){echo ", fim: <b>".formataData($turno['closed'],1)."</b>";}
                                     echo "</small>";
                                   }else{
-                                    echo "<br><small class='text-danger'>Nenhum turno de trabalho aberto.</small>";
+                                    //echo "<br><small class='text-danger'>Nenhum turno de trabalho aberto.</small>";
                                   }
                               ?>
                     </h4>
@@ -65,21 +65,6 @@
                   </header>
 									<div class="panel-body">
                     <div class="row">
-                      <?
-                      //echo "<pre>"; print_r($dados); echo '</pre>';
-                      /*
-                          [id] => 19
-                          [] => 349
-                          [] =>
-                          [] => 2019-06-27 09:00:00
-                          [] => 2019-06-27 11:00:00
-                          [id_company] => 2
-                          [] => 53
-                          [id_workshift] => 62
-                          [] => Sistema de rádio esta com problemas.
-                          [] =>
-                      */
-                      ?>
                       <div class="col-md-6 col-md-offset-3">
 
 

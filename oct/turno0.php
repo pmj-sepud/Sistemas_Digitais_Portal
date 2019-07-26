@@ -13,11 +13,9 @@
     $dados = pg_fetch_assoc($res);
     $acao  = "atualizar";
     $bt_enviar_txt = "Atualizar";
-    //print_r_pre($dados);
   }else{
     $acao = "inserir";
     $bt_enviar_txt = "Inserir novo turno de trabalho";
-    $dados['status'] = "Preparando abertura de turno";
   }
 ?>
 
@@ -43,7 +41,7 @@
                 <span class="text-muted"><small><i>Data atual:</i></small> <b><?=$agora['data'];?></b></span>
                 <div class="panel-actions text-right">
                   <? if($id == ""){ echo "<h4><i><b>Abertura de turno</b></i></h4>"; }
-                     else{ echo "<h4><i><span class='text-muted'>Turno <b>nº ".str_pad($id,5,"0",STR_PAD_LEFT)."</b> ".ucfirst($dados['status'])."</span></i></h4>"; }
+                     else{ echo "<h4><i><span class='text-muted'>Turno <b>nº ".str_pad($id,5,"0",STR_PAD_LEFT)."</b> aberto</span></i></h4>"; }
                  ?>
                 </div>
             </header>
@@ -62,14 +60,14 @@
                             <div class="col-sm-6">
                               <div class="form-group">
                               <label class="control-label">Data de abertura:</label>
-                                  <input type="text" name="opened" class="form-control text-center" value="<?=($dados['opened']!=""?substr(formataData($dados['opened'],1),0,10):$agora['data']);?>">
+                                  <input type="text" name="opened" class="form-control text-center" value="<?=$agora['data'];?>">
                              </div>
                            </div>
 
                             <div class="col-sm-6">
                               <div class="form-group">
                               <label class="control-label">Data de fechamento:</label>
-                                  <input type="text" name="closed" class="form-control text-center" value="<?=($dados['closed']!=""?substr(formataData($dados['closed'],1),0,10):$agora['data']);?>">
+                                  <input type="text" name="closed" class="form-control text-center" value="<?=$agora['data'];?>">
                              </div>
                            </div>
                       </div>
@@ -133,16 +131,13 @@
                            <div class="col-sm-6">
                              <div class="form-group">
                              <label class="control-label">Status do turno:</label>
-                             <?=$acao;?>
                                  <select name="status" class="form-control">
                                    <? if($acao == "inserir")
                                       {
                                           echo "<option value='aberto'>Aberto</option>";
-                                          echo "<option value='inativo'>Inativo</option>";
                                       }else{
-                                          echo "<option value='aberto'  ".($dados['status']=='aberto'?'selected':'').">Aberto</option>";
-                                          echo "<option value='fechado' ".($dados['status']=='fechado'?'selected':'').">Fechado</option>";
-                                          echo "<option value='inativo' ".($dados['status']=='inativo'?'selected':'').">Inativo</option>";
+                                          echo "<option value='aberto'>Aberto</option>";
+                                          echo "<option value='fechado'>Fechado</option>";
                                       }
                                    ?>
                                  </select>
@@ -172,7 +167,7 @@
                       <div class="row" style='margin-top:10px'>
                             <div class="col-sm-12 text-center">
                               <input type="hidden" name="acao" value="<?=$acao;?>" />
-                              <a href="oct/index.php?id_workshift=<?=$id;?>">
+                              <a href="oct/index.php">
                                 <button type='button' class='mb-xs mt-xs mr-xs btn btn-default loading'>Voltar</button>
                               </a>
                               <? if($acao=="atualizar"){ ?>
@@ -194,9 +189,159 @@
                             </div>
                           </div>
 
-                                <? if($id != ""){
-                                      echo "<div class='row'><div class='col-sm-12 text-center'><br><br><br><br><br><br><br><a href='oct/turno_associar_pessoa.php?id_workshift=".$id."'><button type='button' class='btn btn-primary'><i class='fa fa-users'></i> Associar pessoa ao turno corrente</button></a></div></div>";
+                                <? if($id != ""){ ?>
+                                    <form name="person" method="post" action="oct/turno_sql.php">
+                                          <div class="row">
+                                                <div class="col-sm-12">
+                                                  <div class="form-group">
+                                                  <label class="control-label">Colaborador:</label>
+                                                      <select name="id_user" class="form-control select2">
+                                                          <?
 
+                                                              //Lista os colaboradores que ainda não estão associados ao turno, evita que um mesmo colaborador seja associado a mais de uma função dentro do turno.
+                                                              /*
+                                                              $sql = "SELECT
+                                                                      	U.*
+                                                                      FROM
+                                                                      	sepud.users U
+                                                                      LEFT JOIN sepud.oct_rel_workshift_persona T ON T.id_person = U.id AND T.id_shift = '".$id."'
+                                                                      WHERE
+                                                                      	U.id_company = '".$_SESSION[id_company]."' AND T.id_shift is null";
+                                                              */
+                                                              //Libera para que um mesmo usuario possa receber mais de uma atribuição no turno, ex: coordenação e central de atendimento.
+                                                              $sql = "SELECT * FROM sepud.users WHERE id_company = '".$_SESSION['id_company']."' ORDER BY name ASC";
+                                                              $res = pg_query($sql)or die("<option>Erro ".__LINE__." - SQL: ".$sql."</option>");
+
+                                                              if(pg_num_rows($res))
+                                                              {
+                                                                  while($u = pg_fetch_assoc($res))
+                                                                  {
+                                                                    if($u['nickname']!=""){ $nick = "[".$u['nickname']."] ";}else{$nick="";}
+                                                                    if($u['registration']!=""){ $mat = " - Matrícula: ".$u['registration'];}else{$mat="";}
+                                                                    echo "<option value='".$u['id']."'>".$nick.$u['name'].$mat."</option>";
+                                                                  }
+                                                              }else{
+                                                                    $bt_associar_recurso = "disabled";
+                                                                    echo "<option>Todos os colaboradores já foram associados ao turno.</option>";
+                                                              }
+                                                          ?>
+                                                      </select>
+                                                 </div>
+                                               </div>
+                                              </div>
+
+                                             <div class="row">
+                                                     <div class="col-sm-6">
+                                                       <div class="form-group">
+                                                       <label class="control-label">Data de entrada:</label>
+                                                           <input type="text" name="opened" class="form-control text-center" value="<?=($_SESSION['user_opened']!=""?$_SESSION['user_opened']:$agora['data']);?>">
+                                                      </div>
+                                                    </div>
+
+                                                     <div class="col-sm-6">
+                                                       <div class="form-group">
+                                                       <label class="control-label">Data de saída:</label>
+                                                           <input type="text" name="closed" class="form-control text-center" value="<?=($_SESSION['user_closed']!=""?$_SESSION['user_closed']:$agora['data']);?>">
+                                                      </div>
+                                                    </div>
+                                               </div>
+                                               <div class="row">
+                                                     <div class="col-sm-6">
+                                                       <div class="form-group">
+                                                       <label class="control-label">Hora de entrada:</label>
+                                                           <input type="text" name="opened_hour" onclick="$(this).val('');" class="form-control text-center campo_hora" placeholder="00:00" value="<?=($_SESSION['user_opened_hour']!=""?$_SESSION['user_opened_hour']:"");?>">
+                                                      </div>
+                                                    </div>
+
+                                                     <div class="col-sm-6">
+                                                       <div class="form-group">
+                                                       <label class="control-label">Hora de saída:</label>
+                                                           <input type="text" name="closed_hour"  onclick="$(this).val('');" class="form-control text-center campo_hora" placeholder="00:00" value="<?=($_SESSION['user_closed_hour']!=""?$_SESSION['user_closed_hour']:"");?>">
+                                                      </div>
+                                                    </div>
+                                               </div>
+
+                                               <div class="row">
+                                                     <div class="col-sm-6">
+                                                       <div class="form-group">
+                                                       <label class="control-label">Funcão:</label>
+                                                           <select name="type" class="form-control">
+                                                               <option value="agente">Agente de campo</option>
+                                                               <option value="central">Central de atendimento</option>
+                                                               <option value="coordenacao">Coordenação</option>
+                                                           </select>
+                                                      </div>
+                                                    </div>
+
+                                                    <div class="col-sm-6">
+                                                      <div class="form-group">
+                                                      <label class="control-label">Status:</label>
+                                                          <select name="status" class="form-control">
+                                                              <option value="ativo">Ativo</option>
+                                                              <option value="baixado">Baixado</option>
+                                                              <option value="folga">Folga</option>
+                                                              <option value="ferias">Férias</option>
+                                                              <option value="falta">Faltou</option>
+                                                              <option value="atestado">Atestado</option>
+                                                              <option value="licensa">Licensa</option>
+                                                          </select>
+                                                     </div>
+                                                   </div>
+                                              </div>
+
+                                              <div class="row">
+                                                    <div class="col-sm-12">
+                                                      <div class="form-group">
+                                                      <label class="control-label">Observações:</label>
+                                                      <textarea name="observation" class="form-control" rows="3"></textarea>
+                                                    </div>
+                                              </div>
+<!--
+                                              <div class="row">
+                                                    <div class="col-sm-8">
+                                                      <div class="form-group">
+                                                      <label class="control-label">Veículo:</label>
+                                                        <select name="id_fleet" class="form-control">
+                                                            <option value="">- - -</option>
+                                                            <?
+                                                                $sql = "SELECT * FROM sepud.oct_fleet WHERE id_company = '".$_SESSION['id_company']."' ORDER BY type ASC, brand ASC, model ASC";
+                                                                //$res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
+                                                                while($v = pg_fetch_assoc($res))
+                                                                {
+                                                                  $veic[$v['type']][]=$v;
+                                                                }
+                                                                  foreach ($veic as $type => $info) {
+                                                                    echo "<optgroup label='".ucfirst($type)."'>";
+                                                                    for($i=0; $i<count($info);$i++)
+                                                                    {
+                                                                        echo "<option value='".$info[$i]['id']."'>".$info[$i]['plate']." - ".$info[$i]['brand']." ".$info[$i]['model']."</option>";
+                                                                    }
+                                                                  }
+                                                            ?>
+                                                          </select>
+                                                     </div>
+                                                   </div>
+                                                   <div class="col-sm-4">
+                                                     <div class="checkbox" style="margin-top:35px">
+                             														<label><input name="is_driver" type="checkbox" value="true">É o motorista ?</label>
+                             													</div>
+                                                   </div>
+                                              </div>
+-->
+
+                                              <div class="row">
+                                                  <div class="col-sm-12 text-center">
+                                                      <input type="hidden" name="acao" value="associar" />
+                                                      <input type="hidden" name="id_workshift" value="<?=$id?>" />
+                                                      <button type='submit' class='mb-xs mt-xs mr-xs btn btn-primary loading' data-loading-msg="Aguarde, processando informação." <?=$bt_associar_recurso;?>>Associar ao turno corrente</button>
+                                                      <? if($dados['is_populate']=='f'){ ?>
+                                                        <a class='mb-xs mt-xs mr-xs btn btn-primary loading' href="oct/turno_gerar_associacao_automatica.php?data=<?=urlencode($dados['opened']);?>&id_workshift=<?=$_GET['id'];?>&workshift_group=<?=$dados['workshift_group'];?>">Popular turno baseado no cadastro do funcionário</a>
+                                                      <? } ?>
+                                                  </div>
+                                            </div>
+
+                                    </form>
+                                <?
                                     }else {
                                       echo "<br><br><br><br><br><div class='alert alert-warning text-center'>Primeiro deve-se abrir um turno de trabalho para depois associar um recurso.</div>";
                                     }

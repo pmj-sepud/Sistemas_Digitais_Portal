@@ -22,6 +22,8 @@
       $id_hospital   = ($id_hospital   != "" ? $id_hospital             :"Null");
       $id_company    = ($id_company    != "" ? $id_company              :"Null");
       $id_garrison   = ($id_garrison   != "" ? $id_garrison             :"Null");
+      $id_user_resp  = ($id_user_resp  != "" ? $id_user_resp            :"Null");
+
 
       if($data != "" && $hora != "" && strlen($hora)==5 && strlen($data)==10){
         $dtsrv = formataData($data,4);
@@ -44,7 +46,8 @@
                            id_event,
                            id_providence,
                            opened_date,
-                           id_garrison)
+                           id_garrison,
+                           id_user_resp)
              VALUES
 	                      ( ".$_SESSION['id'].",
                           $id_vehicle,
@@ -55,7 +58,8 @@
                           '".$id."',
                           '".$id_providence."',
                           '".$dtsrv."',
-                          $id_garrison);";
+                          $id_garrison,
+                          $id_user_resp);";
       pg_query($sql)or die("<div align='center'>Erro ".__LINE__."<br>".$sql."<br></br><a class='btn' href='oct/FORM_providencias.php?id=".$id."'>Voltar</a></div>");
 
       logger("Inserção","OCT - Providências", "Ocorrência n.".$id);

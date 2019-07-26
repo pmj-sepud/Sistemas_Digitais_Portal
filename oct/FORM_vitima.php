@@ -31,14 +31,14 @@
           <li><span class='text-muted'>Aplicações</span></li>
           <li><a href='oct/ocorrencias.php'>Ocorrências de trânsito</a></li>
           <li><a href='oct/FORM.php?id=<?=$_GET['id']?>'>Ocorrência n.<?=$_GET['id'];?></a></li>
-          <li><span class='text-muted'>Vítimas/Evolvidos</span></li>
+          <li><span class='text-muted'>Evolvidos</span></li>
         </ol>
       </div>
     </header>
 
     <section class="panel">
       <header class="panel-heading">
-        <h4><span class="text-muted"><i class="fa fa-user"></i> Vítimas/Evolvidos</h4>
+        <h4><span class="text-muted"><i class="fa fa-user"></i> Evolvidos</h4>
       </header>
       <div class="panel-body">
 
@@ -55,13 +55,23 @@
                  </div>
             </div>
             <div class="row">
-                  <div class="col-sm-12">
+                  <div class="col-sm-8">
                     <div class="form-group">
                     <label class="control-label">Nome da mãe:</label>
                         <input type="text" name="mother_name" placeholder="Nome completo" class="form-control" value="<?=$dados['mother_name'];?>">
                    </div>
                  </div>
-            </div>
+
+                 <div class="col-sm-4">
+                   <div class="form-group">
+                   <label class="control-label">Conduzido a delegacia:</label>
+                   <select name="conducted" class="form-control">
+                       <option value="f" <?=($dados['conducted']=="f"?"selected":"");?>>Não</option>
+                       <option value="t" <?=($dados['conducted']=="t"?"selected":"");?>>Sim</option>
+                   </select>
+                  </div>
+                </div>
+          </div>
 
           <div class="row">
                 <div class="col-sm-2">
@@ -101,19 +111,20 @@
                 <div class="form-group">
                 <label class="control-label">Estado de saúde:</label>
                 <select id="state" name="state" class="form-control">
-                    <option value="Nada"  <?=($dados['state']=="Nada"?"selected":"");?>>Nada consta</option>
-                    <option value="Leve"  <?=($dados['state']=="Leve"?"selected":"");?>>Leve</option>
-                    <option value="Médio" <?=($dados['state']=="Médio"?"selected":"");?>>Médio</option>
-                    <option value="Grave" <?=($dados['state']=="Grave"?"selected":"");?>>Grave</option>
-                    <option value="Óbito" <?=($dados['state']=="Óbito"?"selected":"");?>>Óbito</option>
+                    <option value=""></option>
+                    <option value="azul"  <?=($dados['state']=="azul"?"selected":"");?>>Azul</option>
+                    <option value="verde"  <?=($dados['state']=="verde"?"selected":"");?>>Verde</option>
+                    <option value="amarelo" <?=($dados['state']=="amarelo"?"selected":"");?>>Amarelo</option>
+                    <option value="vermelho" <?=($dados['state']=="vermelho"?"selected":"");?>>Vermelho</option>
                 </select>
                 <!--<input type="text" name="state" class="form-control" value="<?=$dados['state'];?>">-->
                </div>
              </div>
              <div class="col-sm-4">
                <div class="form-group">
-               <label class="control-label">Recusou:</label>
+               <label class="control-label">Recusou atend. clínico:</label>
                <select id="refuse_help" name="refuse_help" class="form-control">
+                   <option value=""></option>
                    <option value="t" <?=($dados['refuse_help']=="t"?"selected":"");?>>Sim</option>
                    <option value="f" <?=($dados['refuse_help']=="f"?"selected":"");?>>Não</option>
                </select>
@@ -169,7 +180,7 @@
                   <div class="col-sm-12">
                     <div class="form-group">
                     <label class="control-label">Observações:</label>
-                        <textarea name="description" placeholder="Descrição detalhada do estado da vítima, procedimentos realizados, encaminhamento, etc." rows="4" class="form-control"><?=$dados['description'];?></textarea>
+                        <textarea name="description" placeholder="Descrição detalhada do estado da vítima, procedimentos realizados, encaminhamento, etc." rows="10" class="form-control"><?=$dados['description'];?></textarea>
                    </div>
                  </div>
             </div>
@@ -187,7 +198,7 @@
                       <button id='bt_inserir_voltar'    type='submit' class="btn btn-primary loading" role="button">Inserir e voltar</button>
                       <button id='bt_inserir_continuar' type='button' class="btn btn-primary loading" role="button">Inserir e continuar</button>
                       <? }else{ ?>
-                        <a href="oct/FORM_vitima.php?id=<?=$id;?>"><button type="button" class="mb-xs mt-xs mr-xs btn btn-default loading"><i class="fa fa-user"></i> Nova vítima</button></a><br>
+                        <a href="oct/FORM_vitima.php?id=<?=$id;?>"><button type="button" class="mb-xs mt-xs mr-xs btn btn-default loading"><i class="fa fa-user"></i> Novo envolvido</button></a><br>
                         <button id='bt_inserir_voltar'    type='submit' class="btn btn-primary loading" role="button">Atualizar e voltar</button>
                         <button id='bt_inserir_continuar' type='button' class="btn btn-primary loading" role="button">Atualizar e continuar</button>
                       <? } ?>

@@ -100,40 +100,18 @@
     									  </div>
                     </div>
 
-                    <div class="row">
-                          <div class="col-md-12">
-                                  <div class="row">
-                                    <div class="col-md-6">
-                                      <div class="form-group">
-                                       <label class="control-label">Combustível inicial:</label>
-                                       <input id="initial_fuel" name="initial_fuel" type="text" class="form-control">
-                                      </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                      <div class="form-group">
-                                        <label class="control-label">Combustível final:</label>
-                                        <input id="final_fuel" name="final_fuel" type="text" class="form-control">
-                                      </div>
-                                    </div>
-                                </div>
-    									  </div>
-                    </div>
+
 
                     <div class="row">
                           <div class="col-md-12">
                                   <div class="row">
                                     <div class="col-md-6">
                                       <div class="form-group">
-                                       <label class="control-label">KM inicial:</label>
+                                       <label class="control-label">KM atual:</label>
                                        <input id="initial_km" name="initial_km" type="text" class="form-control">
                                       </div>
                                     </div>
-                                    <div class="col-md-6">
-                                      <div class="form-group">
-                                        <label class="control-label">KM final:</label>
-                                        <input id="final_km" name="final_km" type="text" class="form-control">
-                                      </div>
-                                    </div>
+
                                 </div>
     									  </div>
                     </div>
@@ -151,7 +129,7 @@
                       <div class="col-md-12 text-center" style="margin-top:15px">
                           <input type="hidden" id="id_workshift" name="id_workshift" value="<?=$turno;?>">
                           <input type="hidden" id="acao" name="acao" value="<?=$acao;?>">
-                          <a href="oct/index.php" class="btn btn-default loading2">Voltar</a>
+                          <a href="oct/index.php?id_workshift=<?=$turno;?>" class="btn btn-default loading2">Voltar</a>
                           <?
                               if($acao=="Atualizar")
                               {

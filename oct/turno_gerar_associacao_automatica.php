@@ -108,12 +108,14 @@
                                           id_person,
                                           opened,
                                           closed,
-                                          type)
+                                          type,
+                                          status)
                               VALUES ('".$id_workshift."',
                                       '".$uid."',
                                       '".$datas['ini']."',
                                       '".$datas['fim']."',
-                                      '".$type."')";
+                                      '".$type."',
+                                      'ativo')";
                       echo $c++."/".$total;
 
                       $res = pg_query($sql);

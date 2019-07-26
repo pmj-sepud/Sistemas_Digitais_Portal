@@ -75,11 +75,15 @@
           }
         }
 
-        if($id_street       == "")    { $id_street="Null";   }else{ $id_street       = "'".$id_street."'";     }
-        if($street_number   == ""){ $street_number="Null";   }else{ $street_number   = "'".$street_number."'"; }
+        if($id_street       == ""){ $id_street      ="Null"; }else{ $id_street       = "'".$id_street."'";     }
+        if($street_number   == ""){ $street_number  ="Null"; }else{ $street_number   = "'".$street_number."'"; }
         if($id_addressbook  == ""){ $id_addressbook ="Null"; }else{ $id_addressbook  = "'".$id_addressbook."'";}
         if($id_garrison     == ""){ $id_garrison    ="Null"; }else{ $id_garrison     = "'".$id_garrison."'";   }
         if($id_workshift    == ""){ $id_workshift   ="Null"; }else{ $id_workshift    = "'".$id_workshift."'";  }
+        if($closure         != ""){ $sql_closure    = ",closure = '".$closure."'";  }
+        if($arrival         != ""){ $sql_arrival    = ",arrival = '".$arrival."'";  }
+
+
 
         $sql = "UPDATE sepud.oct_events SET
                      date               = '".$datafinal."',
@@ -97,6 +101,8 @@
                      id_addressbook     = ".$id_addressbook.",
                      id_garrison        = ".$id_garrison.",
                      id_workshift       = ".$id_workshift."
+                     ".$sql_closure."
+                     ".$sql_arrival."
                WHERE id                 = '".$id."'";
 
         pg_query($sqlCond.$sql) or die("Erro ".__LINE__."<br>SQL: ".$sql);
@@ -114,7 +120,7 @@ if($_GET['status_acao'] == "atualizar" && $_GET['id'] != "")
     switch ($_GET['status_alterar']) {
       case 'd':
         $var_status = "Em deslocamento";
-        $sqlU = "UPDATE sepud.oct_events SET active = true, closure = null, status = '".$var_status."' WHERE id = '".$_GET['id']."'";
+        $sqlU = "UPDATE sepud.oct_events SET active = true, closure = null, arrival = null,  status = '".$var_status."' WHERE id = '".$_GET['id']."'";
         break;
       case 'a':
         $var_status = "Em atendimento";

@@ -3,9 +3,9 @@
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
 
-  $id = $_GET['id'];
+  $id       = $_GET['id'];
   $veic_sel = $_GET['veic_sel'];
-
+  $agora    = now();
   logger("Acesso","OCT - Veículo", "Ocorrência n.".$_GET['id']);
 
   if($veic_sel)
@@ -107,6 +107,30 @@
                </div>
         </div>
 
+        <div class="row">
+
+              <div class="col-sm-4">
+                <div class="form-group">
+                <label class="control-label">Nº AIT:</label>
+                    <input type="text" name="ait" class="form-control" value="<?=$dados['ait'];?>">
+               </div>
+             </div>
+
+              <div class="col-sm-2">
+                <div class="form-group">
+                <label class="control-label">infração:</label>
+                    <input type="text" name="cod_infra" class="form-control" value="<?=$dados['cod_infra'];?>">
+               </div>
+             </div>
+
+               <div class="col-sm-6">
+                 <div class="form-group">
+                 <label class="control-label">Data recebimento:</label>
+                     <input type="datetime-local" name="data_rec_auto" class="form-control" value="<?=($dados['data_rec_auto']!=""?str_replace(" ","T",$dados['data_rec_auto']):substr(str_replace(" ","T",$agora['datatimesrv']),0,-3));?>">
+                </div>
+             </div>
+      </div>
+
 
             <!-- ========================================================= -->
           </div><!--<div class="col-sm-8"> FORM PRINCIPAL-->
@@ -115,7 +139,7 @@
                   <div class="col-sm-12">
                     <div class="form-group">
                     <label class="control-label">Observações:</label>
-                        <textarea name="observation" placeholder="Observações sobre o veículo, condições geraias, posicionamento na via, etc." rows="4" class="form-control"><?=$dados['observation'];?></textarea>
+                        <textarea name="observation" placeholder="Observações sobre o veículo, condições geraias, posicionamento na via, etc." rows="7" class="form-control"><?=$dados['observation'];?></textarea>
                    </div>
                  </div>
             </div>
@@ -128,7 +152,7 @@
                       <input type="hidden" name="acao" value="<?=$acao;?>">
                       <input type="hidden" name="retorno_acao" id="retorno_acao" value="">
                       <a href='oct/FORM.php?id=<?=$_GET['id']?>'><button type="button" class="btn btn-default loading">Voltar</button></a>
-                      <a href="oct/FORM_vitima.php?id=<?=$id;?>"><button type="button" class="mb-xs mt-xs mr-xs btn btn-default loading"><i class="fa fa-user"></i> Vítimas/Envolvidos</button></a>
+                      <a href="oct/FORM_vitima.php?id=<?=$id;?>"><button type="button" class="mb-xs mt-xs mr-xs btn btn-default loading"><i class="fa fa-user"></i> Envolvidos</button></a>
                       <? if($acao == "inserir"){ ?>
                       <button id='bt_inserir_voltar'    type='submit' class="btn btn-primary loading" role="button">Inserir e voltar</button>
                       <button id='bt_inserir_continuar' type='button' class="btn btn-primary loading" role="button">Inserir e continuar</button>
@@ -181,7 +205,10 @@
                               <th width='10px'>Renavam</th>
                               <th width='10px'>Chassi</th>
                               <th width='100px'>Tipo</th>
-                              <th class='text-center' width='10px'>Vítimas</th>
+                              <th class='text-center' >Envolvido(s)</th>
+                              <th class='text-center' >Nº AIT</th>
+                              <th class='text-center' >Infração</th>
+                              <th class='text-center' >Data recebimento</th>
                               <th colspan='3' class='text-center'>Ações</th>
 
 
@@ -197,6 +224,9 @@
                             echo "<td>".$d['chassi']."</td>";
                             echo "<td>".$d['vehicle_type']."</td>";
                             echo "<td class='text-center'>".$d['qtd_vitimas']."</td>";
+                            echo "<td class='text-center'>".$d['ait']."</td>";
+                            echo "<td class='text-center'>".$d['cod_infra']."</td>";
+                            echo "<td class='text-center'>".formataData($d['data_rec_auto'],1)."</td>";
 
 
                               echo "<td class='text-center' width='50px'><a href='oct/FORM_veiculo_sql.php?id=".$id."&veic_sel=".$d['id']."&acao=remover'><button type='button' class='loading2 mb-xs mt-xs mr-xs btn btn-xs btn-danger'><i class='fa fa-trash'></i></button></a></td>";

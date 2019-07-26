@@ -1,4 +1,4 @@
-<aside id="sidebar-left" class="sidebar-left">
+<aside id="sidebar-left" class="sidebar-left hidden-print">
 
   <div class="sidebar-header">
     <div class="sidebar-title">
@@ -63,19 +63,21 @@
             <a><i class="fa fa-bank" aria-hidden="true"></i><span>Aplicações</span></a>
             <ul class="nav nav-children">
               <!--<li><a href="erg/index.php">Estacionamento Rotativo</a></li>-->
-              <li><a href="oct/ocorrencias.php">Ocorrências de Trânsito</a></li>
+              <li><a href="oct/ocorrencias.php">Todas as ocorrências</a></li>
 
 
 
   <li class="nav-parent">
-    <a><span>Sistema de gestão</span></a>
+    <a><span>Sistema de gestão - ROTSS</span></a>
     <ul class="nav nav-children">
         <li><a href="oct/index.php">1. Sistema</a></li>
         <li><a href="oct/turnos_INDEX.php">2. Turnos</a></li>
-        <li><a href="oct/minhas_ocorrencias.php">3. Minhas ocorrências</a></li>
-        <li><a href="oct/ocorrencias.php">4. Todas ocorrências</a></li>
-        <li><a href="oct/eventos_administrativos_INDEX.php">5. Diário administrativo</a></li>
-        <li><a href="oct/dashboard.php">6. Evolução mensal</a></li>
+        <li><a href="oct/ocorrencias.php">3. Todas ocorrências</a></li>
+        <li><a href="oct/eventos_administrativos_INDEX.php">4. Diário administrativo</a></li>
+        <li><a href="oct/dashboard.php">5. Evolução mensal</a></li>
+
+        <!--<li><a href="oct/minhas_ocorrencias.php">6. Minhas ocorrências</a></li>-->
+
 
     </ul>
   </li>

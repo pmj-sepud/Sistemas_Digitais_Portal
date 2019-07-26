@@ -5,11 +5,6 @@
 
   $agora = now();
 
-  function query($sql)
-  {
-    //$res = pg_query($)
-  }
-
   if($_GET['turno']==""){ header("Location: index.php"); exit(); }
   $turno = $_GET['turno'];
   if($_GET['id_garrison']==""){
@@ -27,31 +22,11 @@
       $associados[] = $ret;
       if($ret['type']=="Motorista"){ $motorista = $ret['id_user'];}
     }
-    /*
-    Array
-      (
-        [id] => 32
-        [id_fleet] => 22
-        [id_workshift] => 117
-        [opened] => 2019-07-16 06:30:00
-        [closed] =>
-        [initial_fuel] =>
-        [final_fuel] =>
-        [observation] => Passageiro Maguiroski
-        [initial_km] => 64648
-        [final_km] =>
-      )
-*/
-      //echo "<div class='row'><div class='col-sm-6 col-sm-offset-3'><pre>";
-      //echo "Motorista ID: ".$motorista."<br>Associados ao veículo:";
-      //print_r($_GET);
-      //echo "<br>";
-      //print_r($dados);
-      //echo "</div></div>";
-
   }
 ?>
+<style>
 
+</style>
 <section role="main" class="content-body">
   <header class="page-header">
     <h2>Guarnição</h2>
@@ -74,12 +49,9 @@
 									  </div>
                   </header>
 									<div class="panel-body">
-<?
-
-?>
-
                     <div class="row">
-                      <div class="col-md-6 col-md-offset-3">
+                      <div class="col-md-6">
+                          <h4>Guarnição:</h4>
                                     <div class="row">
                                         <div class="col-md-12">
                                           <?
@@ -118,14 +90,16 @@
                                               $sql = "SELECT U.id, U.name, U.nickname, U.registration
                                                       FROM sepud.oct_rel_workshift_persona W
                                                       JOIN sepud.users U ON U.id = W.id_person
-                                                      WHERE W.id_shift = '".$turno."'";
+                                                      WHERE W.id_shift = '".$turno."' AND W.status = 'ativo' ORDER BY U.nickname ASC";
                                               $res = pg_query($sql)or die("<option>SQL ERROR ".__LINE__."</option>");
                                               echo "<option value=''></option>";
                                               while($d = pg_fetch_assoc($res))
                                               {
                                                 $sel = ($motorista==$d['id']?"selected":"");
                                                 echo "<option value='".$d['id']."' ".$sel.">[".$d['nickname']."] ".$d['name']." - Matrícula: ".$d['registration']."</option>";
+                                                $opt_users_pass .= "<option value='".$d['id']."'>[".$d['nickname']."] ".$d['name']." - Matrícula: ".$d['registration']."</option>";
                                               }
+
                                           ?>
                                        </select>
                                        <span class='text-muted'><sup>*</sup>Aparecerão apenas os agentes associados ao turno.</span>
@@ -141,7 +115,7 @@
                                       <div class="form-group">
                                        <label class="control-label">Início do uso:</label>
                                        <? //substr(str_replace(" ","T",$agora['datatimesrv']),0,-3)) ?>
-                                       <input id="opened" name="opened" type="datetime-local" class="form-control" value="<?=($dados['opened']!=""?str_replace(" ","T",$dados['opened']):"");?>">
+                                       <input id="opened" name="opened" type="datetime-local" class="form-control" value="<?=($dados['opened']!=""?str_replace(" ","T",$dados['opened']):substr(str_replace(" ","T",$agora['datatimesrv']),0,-3));?>">
                                       </div>
                                     </div>
                                     <div class="col-md-6">
@@ -159,33 +133,14 @@
                                   <div class="row">
                                     <div class="col-md-6">
                                       <div class="form-group">
-                                       <label class="control-label">Combustível inicial:</label>
-                                       <input id="initial_fuel" name="initial_fuel" type="text" class="form-control" value="<?=$dados['initial_fuel'];?>">
-                                      </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                      <div class="form-group">
-                                        <label class="control-label">Combustível final:</label>
-                                        <input id="final_fuel" name="final_fuel" type="text" class="form-control" value="<?=$dados['final_fuel'];?>">
-                                      </div>
-                                    </div>
-                                </div>
-    									  </div>
-                    </div>
-
-                    <div class="row">
-                          <div class="col-md-12">
-                                  <div class="row">
-                                    <div class="col-md-6">
-                                      <div class="form-group">
                                        <label class="control-label">KM inicial:</label>
-                                       <input id="initial_km" name="initial_km" type="text" class="form-control" value="<?=$dados['initial_km'];?>">
+                                       <input name="initial_km" type="text" class="form-control" value="<?=$dados['initial_km'];?>">
                                       </div>
                                     </div>
                                     <div class="col-md-6">
                                       <div class="form-group">
                                         <label class="control-label">KM final:</label>
-                                        <input id="final_km" name="final_km" type="text" class="form-control" value="<?=$dados['final_km'];?>">
+                                        <input name="final_km" type="text" class="form-control" value="<?=$dados['final_km'];?>">
                                       </div>
                                     </div>
                                 </div>
@@ -205,12 +160,12 @@
                       <div class="col-md-12 text-center" style="margin-top:15px">
                           <input type="hidden" id="id_workshift" name="id_workshift" value="<?=$turno;?>">
                           <input type="hidden" id="acao" name="acao" value="<?=$acao;?>">
-                          <a href="oct/index.php" class="btn btn-default loading2">Voltar</a>
+                          <a href="oct/index.php?id_workshift=<?=$turno;?>" class="btn btn-default loading2">Voltar</a>
                           <?
                               if($acao=="Atualizar")
                               {
                                 echo "<input type='hidden' name='id' value='".$_GET['id_garrison']."'>";
-                                //echo  "<a href='oct/eventos_administrativos_SQL.php?acao=Remover&id=".$_GET['id']."' class='btn btn-danger loading2'>Remover</a>";
+                                echo  "<a href='oct/veiculo_turno_SQL.php?id_workshift=".$turno."&acao=remover&id=".$_GET['id_garrison']."' class='btn btn-danger loading2'>Remover</a>";
                               }
                           ?>
                           <button type="submit" class="btn btn-primary loading"><?=$acao;?></button>
@@ -218,6 +173,73 @@
                    </div>
 
 							   </div>
+<? if($dados['id'] != ""){ ?>
+
+                      <div class="col-sm-6">
+                          <h4>Passageiro(s):</h4>
+                          <div class="row">
+                            <div class="col-sm-10">
+                              <div class="form-group">
+                               <label class="control-label">Inserir passageiro:</label>
+                               <select id="id_user_pass" name="id_user_pass" class="form-control select2">
+                                  <option value=""></option>
+                                  <?=$opt_users_pass;?>
+                               </select>
+                             </div>
+                           </div>
+                           <div class="col-sm-2" style="margin-top:27px">
+                              <button id="bt_add_pass" class="btn  btn-sm btn-primary loading2"><i class="fa fa-user"></i><sup> <i class="fa fa-plus"></i></sup></button>
+                          </div>
+                         </div>
+                         <div class="row" style="margin-top:10px">
+                            <div class="col-sm-12">
+                                      <?
+                                          $sql = "SELECT
+                                                    	R.id_garrison,
+                                                    	U.id, U.name, U.nickname, U.registration
+                                                    FROM
+                                                    	sepud.oct_rel_garrison_persona R
+                                                    JOIN sepud.users U ON U.id = R.id_user
+                                                    WHERE
+                                                    	R.id_garrison = '".$dados['id']."'
+                                                    	AND R.TYPE = 'Passageiro'";
+                                          $resPass = pg_query($sql)or die("SQL error ".__LINE__);
+                                          if(pg_num_rows($resPass))
+                                          {
+                                              echo "<table class='table table-striped'>";
+                                              echo "<thead><tr>
+                                                           <th class='text-muted'><small><i>Matrícula</i></small></th>
+                                                           <th class='text-muted'><small><i>Nome de guerra</i></small></th>
+                                                           <th class='text-muted'><small><i>Nome</i></small></th>
+                                                           <th class='text-muted text-center'><i class='fa fa-trash'></th>
+                                                    </tr></thead>";
+                                              while($dp = pg_fetch_assoc($resPass))
+                                              {
+                                                echo "<tr>";
+                                                  echo "<td>".$dp['registration']."</td>";
+                                                  echo "<td>".$dp['nickname']."</td>";
+                                                  echo "<td>".$dp['name']."</td>";
+                                                  echo "<td class='text-center'><button class='btn btn-xs btn-danger loading2' onClick='remove_passageiro(\"".$dp['id']."\");'><i class='fa fa-trash'></button></td>";
+                                                echo "<tr>";
+                                              }
+                                              echo "</table>";
+                                         }else {
+                                           echo "<div class='alert alert-warning text-center'>Nenhum passageiro vinculado a essa guarnição</div>";
+                                         }
+                                      ?>
+
+                            </div>
+                         </div>
+
+                      </div>
+<? }else {
+  echo "<div class='col-sm-6'>
+          <h4>Passageiro(s):</h4>
+            <div class='row'>
+              <div class='col-sm-10'><div class='alert alert-warning text-center'>Após cadastrar a guarnição, será liberado para inserção de passageiros.</div>
+            </div>
+        </div>";
+} ?>
                </div>
              </div>
     </section>
@@ -225,6 +247,32 @@
 </section>
 <script>
 $('.select2').select2();
+$(document).ready(function(){ $(this).scrollTop(0);});
+
+
+function remove_passageiro(id_user_pass)
+{
+  <? if($acao=="Atualizar"){ ?>
+  var id_garrison  = <?=$dados['id'];?>;
+  var turno        = <?=$turno;?>;
+  //alert("REMOVER Passageiro:\nTurno: "+turno+"\nID da guarnição: "+id_garrison+"\nId user passageiro: "+id_user_pass);
+  $('#wrap').load("oct/veiculo_turno_SQL.php?acao=remover_passageiro&turno="+turno+"&id_garrison="+id_garrison+"&id_user_pass="+id_user_pass);
+  <? } ?>
+  return false;
+}
+
+$("#bt_add_pass").click(function(){
+    <? if($acao=="Atualizar"){ ?>
+    var id_garrison  = <?=$dados['id'];?>;
+    var id_user_pass = $("#id_user_pass").val();
+    var turno        = <?=$turno;?>;
+    //alert("ASSOCIAR Passageiro:\nTurno: "+turno+"\nID da guarnição: "+id_garrison+"\nId user passageiro: "+id_user_pass);
+    $('#wrap').load("oct/veiculo_turno_SQL.php?acao=associar_passageiro&turno="+turno+"&id_garrison="+id_garrison+"&id_user_pass="+id_user_pass);
+    <? } ?>
+    return false;
+
+});
+
 $(".loading").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> Aguarde");});
 $(".loading2").click(function(){ $(this).addClass("disabled").html("<i class=\"fa fa-spinner fa-spin\"></i>");});
 </script>

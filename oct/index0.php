@@ -1,4 +1,4 @@
-  <?
+<?
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
@@ -8,15 +8,7 @@
   logger("Acesso","OCT", "Sistema - página inicial");
 
   $agora = now();
-
-  if($_GET['id_workshift']=="")
-  {
-      $sql   = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
-  }else {
-      $sql   = "SELECT * FROM sepud.oct_workshift WHERE id ='".$_GET['id_workshift']."'";
-  }
-
-
+  $sql   = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
   $res   = pg_query($sql)or die("Erro ".__LINE__);
 
   if(pg_num_rows($res))
@@ -32,51 +24,39 @@
                      JOIN sepud.users                      U ON U.id = WP.id_person
                   WHERE
                     WP.id_shift =  '".$turno['id']."'
-                  ORDER BY U.name ASC";
+                  ORDER BY WP.opened ASC, U.name ASC";
         $resRecursos = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
-
+        $qtd_agentes = pg_num_rows($resRecursos);
         while($d = pg_fetch_assoc($resRecursos))
         {
-          if($d['type']=="agente")
-          {
-            if($d['status']=="ativo")
-            {
-              $agentes_turno['ativos'][] = $d;
-            }else{
-              $agentes_turno['outros'][] = $d;
-            }
-          }
           $dados_turno[$d['type']][] = $d;
-          $qtd_agentes[] = $d["id_user"];
         }
+//echo "<pre>";
+  //print_r($dados_turno);
+//echo "</pre>";
+        /*
 
-        if(isset($qtd_agentes) && count($qtd_agentes)){ $qtd_agentes = count(array_values(array_unique($qtd_agentes))); }else{ $qtd_agentes = 0;}
-
+        (
+               [nome] => Robinson Da Maia
+               [id_user] => 120
+               [registration] => 45542
+               [nickname] => DA MAIA
+               [id_shift] => 82
+               [id_person] => 120
+               [id_fleet] =>
+               [opened] => 2019-07-04 09:30:00
+               [closed] => 2019-07-04 22:30:00
+               [type] => coordenacao
+               [is_driver] => f
+        */
         $turno_aberto = true;
-
-        $sqlOc = "SELECT
-                  	E.active, count(*) AS qtd
-                  FROM
-                  	sepud.oct_events E
-                  WHERE
-                  	id_workshift = '".$turno['id']."'
-                  GROUP BY
-                  	E.active";
-        $resOc = pg_query($sqlOc)or die("SQL error ".__LINE__);
-        $status_ocs['abertas'] = $status_ocs['fechadas'] = $status_ocs['total'] = 0;
-        while($dOc = pg_fetch_assoc($resOc))
-        {
-          if($dOc['active']=='t'){ $status_ocs['abertas'] = $dOc['qtd']; }else{ $status_ocs['fechadas'] = $dOc['qtd']; }
-          $status_ocs['total'] += $dOc['qtd'];
-        }
-
-  }else{
-    $$turno_aberto = false;
+  }else {
+    $turno_aberto = false;
   }
 ?>
 
 <section role="main" class="content-body">
-  <header class="page-header hidden-print">
+  <header class="page-header">
     <h2>Registro de Ocorrências de Trânsito e Segurança</h2>
     <div class="right-wrapper pull-right" style='margin-right:15px;'>
       <ol class="breadcrumbs">
@@ -95,23 +75,18 @@
             <header class="panel-heading" style="height:70px">
                 <?=$_SESSION['company_acron']." - ".$_SESSION['company_name'];?><br>
                 <span class="text-muted"><small><i>Data atual:</i></small> <b><?=$agora['data'];?></b></span>
-                <div class="panel-actions hidden-print" style="margin-top:5px">
+                <div class="panel-actions" style="margin-top:5px">
                     <?
                         if($turno_aberto)
                         {
-                            echo " <a href='oct/turno.php?id=".$turno['id']."'><button id='bt_atualizar_turno' type='button' class='btn btn-primary'><i class='fa fa-cogs'></i> Turno</button></a>";
-                            echo " <a href='oct/turno_associar_pessoa.php?id_workshift=".$turno['id']."'><button type='button' class='btn btn-primary'><i class='fa fa-users'></i> Pessoal</button></a>";
-
+                            echo "<a href='oct/turno.php?id=".$turno['id']."'><button id='bt_atualizar_turno' type='button' class='btn btn-sm btn-primary'><i class='fa fa-cogs'></i> Atualizar turno</button></a>";
                             if(isset($qtd_agentes) && $qtd_agentes > 0)
                             {
-                              echo " <a href='oct/veiculo_turno_FORM.php?turno=".$turno['id']."'><button id='bt_atualizar_veiculo' type='button' class='btn btn-primary'><i class='fa fa-cab'></i> Guarnições</button></a>";
-                              //echo " <a href='oct/veiculo_registros_FORM.php?turno=".$turno['id']."'><button id='bt_atualizar_veiculo' type='button' class='btn btn-primary'><i class='fa fa-cab'></i> Registros da VTR</button></a>";
+                              echo " <a href='oct/veiculo_turno_FORM.php?turno=".$turno['id']."'><button id='bt_atualizar_veiculo' type='button' class='btn btn-sm btn-info'><i class='fa fa-cab'></i> Inserir guarnições</button></a>";
+                              echo " <a href='oct/veiculo_registros_FORM.php?turno=".$turno['id']."'><button id='bt_atualizar_veiculo' type='button' class='btn btn-sm btn-success'><i class='fa fa-cab'></i> Registros da VTR</button></a>";
                             }else {
-                              echo " <button type='button' class='btn  btn-primary disabled'><i class='fa fa-cab'></i> Inserir guarnições</button>";
+                              echo " <button type='button' class='btn btn-sm btn-info disabled'><i class='fa fa-cab'></i> Inserir guarnições</button>";
                             }
-
-                            echo " <button id='bt_print' class='btn btn-primary'><i class='fa fa-print'></i> Imprimir</button>";
-
                         }else{
                             echo "<a href='oct/turno.php'><button type='button' class='btn btn-primary'><i class='fa fa-plus'></i> Abrir novo turno de trabalho</button></a>";
                         }
@@ -122,92 +97,50 @@
 
               <div class="row">
                 <div class="col-sm-12">
-                    <h4><b>Informações gerais</b></h4>
-                </div>
-              </div>
-<? if($turno_aberto){ ?>
-  <div class="row">
-    <div class="col-sm-2 text-center">
+                                  <?
+                                      if(pg_num_rows($res))
+                                      {
 
-          <?
-              echo "<small class='text-muted'><i>Turno atual:</i></small>";
-              echo "<h2 style='margin-top:0px'><b>".str_pad($turno['id'],5,"0",STR_PAD_LEFT)."</b></h2>";
-              echo "<h5 style='margin-top:-5px'>".strtoupper($turno['workshift_group'])."</h5>";
-          ?>
-    </div>
-    <div class="col-sm-4 text-center">
-        <?
-            echo "<small class='text-muted'><i>Período de trabalho:</i></small>";
-            echo  "<h5 style='margin-top:0px'><b>".formataData($turno['opened'],1)."</b><br><small>a</small><br><b>".formataData($turno['closed'],1)."</b></h5>";
-        ?>
-    </div>
+                                            $livro_class="success";
+                                      ?>
+                                      <section class='panel panel-horizontal'>
+                             <header class='panel-heading bg-success' style='width:150px'>
+                               <div class='panel-heading-icon'>
+                                 <i class='fa fa-cogs'></i>
+                               </div>
+                             </header>
 
+                             <div class='panel-body p-lg'>
+<div class="table-responsive">
+                                    <table class='table table-condensed'>
+                                      <thead>
+                                          <tr>
+                                            <th>Turno</th>
+                                            <th>Período</th>
+                                            <th>Total</th>
+                                            <th>Grupo</th>
+                                          </tr>
+                                      </thead>
 
-  <div class="col-sm-2 text-center">
-        <?
-            echo "<small class='text-muted'><i>Agentes envolvidos:</i></small>";
-            echo "<h2 style='margin-top:0px'><b>".$qtd_agentes."</b></h2>";
-        ?>
-  </div>
-
-  <div class="col-sm-2 text-center">
-        <?
-            echo "<small class='text-muted'><i>Total de ocorrências:</i></small>";
-            echo "<h2 style='margin-top:0px'><b>".$status_ocs['total']."</b></h2>";
-            echo "<h5 style='margin-top:-5px'><b>".$status_ocs['abertas']."</b> <i class='text-muted'>Aberta(s)</i><br><b>".$status_ocs['fechadas']."</b> <i class='text-muted'>Fechada(s)</i></h5>";
-        ?>
-  </div>
-  <div class="col-sm-2 text-center">
-        <?
-            $class = ($turno['status']=="aberto"?"text-success":"text-warning");
-            echo "<small class='text-muted'><i>Status:</i></small>";
-            echo "<h2 style='margin-top:0px' class='".$class."'><b>".$turno['status']."</b></h2>";
-
-        ?>
-  </div>
-
-</div>
-<div class="row"><div class="col-sm-12">
-
-  <table class='table table-condensed'><tbody>
-  <tr><td><b>Observações:</b></td></tr>
-  <tr><td><?=($turno['observation']==""?"<span class='text-muted'><small>Nenhuma observação.</small></span>":$turno['observation']);?></td></tr>
-  </tbody></table>
-
-
-</div></div>
-
-
-<?
-}else {
-  echo "<div class='row'><div class='col-sm-12 text-center'><div class='alert alert-warning'>Nehum turno aberto ou selecionado</div></div></div>";
-}
-
-?>
-<div class="row"><div class="col-sm-12"><hr></div></div>
-
-
-
-              <div class="row">
-                <div class="col-sm-12">
-
-                  <table class='table table-condensed'>
-                  <thead><tr><th><h4><b>Coordenação:</h4></b></th></tr></thead>
-                  <tbody>
-                    <tr>
-                      <td style="vertical-align: middle;">
+                                      <tbody>
+                                              <tr>
+                                                  <td><b><?=str_pad($turno['id'],5,"0",STR_PAD_LEFT);?></b></td>
+                                                  <td><?=formataData($turno['opened'],1)." a ".formataData($turno['closed'],1);?></td>
+                                                  <td><?=$qtd_agentes;?> Agentes</td>
+                                                  <td class="<?=$livro_class;?>"><?="<b>".strtoupper($turno['workshift_group'])."</b>";?></td>
+                                              <tr>
+                                              <tr><td colspan='4'><b>Observações:</b></td></tr>
+                                              <tr><td colspan='4'><?=($turno['observation']==""?"<span class='text-muted'><small>Nenhuma observação.</small></span>":$turno['observation']);?></td></tr>
+                                              <tr><td colspan='4'><b>Coordenador(es):</b></td></tr>
                                               <?
                                                 if(isset($dados_turno['coordenacao']))
                                                 {
-                                                  echo "<table class='table table-condensed'>
-                                                        <thead><tr>
+                                                  echo "<tr>
                                                           <th class='text-center' width='25px'><small><i>Matrícula</i></small></th>
                                                           <th><small><i>Nome</i></small></th>
                                                           <th class='text-center'><small><i>Entrada</i></small></th>
                                                           <th class='text-center'><small><i>Saída</i></small></th>
-                                                        </tr>
-                                                  <tbody>";
-
+                                                         </tr>";
                                                   $coord = $dados_turno['coordenacao'];
                                                   for($i=0;$i<count($coord);$i++)
                                                   {
@@ -232,33 +165,55 @@
                                                       echo "<td width='125px' class='text-center'>".$dt_closed."</td>";
                                                     echo "</tr>";
                                                   }
-                                                  echo "</tbody></table>";
                                                 }else {
-                                                  echo "<small class='text-muted'>Nenhum coordenador designado.</small>";
+                                                  echo "<tr><td colspan='4'><span class='text-muted'><small>Nenhum coordenador designado.</small></span></td></tr>";
                                                 }
                                               ?>
-                            </td>
-                          </tr>
                                       </tbody>
+<!--
+                                      <tfoot>
+                                              <tr class=""><td colspan="4" class=""><b>Ações:</b></td></tr>
+                                              <tr class="">
+                                                <td colspan="4" class="">
+                                                    <a href='oct/turno_sql.php?id=<?=$turno['id'];?>&acao=fechar'><button id='bt_fechar_turno'    type='button' class='btn btn-sm btn-warning'>Fechar</button></a>
+                                                    <a href='oct/turno.php?id=<?=$turno['id'];?>'><button id='bt_atualizar_turno' type='button' class='btn btn-sm btn-primary'>Atualizar</button></a>
+                                                </td>
+                                              </tr>
+                                      </tfoot>
+-->
                                     </table>
+</div>
 
+                             </div>
+                           </section>
 
+                           <? }else{ ?>
+                                    <section class='panel panel-horizontal'>
+                                        <header class='panel-heading bg-default' style='width:150px;min-height:50px'>
+                                            <div class='panel-heading-icon'><i class='fa fa-cogs'></i></div>
+                                        </header>
+                                        <div class='panel-body p-lg text-center'>
+                                            <div class="alert alert-warning">Nenhum turno de trabalho aberto.</div>
 
+                                        </div>
+                                    </section>
+                          <?  } ?>
                 </div>
               </div>
-
-
-
-
-
-
                 <div class="row">
                 <div class="col-sm-12">
+                              <section class='panel panel-horizontal'>
+                              <header class='panel-heading <?=(!$turno_aberto?"bg-default":"bg-info");?>' style='width:150px;min-height:50px'>
+                              <div class='panel-heading-icon'>
+                              <i class='fa fa-phone-square'></i>
+                              </div>
+                              </header>
 
+                              <div class='panel-body p-lg'>
 <div class="table-responsive">
 
                                 <table class='table table-condensed'>
-                                <thead><tr><th><h4><b>Central de atendimento</h4></b></th></tr></thead>
+                                <thead><tr><th>Central de atendimento</th></tr></thead>
                                 <tbody>
                                   <tr>
                                     <td style='vertical-align: middle;'>
@@ -310,115 +265,75 @@
                                 </tbody>
                                 </table>
 </div>
-
+                              </div>
+                              </section>
                 </div>
               </div>
 
               <div class="row">
                 <div class="col-sm-12">
+                                <section class='panel panel-horizontal'>
+                                <header class='panel-heading <?=(!$turno_aberto?"bg-default":"bg-info");?>' style='width:150px'>
+                                <div class='panel-heading-icon'>
+                                <i class='fa fa-users'></i>
+                                </div>
+                                </header>
 
-
-
+                                <div class='panel-body p-lg'>
 <div class="table-responsive">
                                     <table class='table table-condensed'>
-                                      <thead><tr><th><h4><b>Agentes designados</b></h4></th></tr></thead>
+                                      <thead><tr><th>Agentes designados</th></tr></thead>
                                       <tbody>
                                         <tr>
                                           <td style="vertical-align: middle;">
                                             <?
-                                                if(isset($agentes_turno))
+                                                if(isset($dados_turno['agente']))
                                                 {
-                                                  echo "<table class='table table-condensed'>
-                                                        <tbody>
-                                                          <tr class='success'>
-                                                              <td width='25px'><b>Ativos</b></td>
-                                                              <td class='text-center' width='25px'><small><i>Matrícula</i></small></td>
-                                                              <td><small><i>Nome</i></small></td>
-                                                              <td><small><i>Status</i></small></td>
-                                                              <td class='text-center'><small><i>Entrada</i></small></td>
-                                                              <td class='text-center'><small><i>Saída</i></small></td>
-                                                        </tr>";
-                                                  if(isset($agentes_turno['ativos']))
-                                                  {
-                                                    $agentes = $agentes_turno['ativos'];
-                                                    for ($i=0;$i<count($agentes);$i++)
-                                                    {
-                                                            if($agentes[$i]['opened']!=""){
-                                                                $aux       = explode(" ",formataData($agentes[$i]['opened'],1));
-                                                                $dt_opened = "<small>".$aux[0]."</small> <b>".$aux[1]."</b>";
-                                                              }else {
-                                                                $dt_opened = "";
-                                                              }
-
-                                                              if($agentes[$i]['closed']!=""){
-                                                                  $aux       = explode(" ",formataData($agentes[$i]['closed'],1));
-                                                                  $dt_closed = "<small>".$aux[0]."</small> <b>".$aux[1]."</b>";
+                                                    $agentes = $dados_turno['agente'];
+                                                    echo "<table class='table table-condensed'>
+                                                          <thead><tr>
+                                                            <th class='text-center' width='25px'><small><i>Matrícula</i></small></th>
+                                                            <th><small><i>Nome</i></small></th>
+                                                            <th class='text-center'><small><i>Entrada</i></small></th>
+                                                            <th class='text-center'><small><i>Saída</i></small></th>
+                                                          </tr>
+                                                    <tbody>";
+                                                      unset($aux, $dt_opened, $dt_closed);
+                                                      for ($i=0;$i<count($agentes);$i++)
+                                                      {
+                                                              if($agentes[$i]['opened']!=""){
+                                                                  $aux       = explode(" ",formataData($agentes[$i]['opened'],1));
+                                                                  $dt_opened = "<small>".$aux[0]."</small> <b>".$aux[1]."</b>";
                                                                 }else {
-                                                                  $dt_closed = "";
+                                                                  $dt_opened = "";
                                                                 }
 
-                                                            echo "<tr>";
-                                                              echo "<td>&nbsp;</td>";
-                                                              echo "<td class='text-center'>".$agentes[$i]['registration']."</td>";
-                                                              echo "<td>".$agentes[$i]['nome']."</td>";
-                                                              echo "<td>".ucfirst($agentes[$i]['status'])."</td>";
-                                                              echo "<td width='125px' class='text-center'>".$dt_opened."</td>";
-                                                              echo "<td width='125px' class='text-center'>".$dt_closed."</td>";
-                                                            echo "</tr>";
-                                                    }
-                                                  }else {
-                                                    echo "<tr><td colspan='6' class='text-muted'><i>Nenhum agente ativo.</i></td></tr>";
-                                                  }
-                                                  echo "<tr class='warning'>
-                                                          <td width='25px'><b>Afastados</b></td>
-                                                          <td class='text-center' width='25px'><small><i>Matrícula</i></small></td>
-                                                          <td><small><i>Nome</i></small></td>
-                                                          <td><small><i>Status</i></small></td>
-                                                          <td class='text-center'><small><i>Entrada</i></small></td>
-                                                          <td class='text-center'><small><i>Saída</i></small></td>
-                                                        </tr>";
-
-                                                  if(isset($agentes_turno['outros']))
-                                                  {
-                                                    $agentes = $agentes_turno['outros'];
-                                                    for ($i=0;$i<count($agentes);$i++)
-                                                    {
-                                                            if($agentes[$i]['opened']!=""){
-                                                                $aux       = explode(" ",formataData($agentes[$i]['opened'],1));
-                                                                $dt_opened = "<small>".$aux[0]."</small> <b>".$aux[1]."</b>";
-                                                              }else {
-                                                                $dt_opened = "";
-                                                              }
-
-                                                              if($agentes[$i]['closed']!=""){
-                                                                  $aux       = explode(" ",formataData($agentes[$i]['closed'],1));
-                                                                  $dt_closed = "<small>".$aux[0]."</small> <b>".$aux[1]."</b>";
-                                                                }else {
-                                                                  $dt_closed = "";
-                                                                }
-                                                            echo "<tr>";
-                                                              echo "<td>&nbsp;</td>";
-                                                              echo "<td class='text-center'>".$agentes[$i]['registration']."</td>";
-                                                              echo "<td>".$agentes[$i]['nome']."</td>";
-                                                              echo "<td>".ucfirst($agentes[$i]['status'])."</td>";
-                                                              echo "<td width='125px' class='text-center'>".$dt_opened."</td>";
-                                                              echo "<td width='125px' class='text-center'>".$dt_closed."</td>";
-                                                            echo "</tr>";
-                                                    }
-                                                  }else {
-                                                    echo "<tr><td colspan='6' class='text-muted'><i>Nenhum agente afastado.</i></td></tr>";
-                                                  }
-                                                  echo "</tbody></table>";
+                                                                if($agentes[$i]['closed']!=""){
+                                                                    $aux       = explode(" ",formataData($agentes[$i]['closed'],1));
+                                                                    $dt_closed = "<small>".$aux[0]."</small> <b>".$aux[1]."</b>";
+                                                                  }else {
+                                                                    $dt_closed = "";
+                                                                  }
+                                                              echo "<tr>";
+                                                                echo "<td class='text-center'>".$agentes[$i]['registration']."</td>";
+                                                                echo "<td>".$agentes[$i]['nome']."</td>";
+                                                                echo "<td width='125px' class='text-center'>".$dt_opened."</td>";
+                                                                echo "<td width='125px' class='text-center'>".$dt_closed."</td>";
+                                                              echo "</tr>";
+                                                      }
+                                                      echo "</tbody></table>";
                                                 }else {
                                                   echo "<small class='text-muted'>Nenhum agente designado.</small>";
                                                 }
                                             ?>
+
                                           </td>
                                         </tr>
                                       </tbody>
                                       </table>
 </div>
-
+                                </div>
+                                </section>
                 </div>
 
 
@@ -427,10 +342,17 @@
 
               <div class="row">
                 <div class="col-sm-12">
+                                <section class='panel panel-horizontal'>
+                                <header class='panel-heading <?=(!$turno_aberto?"bg-default":"bg-info");?>' style='width:150px'>
+                                <div class='panel-heading-icon'>
+                                <i class='fa fa-cab'></i>
+                                </div>
+                                </header>
 
+                                <div class='panel-body p-lg'>
 <div class="table-responsive">
                                   <table class='table table-condensed'>
-                                  <thead><tr><th><h4><b>Guarnições</b></h4></th></tr></thead>
+                                  <thead><tr><th>Guarnições</th></tr></thead>
                                   <tbody>
                                         <tr>
                                           <td style="vertical-align: middle;">
@@ -444,29 +366,31 @@
                                                             	sepud.oct_garrison
                                                             	G JOIN sepud.oct_fleet F ON F.ID = G.id_fleet
                                                             WHERE
-                                                            	G.id_workshift = '".$turno['id']."' ORDER BY id DESC";
+                                                            	G.id_workshift = '".$turno['id']."'";
                                                     $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);;
                                                     if(pg_num_rows($res))
                                                     {
                                                         echo "<table class='table table-condensed'>
                                                               <thead>
                                                               <tr>
-                                                                <td colspan='4'>&nbsp;</td>
-                                                                <td colspan='3' class=''>Quilometragem</td>
-                                                                <td colspan='2' class=''>Datas</td>
+                                                                <td colspan='3'>&nbsp;</td>
+                                                                <td colspan='2' class='text-center'>Quilometragem</td>
+                                                                <td colspan='2' class='text-center'>Combustível</td>
+                                                                <td colspan='2' class='text-center'>Datas</td>
                                                               </tr>
                                                               <tr>
                                                                 <th>#</th>
                                                                 <th>Apelido</th>
                                                                 <th>Placa</th>
                                                                 <th>Veículo</th>
-                                                                <th class=''>Inicial</th>
-                                                                <th class=''>Final</th>
-                                                                <th class=''>Total</th>
-                                                                <th class=''>Inicial</th>
-                                                                <th class=''>Final</th>
+                                                                <th class='text-center'>Inicial</th>
+                                                                <th class='text-center'>Final</th>
+                                                                <th class='text-center'>Inicial</th>
+                                                                <th class='text-center'>Final</th>
+                                                                <th class='text-center'>Inicial</th>
+                                                                <th class='text-center'>Final</th>
                                                                 <th class='text-center'>Status</th>
-                                                                <th class='text-center hidden-print'><i class='fa fa-cogs'></i></th>";
+                                                                <th class='text-center'><i class='fa fa-cogs'></i></th>";
                                                         echo "<tbody>";
                                                         while($d = pg_fetch_assoc($res))
                                                         {
@@ -475,13 +399,14 @@
                                                               echo "<td>".$d['nickname']."</td>";
                                                               echo "<td>".$d['plate']."</td>";
                                                               echo "<td>".$d['brand']." ".$d['model']."</td>";
-                                                              echo "<td class=''>".number_format($d['initial_km'],0,'','.')."</td>";
-                                                              echo "<td class=''>".number_format($d['final_km'],0,'','.')."</td>";
-                                                              echo "<td class=''>".($d['final_km'] != "" && $d['initial_km'] != ""? $d['final_km'] - $d['initial_km']." Km":"-")."</td>";
-                                                              echo "<td class=''>".formataData($d['opened'],1)."</td>";
-                                                              echo "<td class=''>".formataData($d['closed'],1)."</td>";
+                                                              echo "<td class='text-center'>".$d['initial_km']."</td>";
+                                                              echo "<td class='text-center'>".$d['final_km']."</td>";
+                                                              echo "<td class='text-center'>".$d['initial_fuel']."</td>";
+                                                              echo "<td class='text-center'>".$d['final_fuel']."</td>";
+                                                              echo "<td class='text-center'>".formataData($d['opened'],1)."</td>";
+                                                              echo "<td class='text-center'>".formataData($d['closed'],1)."</td>";
                                                               echo "<td class='text-center ".($d['closed']==""?"success":"warning")."'>".($d['closed']==""?"Em uso":"Baixado")."</td>";
-                                                              echo "<td class='text-center hidden-print'>";
+                                                              echo "<td class='text-center'>";
                                                                 echo "<a href='oct/veiculo_turno_FORM.php?id_garrison=".$d['id']."&turno=".$turno['id']."' class='btn btn-xs btn-default'><i class='fa fa-cab'></i> Atualizar</a>";
                                                               echo "</td>";
                                                             echo "</tr>";
@@ -498,7 +423,7 @@
                                                                         	sepud.oct_rel_garrison_persona GP
                                                                         	JOIN sepud.users U ON U.ID = GP.id_user
                                                                         WHERE
-                                                                        	GP.id_garrison = '".$d['id']."' ORDER BY GP.type ASC";
+                                                                        	GP.id_garrison = '".$d['id']."'";
 
                                                             $resGP = pg_query($sqlGP)or die("Erro ".__LINE__."<br>".$sqlGP);
                                                             echo "<table class='table table-condensed table-hover'>
@@ -533,7 +458,8 @@
                                 </tbody>
                             </table>
 </div>
-
+                                </div>
+                                </section>
                 </div>
 
 
@@ -550,11 +476,6 @@
 </section>
 
 <script>
-$("#bt_print").click(function(){
-	var vw = window.open('oct/turno_rel_print.php?id_workshift=<?=$turno['id'];?>',
-									     'popup',
-								 	     'width=800, height=600, top=10, left=10, scrollbars=no,location=no,status=no');
-});
 $("#bt_fecsssshar_turno").click(function(){
   var url = "oct/turno_sql.php?id=<?=$turno['id'];?>&acao=fechar";
   $("#wrap").load(url);

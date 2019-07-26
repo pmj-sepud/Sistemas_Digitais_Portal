@@ -71,7 +71,6 @@ $sql = "SELECT
           <div class="panel-actions">
               <button id="bt_print" class='btn btn-sm btn-info'><i class='fa fa-print'></i> Imprimir relatório</button>
               <a href="erg/rel_autuados.php"><button class='btn btn-sm btn-default loading'><i class='fa fa-mail-reply'></i> Voltar</button></a>
-
           </div>
         </header>
 

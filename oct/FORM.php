@@ -197,7 +197,7 @@ if($_SESSION['id']==1)
 
                   <div class="col-sm-2">
                         <div class="form-group">
-                          <label class="control-label" for="victim_inform">Qtd. Envolvidos:</label>
+                          <label class="control-label" for="victim_inform">Envolvidos:</label>
                                 <select id="victim_inform" name="victim_inform" class="form-control changefield">
                                   <?
                                     for($i = 0; $i <= 100; $i++)
@@ -280,21 +280,24 @@ if($_SESSION['id']==1)
                                     <?
                                           $sql = "SELECT * FROM sepud.oct_addressbook WHERE id_company = '".$_SESSION['id_company']."' ORDER BY name ASC";
                                           $res = pg_query($sql)or die("Erro ".__LINE__);
-                                          while($d = pg_fetch_assoc($res))
+                                          if(pg_num_rows($res))
                                           {
-                                            $vet_livro_end[$d['neighborhood']][] = $d;
-                                          }
-                                           echo "<option value=''></option>";
-                                           foreach ($vet_livro_end as $bairro => $livro_end) {
-                                               echo "<optgroup label='".$bairro."'>";
-                                               for($i=0;$i<count($livro_end);$i++)
-                                               {
+                                              while($d = pg_fetch_assoc($res))
+                                              {
+                                                $vet_livro_end[$d['neighborhood']][] = $d;
+                                              }
+                                               echo "<option value=''></option>";
+                                               foreach ($vet_livro_end as $bairro => $livro_end) {
+                                                   echo "<optgroup label='".$bairro."'>";
+                                                   for($i=0;$i<count($livro_end);$i++)
+                                                   {
 
-                                                   if($dados['id_addressbook']==$livro_end[$i]["id"]){ $sel = "selected";}else{$sel="";}
-                                                   echo "<option value='".$livro_end[$i]["id"]."' ".$sel.">".$livro_end[$i]["name"]."</option>";
+                                                       if($dados['id_addressbook']==$livro_end[$i]["id"]){ $sel = "selected";}else{$sel="";}
+                                                       echo "<option value='".$livro_end[$i]["id"]."' ".$sel.">".$livro_end[$i]["name"]."</option>";
+                                                   }
+                                                   echo "</optgroup>";
                                                }
-                                               echo "</optgroup>";
-                                           }
+                                          }
                                     ?>
                                  </select>
                                 </div>
@@ -356,13 +359,13 @@ if($_SESSION['id']==1)
                  <div class="col-sm-2">
                    <div class="form-group">
                    <label class="control-label">Data:</label>
-                       <input type="text" name="data" class="form-control changefield" value="<?=($acao=="inserir"?$agora['data']:$data);?>">
+                       <input onclick="$(this).val('');" type="text" name="data" class="form-control changefield campo_data" value="<?=($acao=="inserir"?$agora['data']:$data);?>">
                   </div>
                  </div>
                  <div class="col-sm-2">
                    <div class="form-group">
                    <label class="control-label">Hora:</label>
-                       <input type="text" name="hora" class="form-control changefield" value="<?=($acao=="inserir"?$agora['hm']:$hora);?>">
+                       <input onclick="$(this).val('');" type="text" name="hora" class="form-control changefield campo_hora" value="<?=($acao=="inserir"?$agora['hm']:$hora);?>">
                   </div>
                  </div>
 
@@ -475,32 +478,6 @@ if($_SESSION['id']==1)
                                   {
                                       while($p = pg_fetch_assoc($res))
                                       {
-                                        /*
-                                        [name] => Jonathan Canfield Sniecikoski
-    [acron] => SEPUD
-    [company] => Secretaria de Planejamento Urbano e Desenvolvimento Sustentável
-    [vehicle] => Audi A4
-    [vehicle_color] => Cinza chumbo
-    [licence_plate] => AAA0A00
-    [victim_name] => Dolores Fuertes de Barriga
-    [victim_age] => 58
-    [hospital] => Hospital Dona Helena
-    [company_acron] => CB
-    [company_name] => Corpo de Bombeiros Voluntários
-    [area] => Outros
-    [providence] => Apoio - Bombeiro
-    [id] => 23
-    [opened_date] => 2019-02-18 19:04:46.123768
-    [closed_date] =>
-    [id_owner] => 1
-    [id_vehicle] => 21
-    [id_victim] => 28
-    [id_hospital] => 2
-    [id_company_requested] => 4
-    [observation] => teste de inserção de dados...
-    [id_event] => 53
-    [id_providence] => 17
-                                        */
                                         echo "<table class='table table-bordered table-condensed'>";
                                           echo "<tr bgcolor='#dbe9ff'>";
                                             echo "<td width='10'>".$p['area']."</td>";
@@ -523,7 +500,7 @@ if($_SESSION['id']==1)
 
                                                 echo "<tr>";
                                                 if(isset($p['vehicle'])){      echo "<td width='50'><span style='color:#CCCCCC'>Veículo:</span></td><td>".$p['vehicle'].", ".$p['vehicle_color']." - ".$p['licence_plate']."</td>"; }
-                                                if(isset($p['victim_name'])){  echo "<td width='50'><span style='color:#CCCCCC'>Vítima:</span></td><td>".$p['victim_name'];
+                                                if(isset($p['victim_name'])){  echo "<td width='50'><span style='color:#CCCCCC'>Envolvido:</span></td><td>".$p['victim_name'];
                                                                                if(isset($p['victim_age'])){ echo ", idade: ".$p['victim_age']." ano(s)"; }
                                                                                echo  "</td>"; }
 
@@ -570,7 +547,7 @@ if($_SESSION['id']==1)
             									<div class="panel-actions" style="margin-top:-10px">
                                   <div class="btn-group">
                   										<button id="bt_add_veic" type="button" class="mb-xs mt-xs mr-xs btn btn-default loading disable_button"><i class="fa fa-car"></i> <sup><i class="fa fa-plus"></i></sup> Veículos</button>
-                                      <button  id="bt_add_vit"  type="button"  class="mb-xs mt-xs mr-xs btn btn-default loading disable_button"><i class="fa fa-user"></i> <sup><i class="fa fa-plus"></i></sup> Vítimas/Envolvidos</button>
+                                      <button  id="bt_add_vit"  type="button"  class="mb-xs mt-xs mr-xs btn btn-default loading disable_button"><i class="fa fa-user"></i> <sup><i class="fa fa-plus"></i></sup> Envolvidos</button>
                                   </div>
             									</div>
             									<h2 class="panel-title">Envolvidos:</h2>
@@ -706,9 +683,19 @@ if($_SESSION['id']==1)
             <div class="col-sm-12">
             <table class="table table-condensed">
               <tbody>
-                <tr><td>Abertura:</td>     <td class="text-center"><b><?=formataData($dados['date'],1);?></b></td></tr>
-                <tr><td>Chegada:</td>      <td class="text-center"><b><?=formataData($dados['arrival'],1);?></b></td></tr>
-                <tr><td>Encerramento:</td> <td class="text-center"><b><?=formataData($dados['closure'],1);?></b></td></tr>
+                <tr><td>Abertura:</td>     <td class=""><b><?=substr(formataData($dados['date'],1),0,16);?></b></td></tr>
+                <? if($dados['arrival']!=""){
+                        echo "<tr><td>Chegada:</td><td class=''><input class='changefield' style='border-width:0px;border:none;height:15px;font-weight:bold;' type='datetime-local' name='arrival' value='".substr(str_replace(" ","T",$dados['arrival']),0,16)."'> <i class='fa fa-pencil'></i></td></tr>";
+                    }else{
+                          echo "<tr><td>Chegada:</td><td class='text-center'></td></tr>";
+                    }
+                    if($dados['closure']!=""){
+                        echo "<tr><td>Encerramento:</td><td class=''><input class='changefield' style='border-width:0px;border:none;height:15px;font-weight:bold;' type='datetime-local' name='closure' value='".substr(str_replace(" ","T",$dados['closure']),0,16)."'> <i class='fa fa-pencil'></i></td></tr>";
+                    }else{
+                          echo "<tr><td>Encerramento:</td><td class='text-center'></td></tr>";
+                    }
+                ?>
+
               </tbody>
             </table>
               <hr>
@@ -727,8 +714,7 @@ if($_SESSION['id']==1)
 <? if($acao == "atualizar"){
 
   $sql = "SELECT * FROM sepud.oct_rel_events_images WHERE id_events = '".$id."' ORDER BY id DESC";
-  $res = pg_query($sql)or die("Erro ".__LINE__);
-
+  $res = pg_query($sql)or die("Erro ".__LINE__."SQL: ".$sql);
 ?>
 
       <section class="panel panel-featured panel-featured-primary">
@@ -886,7 +872,8 @@ if($_SESSION['id']==1)
 
 <script>
 
-
+$(".campo_hora").mask('00:00');
+$(".campo_data").mask('00/00/0000');
 
 function bloqueio()
 {

@@ -7,9 +7,11 @@
 
     if($acao == "inserir" && $name != "")
     {
-      if($id_vehicle != "") { $id_vehicle  = "'".$id_vehicle."'";  }else{ $id_vehicle  = "Null"; }
+      if($id_vehicle  != ""){ $id_vehicle  = "'".$id_vehicle."'";  }else{ $id_vehicle  = "Null"; }
       if($description != ""){ $description = "'".$description."'"; }else{ $description = "Null"; }
-      if($age != "")        { $age         = "'".$age."'";         }else{ $age         = "Null"; }
+      if($age         != ""){ $age         = "'".$age."'";         }else{ $age         = "Null"; }
+      if($refuse_help != ""){ $refuse_help = "'".$refuse_help."'"; }else{ $refuse_help = "Null"; }
+      if($state       != ""){ $state       = "'".$state."'";       }else{ $state       = "Null"; }
 
       $sql = "INSERT INTO sepud.oct_victim
                           (name,
@@ -23,20 +25,27 @@
                            refuse_help,
                            rg,
                            cpf,
-                           mother_name)
+                           mother_name,
+                           conducted)
                   VALUES ('".$name."',
                           '".$id."',
                           ".$age.",
                           ".$description.",
                           '".$genre."',
-                          '".$state."',
+                          ".$state.",
                           ".$id_vehicle.",
                           '".$position_in_vehicle."',
-                          '".$refuse_help."',
+                          ".$refuse_help.",
                           '".$rg."',
                           '".$cpf."',
-                          '".$mother_name."')";
-      pg_query($sql)or die("Erro ".__LINE__);
+                          '".$mother_name."',
+                          '".$conducted."')";
+      pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
+
+      /*
+
+      SQL: INSERT INTO sepud.oct_victim (name, id_events, age, description, genre, state, id_vehicle, position_in_vehicle, refuse_help, rg, cpf, mother_name, conducted) VALUES ('Jonathan', '13139', Null, Null, 'Masc', 'Nada', Null, '', 't', '', '', 'Sniecikoski', '')
+      */
 
       logger("Inserção","OCT - Vítima", "Ocorrência n.".$id);
 
@@ -52,19 +61,22 @@
       if($id_vehicle != "") { $id_vehicle  = "'".$id_vehicle."'";  }else{ $id_vehicle  = "Null"; }
       if($description != ""){ $description = "'".$description."'"; }else{ $description = "Null"; }
       if($age != "")        { $age         = "'".$age."'";         }else{ $age         = "Null"; }
+      if($refuse_help != ""){ $refuse_help = "'".$refuse_help."'"; }else{ $refuse_help = "Null"; }
+      if($state       != ""){ $state       = "'".$state."'";       }else{ $state       = "Null"; }
 
       $sql = "UPDATE sepud.oct_victim SET
                      name                = '".$name."',
                      age                 = ".$age.",
                      description         = ".$description.",
                      genre               = '".$genre."',
-                     state               = '".$state."',
+                     state               = ".$state.",
                      id_vehicle          = ".$id_vehicle.",
                      position_in_vehicle = '".$position_in_vehicle."',
-                     refuse_help         = '".$refuse_help."',
+                     refuse_help         = ".$refuse_help.",
                      rg                  = '".$rg."',
                      cpf                 = '".$cpf."',
-                     mother_name         = '".$mother_name."'
+                     mother_name         = '".$mother_name."',
+                     conducted           = '".$conducted."'
               WHERE id = '".$victim_sel."'";
       pg_query($sql)or die("Erro ".__LINE__);
 

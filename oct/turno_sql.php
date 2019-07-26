@@ -6,6 +6,27 @@ require_once("../libs/php/conn.php");
 
 $agora = now();
 
+if($_POST['acao']=="atualizar_associado" && $_POST['id_user']!="" && $_POST['id_workshift'])
+{
+  extract($_POST);
+
+  $dt_abertura   = $opened." ".$opened_hour;
+  $dt_fechamento = ($closed != ""?"'".$closed." ".$closed_hour."'" : "Null");
+
+
+  echo $sql = "UPDATE sepud.oct_rel_workshift_persona SET
+                      opened      = '".$dt_abertura."',
+                      closed      = ".$dt_fechamento.",
+                      type        = '".$type."',
+                      status      = '".$status."',
+                      observation = '".$observation."'
+          WHERE id = '".$id_rel_workshift_persona."'";
+
+  pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
+  header("location: turno_associar_pessoa.php?id_workshift=".$id_workshift."&id_user=".$id_user);
+  exit();
+}
+
 if($_GET['acao'] == "fechar" && $_GET['id'] != "")
 {
   $sqlU  = "UPDATE sepud.oct_workshift             SET status = 'fechado' WHERE       id = '".$_GET['id']."';";
@@ -50,7 +71,7 @@ if($_POST['acao'] == "inserir")
 }
 
 //Associar recurso ao turno ativo//
-if($_POST['acao'] == "associar")
+if($_POST['acao'] == "novo_associado")
 {
 
   extract($_POST);
@@ -71,14 +92,18 @@ if($_POST['acao'] == "associar")
                       id_person,
                       opened,
                       closed,
-                      type)
+                      type,
+                      status,
+                      observation)
           VALUES ('".$id_workshift."',
                   '".$id_user."',
                   '".$dt_abertura."',
                   ".$dt_fechamento.",
-                  '".$type."')";
+                  '".$type."',
+                  '".$status."',
+                  '".$observation."')";
   pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
-  header("location: turno.php?id=".$id_workshift);
+  header("location: turno_associar_pessoa.php?id_workshift=".$id_workshift."&id_user=".$id_user);
 }
 
 
@@ -111,11 +136,11 @@ if($_POST['acao'] == "atualizar" && $_POST['id_workshift'] != "")
    exit();
 }
 
-if($_GET['acao']=="remover_associado" && $_GET['id']!="" && $_GET["id_workshift"]!="")
+if($_GET['acao']=="remover_associado" && $_GET['id_user']!="" && $_GET["id_workshift"]!="")
 {
-  $sql = "DELETE FROM sepud.oct_rel_workshift_persona WHERE id = '".$_GET[id]."'";
+  $sql = "DELETE FROM sepud.oct_rel_workshift_persona WHERE id = '".$_GET['id_user']."'";
   pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
-  header("location: turno.php?id=".$_GET['id_workshift']);
+  header("location: turno_associar_pessoa.php?id_workshift=".$_GET['id_workshift']);
   exit();
 }
 ?>

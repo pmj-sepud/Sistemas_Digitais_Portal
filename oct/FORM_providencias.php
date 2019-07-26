@@ -76,6 +76,27 @@
 
            </div>
 
+
+           <div class="row">
+             <div class="col-sm-12">
+               <div class="form-group">
+                 <label class="control-label">Responsável:</label>
+                 <select class="form-control select2" name="id_user_resp">
+                    <option value=""></option>
+                    <?
+                        $sql = "SELECT id, nickname, name, registration FROM sepud.users U WHERE id_company = '".$_SESSION['id_company']."' AND active = 't' ORDER BY name ASC";
+                        $res = pg_query($sql)or die("<option value=''>Erro: ".$sql."</option>");
+                        while($u = pg_fetch_assoc($res))
+                        {
+                          echo "<option value='".$u['id']."'>".$u['nickname']." - ".$u['name'].", Matricula: ".$u['registration']."</option>";
+                        }
+                    ?>
+                 </select>
+               </div>
+            </div>
+         </div>
+
+
 <div class="row">
   <div class="col-sm-12">
     <div class="form-group">
@@ -155,7 +176,7 @@
 
              <div class="col-sm-6">
                <div class="form-group">
-                   <label class="control-label">Vítima:</label>
+                   <label class="control-label">Envolvido:</label>
                     <select id="id_victim" name="id_victim" class="form-control">
                       <option value="">- - -</option>
                       <?
@@ -242,14 +263,14 @@
                <div class="col-sm-6">
                  <div class="form-group">
                      <label class="control-label">Data:</label>
-                     <input type="text" id="data" name="data" value="<?=$agora['data'];?>" class="form-control"/>
+                     <input onclick="$(this).val('');" type="text" id="data" name="data" value="<?=$agora['data'];?>" class="form-control campo_data"/>
                   </div>
               </div>
 
               <div class="col-sm-6">
                 <div class="form-group">
                     <label class="control-label">Hora:</label>
-                    <input type="text" id="hora" name="hora" value="<?=$agora["hm"];?>" class="form-control"/>
+                    <input onclick="$(this).val('');" type="text" id="hora" name="hora" value="<?=$agora["hm"];?>" class="form-control campo_hora"/>
                  </div>
              </div>
 
@@ -404,6 +425,9 @@
 </section>
 </form>
 <script>
+$(".campo_hora").mask('00:00');
+$(".campo_data").mask('00/00/0000');
+$('.select2').select2();
 $(".loading").click(function(){ $(this).addClass("disabled").html("<i class=\"fa fa-spinner fa-spin\"></i> <small>Aguarde</small>");});
 $(".loading2").click(function(){ $(this).addClass("disabled").html("<i class=\"fa fa-spinner fa-spin\"></i>");});
 

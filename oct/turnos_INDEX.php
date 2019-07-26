@@ -68,14 +68,15 @@
 												</thead>
 												<tbody>
 <?
+  $td_width = "140px";
   if(!$turno_aberto)
   {
     echo "<tr class='warning'><td colspan='6'>Turno(s) fechado(s):</td></tr>";
     echo "<tr>
     <th><i>Turno</i></th>
     <th><i>Período</i></th>
-    <th><i>Abertura</i></th>
-    <th><i>Fechamento</i></th>
+    <th width='".$td_width."'><i>Abertura</i></th>
+    <th width='".$td_width."'><i>Fechamento</i></th>
     <th><i>Observações</i></th>
       <th class='text-center'><i class='fa fa-cogs'></i></th>
     </tr>";
@@ -89,8 +90,8 @@
       echo "<tr>
       <th><i>Turno</i></th>
       <th><i>Período</i></th>
-      <th><i>Abertura</i></th>
-      <th><i>Fechamento</i></th>
+      <th width='".$td_width."'><i>Abertura</i></th>
+      <th width='".$td_width."'><i>Fechamento</i></th>
       <th><i>Observações</i></th>
         <th class='text-center'><i class='fa fa-cogs'></i></th>
       </tr>";
@@ -104,13 +105,11 @@
     echo "<td>".formataData($d['closed'],1)."</td>";
     echo "<td>".$d['observation']."</td>";
 
-    //echo "<td class='text-center'>".formataData($d['ultimo_acesso'],1)."</td>";
-
-    if($d['status'] == "aberto"){ $icon = "fa-cogs"; $href="oct/turno.php?id=".$d['id']; $disabled = ""; }
-    else                        { $icon = "fa-eye";  $href="#"; $disabled = "disabled";}
+    if($d['status'] == "aberto"){ $icon = "fa-cogs";}
+    else                        { $icon = "fa-eye"; }
 
     echo "<td class='actions text-center'>
-            <a href='".$href."' class='btn btn-xs btn-default loading2 ".$disabled."'><i class='fa ".$icon."'></i></a>
+            <a href='oct/index.php?id_workshift=".$d['id']."' class='btn btn-xs btn-default loading2'><i class='fa ".$icon."'></i></a>
           </td>";
 
     if($d['status'] == "aberto"){
@@ -118,8 +117,8 @@
       echo "<tr>
         <th><i>Turno</i></th>
         <th><i>Período</i></th>
-        <th><i>Abertura</i></th>
-        <th><i>Fechamento</i></th>
+        <th width='".$td_width."'><i>Abertura</i></th>
+        <th width='".$td_width."'><i>Fechamento</i></th>
         <th><i>Observações</i></th>
         <th class='text-center'><i class='fa fa-cogs'></i></th>
       </tr>";

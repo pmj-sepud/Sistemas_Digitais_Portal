@@ -1,7 +1,7 @@
 <?
   session_start();
 ?>
-<header class="header" >
+<header class="header hidden-print">
   <div class="logo-container">
     <a href="index_sistema.php" class="logo">
       <img src="assets/images/logo.png" height="35" alt="SISTEMAS DIGITAIS" />
@@ -11,7 +11,7 @@
     </div>
   </div>
   <!-- start: search & user box -->
-  <div class="header-right" style="margin-left:200px">
+  <div class="header-right hidden-print" style="margin-left:200px">
 
 <!--
     <form action="pages-search-results.html" class="search nav-form">

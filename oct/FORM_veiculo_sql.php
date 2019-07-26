@@ -9,6 +9,7 @@
     {
 
       $id_vehicle_type = ($tipo_veiculo == "" ? "Null" : "'".$tipo_veiculo."'");
+      $data_rec_auto   = ($data_rec_auto == "" ? "Null" : "'".$data_rec_auto."'");
 
 
       $sql = "INSERT INTO sepud.oct_vehicles
@@ -19,7 +20,10 @@
                            color,
                            renavam,
                            chassi,
-                           id_vehicle_type)
+                           id_vehicle_type,
+                           ait,
+                           cod_infra,
+                           data_rec_auto)
                   VALUES ('".$description."',
                           '".$id."',
                           '".$observation."',
@@ -27,7 +31,10 @@
                           '".$color."',
                           '".$renavam."',
                           '".$chassi."',
-                           ".$id_vehicle_type.")";
+                           ".$id_vehicle_type.",
+                          '".$ait."',
+                          '".$cod_infra."',
+                          ".$data_rec_auto.")";
       pg_query($sql)or die("Erro ".__LINE__);
 
       logger("Inserção","OCT - Veículo", "Ocorrência n.".$id);
@@ -40,14 +47,19 @@
     if($acao == "atualizar")
     {
          $id_vehicle_type = ($tipo_veiculo == "" ? "Null" : "'".$tipo_veiculo."'");
+         $data_rec_auto   = ($data_rec_auto == "" ? "Null" : "'".$data_rec_auto."'");
+
          $sql = "UPDATE sepud.oct_vehicles SET
-                             description   = '".$description."',
-                             observation   = '".$observation."',
-                             licence_plate = '".$licence_plate."',
-                             color         = '".$color."',
-                             renavam       = '".$renavam."',
-                             chassi        = '".$chassi."',
-                             id_vehicle_type = $id_vehicle_type
+                             description     = '".$description."',
+                             observation     = '".$observation."',
+                             licence_plate   = '".$licence_plate."',
+                             color           = '".$color."',
+                             renavam         = '".$renavam."',
+                             chassi          = '".$chassi."',
+                             id_vehicle_type = $id_vehicle_type,
+                             ait             = '".$ait."',
+                             cod_infra       = '".$cod_infra."',
+                             data_rec_auto   = ".$data_rec_auto."
                 WHERE  id = '".$veic_sel."'";
        pg_query($sql)or die("Erro ".__LINE__);
 

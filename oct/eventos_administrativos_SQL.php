@@ -23,6 +23,9 @@
     if($acao == "Inserir" && $description!="Null" && $_SESSION['id_company']!="" && $opened_timestamp!="Null")
     {
 
+      $description = str_replace("'","",$description);
+      //$description = htmlspecialchars($description);
+
       $sql = "INSERT INTO sepud.oct_administrative_events(
                           id_addressbook,
                           id_street,
@@ -41,7 +44,7 @@
                           '".$_SESSION['id_company']."',
                           $id_user,
                           $id_workshift,
-                          $description,
+                          '".$description."',
                           $street_ref
                         )RETURNING id";
       $res = pg_query($sql)or die("SQL Error ".__LINE__."<hr>SQL:<br>".$sql);

@@ -79,7 +79,7 @@
 													<tr>
 														<th>#</th>
 														<th>Nome</th>
-														<!--<th>E-mail</th>-->
+														<th>Nome de guerra</th>
                             <th class='text-center'>Orgão</th>
                             <!--<th class='text-center'>Setor</th>
                             <th class='text-center'>Função</th>-->
@@ -97,7 +97,7 @@
     echo "<tr id='".$d['id']."'>";
     echo "<td class='text-muted'>".$d['id']."</td>";
     echo "<td>".$d['name']."</td>";
-    //echo "<td>".$d['email']."</td>";
+    echo "<td>".$d['nickname']."</td>";
     echo "<td class='text-center'>".$d['ccompany_acron']."</td>";
     //echo "<td class='text-center'>".$d['area']."</td>";
     //echo "<td class='text-center'>".$d['job']."</td>";
