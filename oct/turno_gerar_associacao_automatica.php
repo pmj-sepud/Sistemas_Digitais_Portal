@@ -6,6 +6,31 @@
   logger("Acesso","OCT", "Turno - Gerar associação automática");
   $agora = now();
 
+  if($_GET['id_workshift']!=""){
+    $id_workshift    = $_GET['id_workshift'];
+    $sql             = "SELECT * FROM sepud.oct_workshift WHERE id = ".$id_workshift;
+    $res             = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
+    $dados_workshift = pg_fetch_assoc($res)or die("SQL Error ".__LINE__);
+  }else {
+    echo "Erro na passagem dos parametros.";
+    exit();
+  }
+
+  /*
+
+  (
+      [id] => 141
+      [opened] => 2019-07-22 00:00:00
+      [closed] => 2019-07-23 23:59:00
+      [id_company] => 8
+      [observation] => #Teste de inserção e abertura de turno#
+      [workshift_group] => Turno 1
+      [status] => fechado
+      [is_populate] => f
+      [create_date] => 2019-07-25 08:53:58
+  )
+  */
+
   $dia_da_semana_txt[0]['completo']   = "Domingo";
   $dia_da_semana_txt[0]['abreviado']  = "Dom";
 
@@ -57,14 +82,16 @@
             <div class="panel-body">
               <?
                   extract($_GET);
-                  $dia_da_semana = date('N', date2mkt(formataData($data,1)));
+
+                  $dia_da_semana = date('N', date2mkt(formataData($dados_workshift['opened'],1)));
 
 
 
                   echo     "01. ID Turno: <b>".$id_workshift."</b>";
                   echo "<br>02. Turno corrente: <b>".$workshift_group."</b>";
-                  echo "<br>03. Data de abertura: <b>".formataData($data,1)."</b>";
-                  echo "<br>04. Dia da semana: <b>[".$dia_da_semana_txt[$dia_da_semana]['abreviado']."] ".$dia_da_semana_txt[$dia_da_semana]['completo']."</b>";
+                  echo "<br>03. Data de abertura: <span style='font-size:18px'><b>".formataData($dados_workshift['opened'],1)."</b></span>";
+                  echo "<br>03.1. Data de fechamento: <span style='font-size:18px'><b>".formataData($dados_workshift['closed'],1)."</b></span>";
+                  echo "<br>04. Dia da semana do início do turno: <b>[".$dia_da_semana_txt[$dia_da_semana]['abreviado']."] ".$dia_da_semana_txt[$dia_da_semana]['completo']."</b>";
                   echo "<br>05. Orgão: <b>[".$_SESSION['id_company']."] ".$_SESSION['company_acron']." - ".$_SESSION['company_name']."</b>";
                   echo "<br>06. Preparando  colaboradores para inserção neste turno de trabalho: ";
 
@@ -78,7 +105,7 @@
                           	AND workshift_group IS NOT NULL
                           	AND workshift_group_time_init IS NOT NULL
                           	AND workshift_group_time_finish IS NOT NULL
-                          	AND workshift_group = '".$workshift_group."'
+                          	AND workshift_group = '".$dados_workshift['workshift_group']."'
                           ORDER BY
                           	workshift_group_time_init ASC, name ASC";
                   $res = pg_query($sql) or die("SQL error ".__LINE__);
@@ -90,8 +117,8 @@
                     echo "<small class='text-muted'>";
                     while($us = pg_fetch_assoc($res))
                     {
-                        $usuarios_a_incluir[$us['id']]['ini'] = substr($data,0,10)." ".$us['workshift_group_time_init'];
-                        $usuarios_a_incluir[$us['id']]['fim'] = substr($data,0,10)." ".$us['workshift_group_time_finish'];
+                        $usuarios_a_incluir[$us['id']]['ini'] = substr($dados_workshift['opened'],0,10)." ".$us['workshift_group_time_init'];
+                        $usuarios_a_incluir[$us['id']]['fim'] = substr($dados_workshift['opened'],0,10)." ".$us['workshift_group_time_finish'];
                         echo "<br>&nbsp;&nbsp;06.".$c++.". ".$us['workshift_group_time_init']." a ".$us['workshift_group_time_finish']." - [UID: ".$us['id']."] ".$us['name'];
                     }
                     echo "</small>";
@@ -133,6 +160,11 @@
                   }
 
               ?>
+              <div class="row">
+                <div class="col-md-12 text-center" style="margin-top:50px;margin-bottom:20px">
+                  <a href='oct/turno_associar_pessoa.php?id_workshift=<?=$id_workshift;?>'><button type='button' class='btn btn-primary'><i class='fa fa-users'></i> Voltar para gestão de pessoal</button></a>
+                </div>
+              </div>
             </div><!--<div class="panel-body">-->
         </section><!--<section class="panel">-->
   </div><!--<div class="col-md-12">-->

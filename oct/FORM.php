@@ -438,105 +438,7 @@ if($_SESSION['id']==1)
 
 
 
-              <div class="row" style="margin-top:15px">
-                    <div class="col-md-12">
-                          <section class="panel panel-featured panel-featured-warning">
-                            <header class="panel-heading">
-                              <div class="panel-actions" style="margin-top:-10px">
-                                  <div class="btn-group">
-                                      <button id="bt_add_prov" type="button" class="mb-xs mt-xs mr-xs btn btn-default loading disable_button"><i class="fa fa-file-powerpoint-o"></i> <sup><i class="fa fa-plus"></i></sup> Providências</button>
-                                  </div>
-                              </div>
-                              <h2 class="panel-title">Providências:</h2>
-                            </header>
-                            <div class="panel-body">
 
-                                <?
-                                  $sql = "SELECT
-                                          			 U.name,
-                                          			 C.acron, C.name as company,
-                                          			 VE.description as vehicle, VE.color as vehicle_color, VE.licence_plate,
-                                          			 VI.name as victim_name, VI.age as victim_age,
-                                          			 H.name as hospital,
-                                          			 CO.acron as company_acron, CO.name as company_name,
-                                          			 PR.area, PR.providence,
-                                          		   P.*
-                                          FROM sepud.oct_rel_events_providence P
-                                          JOIN sepud.users U ON U.id = P.id_owner
-                                          JOIN sepud.company C ON C.id = U.id_company
-                                          LEFT JOIN sepud.oct_vehicles VE ON VE.id = P.id_vehicle
-                                          LEFT JOIN sepud.oct_victim   VI ON VI.id = P.id_victim
-                                          LEFT JOIN sepud.hospital      H ON  H.id = P.id_hospital
-                                          LEFT JOIN sepud.company      CO ON CO.id = P.id_company_requested
-                                          JOIN sepud.oct_providence    PR ON PR.id = P.id_providence
-                                          WHERE P.id_event = '".$id."'
-                                          ORDER BY P.opened_date DESC";
-                                    $res = pg_query($sql)or die("Erro ".__LINE__."<hr><pre>".$sql."</pre>");
-
-
-                                  if(pg_num_rows($res))
-                                  {
-                                      while($p = pg_fetch_assoc($res))
-                                      {
-                                        echo "<table class='table table-bordered table-condensed'>";
-                                          echo "<tr bgcolor='#dbe9ff'>";
-                                            echo "<td width='10'>".$p['area']."</td>";
-                                            echo "<td>".$p['providence']."</td>";
-                                            echo "<td  width='150' align='center'>".formataData($p['opened_date'],1)."</td>";
-                                            //echo "<td  width='150px' align='center'>".formataData($p['closed_date'],1)."</td>";
-                                          echo "</tr>";
-                                          echo "<tr>";
-                                            echo "<td colspan='3'>";
-
-
-                                            echo "<table class='table'>";
-                                            echo "<tr><td width='50'><span style='color:#CCCCCC'>Observações:</span></td><td>";
-                                            if($p['observation'] != ""){ echo $p['observation']; }else{ echo "<span style='color:#CCCCCC'>Nenhuma anotação de observação para essa providência.</span>";}
-                                            echo "</td></tr>";
-
-                                              if(isset($p['vehicle']) || isset($p['victim_name']) || isset($p['hospital']) || isset($p['company_name']))
-                                              {
-                                                //echo "<hr><span style='color:#CCCCCC'>Envolvidos: </span>";
-
-                                                echo "<tr>";
-                                                if(isset($p['vehicle'])){      echo "<td width='50'><span style='color:#CCCCCC'>Veículo:</span></td><td>".$p['vehicle'].", ".$p['vehicle_color']." - ".$p['licence_plate']."</td>"; }
-                                                if(isset($p['victim_name'])){  echo "<td width='50'><span style='color:#CCCCCC'>Envolvido:</span></td><td>".$p['victim_name'];
-                                                                               if(isset($p['victim_age'])){ echo ", idade: ".$p['victim_age']." ano(s)"; }
-                                                                               echo  "</td>"; }
-
-                                                echo "</tr><tr>";
-
-                                                if(isset($p['hospital'])){     echo "<td width='50'><span style='color:#CCCCCC'>Hospital:</span></td><td>".$p['hospital']."</td>"; }
-                                                if(isset($p['company_name'])){ echo "<td width='50'><span style='color:#CCCCCC'>Orgão:</span></td><td>".$p['company_name']."</td>";}
-
-                                                echo "</tr>";
-
-                                              }
-                                              echo "</table>";
-                                            echo "</td>";
-                                          echo "</tr>";
-
-                                          echo "<tr bgcolor='#eeeeee'>";
-                                            echo "<td colspan='4' align='right'>".$p['name']."<br><small>".$p['acron']." - ".$p["company"]."</small></td>";
-                                          echo "</tr>";
-
-
-
-                                        echo "</table>";
-                                      }
-                                  }else{
-                                        echo "<div class='alert alert-warning text-center'>Nenhuma providência cadastrada para esta ocorrência.</div>";
-                                  }
-
-
-
-                                ?>
-
-
-                          </div>
-                        </section>
-                  </div>
-            </div>
 
 
 
@@ -546,8 +448,8 @@ if($_SESSION['id']==1)
             								<header class="panel-heading">
             									<div class="panel-actions" style="margin-top:-10px">
                                   <div class="btn-group">
-                  										<button id="bt_add_veic" type="button" class="mb-xs mt-xs mr-xs btn btn-default loading disable_button"><i class="fa fa-car"></i> <sup><i class="fa fa-plus"></i></sup> Veículos</button>
-                                      <button  id="bt_add_vit"  type="button"  class="mb-xs mt-xs mr-xs btn btn-default loading disable_button"><i class="fa fa-user"></i> <sup><i class="fa fa-plus"></i></sup> Envolvidos</button>
+                  										<button id="bt_add_veic" type="button" class="mb-xs mt-xs mr-xs btn btn-default loading disable_button"><small class='text-muted'>1.</small> <i class="fa fa-car"></i> <sup><i class="fa fa-plus"></i></sup> Veículos</button>
+                                      <button  id="bt_add_vit"  type="button"  class="mb-xs mt-xs mr-xs btn btn-default loading disable_button"><small class='text-muted'>2.</small> <i class="fa fa-user"></i> <sup><i class="fa fa-plus"></i></sup> Envolvidos</button>
                                   </div>
             									</div>
             									<h2 class="panel-title">Envolvidos:</h2>
@@ -659,6 +561,110 @@ if($_SESSION['id']==1)
             							</section>
     						      </div>
               </div>
+
+
+
+
+              <div class="row" style="margin-top:15px">
+                    <div class="col-md-12">
+                          <section class="panel panel-featured panel-featured-warning">
+                            <header class="panel-heading">
+                              <div class="panel-actions" style="margin-top:-10px">
+                                  <div class="btn-group">
+                                      <button id="bt_add_prov" type="button" class="mb-xs mt-xs mr-xs btn btn-default loading disable_button"><small class='text-muted'>3.</small> <i class="fa fa-file-powerpoint-o"></i> <sup><i class="fa fa-plus"></i></sup> Providências</button>
+                                  </div>
+                              </div>
+                              <h2 class="panel-title">Providências:</h2>
+                            </header>
+                            <div class="panel-body">
+
+                                <?
+                                  $sql = "SELECT
+                                                 U.name,
+                                                 C.acron, C.name as company,
+                                                 VE.description as vehicle, VE.color as vehicle_color, VE.licence_plate,
+                                                 VI.name as victim_name, VI.age as victim_age,
+                                                 H.name as hospital,
+                                                 CO.acron as company_acron, CO.name as company_name,
+                                                 PR.area, PR.providence,
+                                                 P.*
+                                          FROM sepud.oct_rel_events_providence P
+                                          JOIN sepud.users U ON U.id = P.id_owner
+                                          JOIN sepud.company C ON C.id = U.id_company
+                                          LEFT JOIN sepud.oct_vehicles VE ON VE.id = P.id_vehicle
+                                          LEFT JOIN sepud.oct_victim   VI ON VI.id = P.id_victim
+                                          LEFT JOIN sepud.hospital      H ON  H.id = P.id_hospital
+                                          LEFT JOIN sepud.company      CO ON CO.id = P.id_company_requested
+                                          JOIN sepud.oct_providence    PR ON PR.id = P.id_providence
+                                          WHERE P.id_event = '".$id."'
+                                          ORDER BY P.opened_date DESC";
+                                    $res = pg_query($sql)or die("Erro ".__LINE__."<hr><pre>".$sql."</pre>");
+
+
+                                  if(pg_num_rows($res))
+                                  {
+                                      while($p = pg_fetch_assoc($res))
+                                      {
+                                        echo "<table class='table table-bordered table-condensed'>";
+                                          echo "<tr bgcolor='#dbe9ff'>";
+                                            echo "<td width='10'>".$p['area']."</td>";
+                                            echo "<td>".$p['providence']."</td>";
+                                            echo "<td  width='150' align='center'>".formataData($p['opened_date'],1)."</td>";
+                                            //echo "<td  width='150px' align='center'>".formataData($p['closed_date'],1)."</td>";
+                                          echo "</tr>";
+                                          echo "<tr>";
+                                            echo "<td colspan='3'>";
+
+
+                                            echo "<table class='table'>";
+                                            echo "<tr><td width='50'><span style='color:#CCCCCC'>Observações:</span></td><td>";
+                                            if($p['observation'] != ""){ echo $p['observation']; }else{ echo "<span style='color:#CCCCCC'>Nenhuma anotação de observação para essa providência.</span>";}
+                                            echo "</td></tr>";
+
+                                              if(isset($p['vehicle']) || isset($p['victim_name']) || isset($p['hospital']) || isset($p['company_name']))
+                                              {
+                                                //echo "<hr><span style='color:#CCCCCC'>Envolvidos: </span>";
+
+                                                echo "<tr>";
+                                                if(isset($p['vehicle'])){      echo "<td width='50'><span style='color:#CCCCCC'>Veículo:</span></td><td>".$p['vehicle'].", ".$p['vehicle_color']." - ".$p['licence_plate']."</td>"; }
+                                                if(isset($p['victim_name'])){  echo "<td width='50'><span style='color:#CCCCCC'>Envolvido:</span></td><td>".$p['victim_name'];
+                                                                               if(isset($p['victim_age'])){ echo ", idade: ".$p['victim_age']." ano(s)"; }
+                                                                               echo  "</td>"; }
+
+                                                echo "</tr><tr>";
+
+                                                if(isset($p['hospital'])){     echo "<td width='50'><span style='color:#CCCCCC'>Hospital:</span></td><td>".$p['hospital']."</td>"; }
+                                                if(isset($p['company_name'])){ echo "<td width='50'><span style='color:#CCCCCC'>Orgão:</span></td><td>".$p['company_name']."</td>";}
+
+                                                echo "</tr>";
+
+                                              }
+                                              echo "</table>";
+                                            echo "</td>";
+                                          echo "</tr>";
+
+                                          echo "<tr bgcolor='#eeeeee'>";
+                                            echo "<td colspan='4' align='right'>".$p['name']."<br><small>".$p['acron']." - ".$p["company"]."</small></td>";
+                                          echo "</tr>";
+
+
+
+                                        echo "</table>";
+                                      }
+                                  }else{
+                                        echo "<div class='alert alert-warning text-center'>Nenhuma providência cadastrada para esta ocorrência.</div>";
+                                  }
+
+
+
+                                ?>
+
+
+                          </div>
+                        </section>
+                  </div>
+              </div>
+
 <? } ?>
 
 

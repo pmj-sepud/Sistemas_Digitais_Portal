@@ -127,17 +127,41 @@
                                                      <div class="col-sm-6">
                                                        <div class="form-group">
                                                        <label class="control-label">Data de entrada:</label>
+                                                        <?
+                                                              if($dados_user['opened']!="")
+                                                              {
+                                                                     $dt_opened = substr(formataData($dados_user['opened'],1),0,10);
+                                                              }else
+                                                              {
+                                                                    if($dados_workshift['opened']!="")
+                                                                    {
+                                                                      $dt_opened = substr(formataData($dados_workshift['opened'],1),0,10);
+                                                                    }else{
+                                                                      $dt_opened = $agora['data'];
+                                                                    }
+                                                              }
 
-
-
-                                                           <input type="text" name="opened" class="form-control text-center" value="<?=($dados_user['opened']!=""?substr(formataData($dados_user['opened'],1),0,10):$agora['data']);?>">
+                                                              if($dados_user['closed']!="")
+                                                              {
+                                                                     $dt_closed = substr(formataData($dados_user['closed'],1),0,10);
+                                                              }else
+                                                              {
+                                                                    if($dados_workshift['closed']!="")
+                                                                    {
+                                                                      $dt_closed = substr(formataData($dados_workshift['closed'],1),0,10);
+                                                                    }else{
+                                                                      $dt_closed = $agora['data'];
+                                                                    }
+                                                              }
+                                                        ?>
+                                                           <input type="text" name="opened" class="form-control text-center" value="<?=$dt_opened;?>">
                                                       </div>
                                                     </div>
 
                                                      <div class="col-sm-6">
                                                        <div class="form-group">
                                                        <label class="control-label">Data de saída:</label>
-                                                           <input type="text" name="closed" class="form-control text-center" value="<?=($dados_user['closed']!=""?substr(formataData($dados_user['closed'],1),0,10):$agora['data']);?>">
+                                                           <input type="text" name="closed" class="form-control text-center" value="<?=$dt_closed;?>">
                                                       </div>
                                                     </div>
                                                </div>
@@ -179,7 +203,7 @@
                                                               <option value="ferias"   <?=($dados_user['status']=="ferias"?"selected":"");?>>Férias</option>
                                                               <option value="falta"    <?=($dados_user['status']=="falta"?"selected":"");?>>Faltou</option>
                                                               <option value="atestado" <?=($dados_user['status']=="atestado"?"selected":"");?>>Atestado</option>
-                                                              <option value="licensa"  <?=($dados_user['status']=="licensa"?"selected":"");?>>Licensa</option>
+                                                              <option value="licença"  <?=($dados_user['status']=="licença"?"selected":"");?>>Licença</option>
                                                           </select>
                                                      </div>
                                                    </div>
@@ -204,7 +228,7 @@
                                                       <? } ?>
                                                       <button type='submit' class='mb-xs mt-xs mr-xs btn btn-primary loading' data-loading-msg="Aguarde, processando informação." <?=$bt_associar_recurso;?>><?=$bt_acao;?></button>
                                                       <? if($dados_workshift['is_populate']=='f'){ ?>
-                                                        <a class='mb-xs mt-xs mr-xs btn btn-primary loading' href="oct/turno_gerar_associacao_automatica.php?data=<?=urlencode($dados_workshift['opened']);?>&id_workshift=<?=$id_workshift;?>&workshift_group=<?=$dados_workshift['workshift_group'];?>">Inserir todos os funcionários configurados para este turno</a>
+                                                         <a class='mb-xs mt-xs mr-xs btn btn-primary loading' href="oct/turno_gerar_associacao_automatica.php?id_workshift=<?=$id_workshift;?>">Inserir todos os funcionários configurados para este turno</a>
                                                       <? } ?>
                                                   </div>
                                             </div>
@@ -278,7 +302,7 @@
                                         echo "<td>".formataData($d['opened'],1)."</td>";
                                         echo "<td>".formataData($d['closed'],1)."</td>";
                                         echo "<td>".$d['observation']."</td>";
-                                        echo "<td><a href='oct/turno_sql.php?id_workshift=".$id_workshift."&acao=remover_associado&id_user=".$d['id']."' class='btn btn-sm btn-danger'><i class='fa fa-trash'></i></a></td>";
+                                        echo "<td><a href='oct/turno_sql.php?id_workshift=".$id_workshift."&acao=remover_associado&id=".$d['id']."' class='btn btn-sm btn-danger'><i class='fa fa-trash'></i></a></td>";
                                         echo "<td><a href='oct/turno_associar_pessoa.php?id_workshift=".$id_workshift."&id_user=".$d['id_person']."' class='btn btn-sm btn-primary'><i class='fa fa-cogs'></i></a></td>";
                                       echo "</tr>";
                                  }

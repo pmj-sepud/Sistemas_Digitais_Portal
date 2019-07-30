@@ -136,9 +136,9 @@ if($_POST['acao'] == "atualizar" && $_POST['id_workshift'] != "")
    exit();
 }
 
-if($_GET['acao']=="remover_associado" && $_GET['id_user']!="" && $_GET["id_workshift"]!="")
+if($_GET['acao']=="remover_associado" && $_GET['id']!="" && $_GET["id_workshift"]!="")
 {
-  $sql = "DELETE FROM sepud.oct_rel_workshift_persona WHERE id = '".$_GET['id_user']."'";
+  $sql = "DELETE FROM sepud.oct_rel_workshift_persona WHERE id = '".$_GET['id']."'";
   pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
   header("location: turno_associar_pessoa.php?id_workshift=".$_GET['id_workshift']);
   exit();

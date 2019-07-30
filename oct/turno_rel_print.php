@@ -82,7 +82,7 @@
 		<!-- Basic -->
 		<meta charset="UTF-8">
 
-		<title>SISTEMAS DIGITAIS - ROTSS - Impressão de relaório de turno</title>
+		<title><?=$_SESSION['company_acron']."_ROTSS_Relatorio_de_turno_".str_replace("-","_",substr($turno['opened'],0,10));?></title>
 		<meta name="keywords" content="">
 		<meta name="description" content="">
 		<meta name="author" content="">
@@ -169,6 +169,9 @@
         <div class='row'>
           <div class='col-md-12 text-center'>
               <h3><b><i>Relatório de turno de trabalho</i></b></h3>
+              <?
+                //echo "<br>Nome do arquivo: ".$_SESSION['company_acron']."_ROTSS_Relatorio_de_turno_".str_replace("-","_",substr($turno['opened'],0,10));
+              ?>
           </div>
         </div>
         <div class="panel-body">
@@ -353,7 +356,7 @@ if($turno['config_rel_conducao']=="true"){
                                                     sepud.oct_garrison
                                                     G JOIN sepud.oct_fleet F ON F.ID = G.id_fleet
                                                   WHERE
-                                                    G.id_workshift = '".$turno['id']."' ORDER BY id DESC";
+                                                    G.id_workshift = '".$turno['id']."' ORDER BY opened ASC";
                                           $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);;
                                           if(pg_num_rows($res))
                                           {
@@ -776,7 +779,7 @@ if($turno['config_rel_conducao']=="true"){
 </body>
 </html>
 <script>
-//window.print();
+window.print();
 $(".loading").click(function(event){ $(this).addClass("disabled").html("<i class=\"fa fa-spinner fa-spin\"></i> <small>Aguarde</small>");});
 //$("#bt_refresh").click(function(){ $("#bt_refresh_icon").addClass('fa-spin'); $("#wrap").load("erg/rel_placa.php");});
 </script>

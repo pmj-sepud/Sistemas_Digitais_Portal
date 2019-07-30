@@ -76,6 +76,12 @@
         <li><a href="oct/eventos_administrativos_INDEX.php">4. Diário administrativo</a></li>
         <li><a href="oct/dashboard.php">5. Evolução mensal</a></li>
 
+  <?
+      if($_SESSION['id']==8 || $_SESSION['id']==1){
+        echo "<li><a href='oct/dashboard_SAMU.php'>5.1. Evolução mensal - SAMU</a></li>";
+      }
+  ?>
+
         <!--<li><a href="oct/minhas_ocorrencias.php">6. Minhas ocorrências</a></li>-->
 
 
