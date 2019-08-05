@@ -63,7 +63,7 @@ if($_POST['acao'] == "inserir")
                      $id_company,
                   '".$obs."',
                   '".$workshift_group."',
-                  'aberto')RETURNING id";
+                  '".$status."')RETURNING id";
    $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
    $id  = pg_fetch_assoc($res);
    header("location: turno.php?id=".$id['id']);

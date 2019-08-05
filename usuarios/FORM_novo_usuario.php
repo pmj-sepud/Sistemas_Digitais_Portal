@@ -64,7 +64,7 @@
 												</div>
 
                         <div class="form-group">
-                          <label class="col-md-2 control-label" for="registration">Matricula</label>
+                          <label class="col-md-2 control-label" for="registration">Matrícula</label>
                           <div class="col-md-10">
                             <input type="text" class="form-control" id="registration" name="registration" placeholder='' value="<?=$d['registration'];?>">
                           </div>
@@ -171,7 +171,9 @@
 					<!-- end: page -->
 				</section>
 <script type="text/javascript">
-
+$(document).ready(function(){
+    $(window).scrollTop(0);
+})
 //  $("#email").val('Digite o endereço de email');
   //$("#email").val('');
   //$("#senha").val('');

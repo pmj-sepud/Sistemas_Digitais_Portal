@@ -116,7 +116,7 @@
 												</div>
 
                         <div class="form-group">
-                          <label class="col-md-2 control-label" for="registration">Matricula</label>
+                          <label class="col-md-2 control-label" for="registration">Matrícula</label>
                           <div class="col-md-10">
                             <input type="text" class="form-control" id="registration" name="registration" placeholder='' value="<?=$d['registration'];?>">
                           </div>
@@ -319,6 +319,10 @@
 					<!-- end: page -->
 				</section>
 <script>
+$(document).ready(function(){
+    $(window).scrollTop(0);
+})
+
 $(".campo_hora").mask('00:00');
 $(".loading").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> <small>Aguarde.</small>"); });
 $("#userform").on("submit", function(){

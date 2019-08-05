@@ -14,7 +14,7 @@
     $resV  = pg_query($sql)or die("Erro ".__LINE__);
     $dados = pg_fetch_assoc($resV);
     $acao  = "atualizar";
-    $margin_upd = "-19px";
+    $margin_upd = "0px";
   }else{
     $acao = "inserir";
     $margin_upd = "15px";
@@ -108,6 +108,11 @@
         </div>
 
         <div class="row">
+              <div class="col-sm-12"><hr>
+              </div>
+        </div>
+
+        <div class="row">
 
               <div class="col-sm-4">
                 <div class="form-group">
@@ -131,6 +136,44 @@
              </div>
       </div>
 
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label class="control-label">Responsável por aplicar a autuação:</label>
+            <?
+                if($_GET['id_workshift'] != "")
+                {
+                      $sql = "SELECT
+                                	DISTINCT WP.id_shift AS id_workshift,
+                                	U.name, U.nickname, U.registration, U.id as id_user
+                                FROM
+                                	sepud.oct_rel_workshift_persona WP
+                                JOIN sepud.users U ON U.id = WP.id_person
+                                WHERE
+                                	id_shift = '".$_GET['id_workshift']."'
+                                ORDER BY U.nickname ASC";
+                      $resC = pg_query($sql) or die("SQL error ".__LINE__);
+                      echo "<select  class='form-control select2' name='auto_id_user'><option value=''></option>";
+                          if(pg_num_rows($resC))
+                          {
+                              while($dC = pg_fetch_assoc($resC))
+                              {
+                                  if($dados['auto_id_user']==$dC['id_user']){ $sel = "selected"; }else{ $sel = "";}
+                                  echo "<option value='".$dC['id_user']."' ".$sel.">[".$dC['nickname']."] ".$dC['name']." - Matrícula: ".$dC['registration']."</option>";
+                              }
+                          }else {
+                            echo "<option value=''>Nenhum colaborador vinculado ao turno</option>";
+                          }
+                      echo "</select>";
+              }else{
+                echo "<select  class='form-control'><option value=''>Nenhum turno aberto ou vinculado a ocorrência</option></select>";
+              }
+            ?>
+
+          </div>
+       </div>
+      </div>
+
 
             <!-- ========================================================= -->
           </div><!--<div class="col-sm-8"> FORM PRINCIPAL-->
@@ -139,7 +182,7 @@
                   <div class="col-sm-12">
                     <div class="form-group">
                     <label class="control-label">Observações:</label>
-                        <textarea name="observation" placeholder="Observações sobre o veículo, condições geraias, posicionamento na via, etc." rows="7" class="form-control"><?=$dados['observation'];?></textarea>
+                        <textarea name="observation" placeholder="Observações sobre o veículo, condições geraias, posicionamento na via, etc." rows="10" class="form-control"><?=$dados['observation'];?></textarea>
                    </div>
                  </div>
             </div>
@@ -147,17 +190,18 @@
 
             <div class="row">
                   <div class="col-sm-12 text-center" style="margin-top:28px">
+                      <input type="hidden" name="id_workshift"   value="<?=$_GET['id_workshift'];?>">
                       <input type="hidden" name="veic_sel"   value="<?=$veic_sel;?>">
                       <input type="hidden" name="id"   value="<?=$id;?>">
                       <input type="hidden" name="acao" value="<?=$acao;?>">
                       <input type="hidden" name="retorno_acao" id="retorno_acao" value="">
                       <a href='oct/FORM.php?id=<?=$_GET['id']?>'><button type="button" class="btn btn-default loading">Voltar</button></a>
-                      <a href="oct/FORM_vitima.php?id=<?=$id;?>"><button type="button" class="mb-xs mt-xs mr-xs btn btn-default loading"><i class="fa fa-user"></i> Envolvidos</button></a>
+                      <a href="oct/FORM_vitima.php?id_workshift=<?=$_GET['id_workshift'];?>&id=<?=$id;?>"><button type="button" class="mb-xs mt-xs mr-xs btn btn-default loading"><i class="fa fa-user"></i> Envolvidos</button></a>
                       <? if($acao == "inserir"){ ?>
                       <button id='bt_inserir_voltar'    type='submit' class="btn btn-primary loading" role="button">Inserir e voltar</button>
                       <button id='bt_inserir_continuar' type='button' class="btn btn-primary loading" role="button">Inserir e continuar</button>
                     <? }else{ ?>
-                      <a href="oct/FORM_veiculo.php?id=<?=$id;?>"><button type="button" class="mb-xs mt-xs mr-xs btn btn-default loading"><i class="fa fa-car"></i> Novo veículo</button></a><br>
+                      <a href="oct/FORM_veiculo.php?id_workshift=<?=$_GET['id_workshift'];?>&id=<?=$id;?>"><button type="button" class="mb-xs mt-xs mr-xs btn btn-default loading"><i class="fa fa-car"></i> Novo veículo</button></a><br>
                       <button id='bt_inserir_voltar'    type='submit' class="btn btn-primary loading" role="button">Atualizar e voltar</button>
                       <button id='bt_inserir_continuar' type='button' class="btn btn-primary loading" role="button">Atualizar e continuar</button>
                     <? } ?>
@@ -177,7 +221,7 @@
           </div>
 
           <div class="row">
-            <div class="col-sm-12"  style="margin-top:15px">
+            <div class="col-sm-12">
               <div class="table-responsive">
               <!-- ========================================================= -->
                 <?
@@ -230,13 +274,13 @@
                             echo "<td class='text-center'>".formataData($d['data_rec_auto'],1)."</td>";
 
 
-                              echo "<td class='text-center' width='50px'><a href='oct/FORM_veiculo_sql.php?id=".$id."&veic_sel=".$d['id']."&acao=remover'><button type='button' class='loading2 mb-xs mt-xs mr-xs btn btn-xs btn-danger'><i class='fa fa-trash'></i></button></a></td>";
-                              echo "<td class='text-center' width='50px'><a href='oct/FORM_veiculo.php?id=".$id."&veic_sel=".$d['id']."'                 ><button type='button' class='loading2 mb-xs mt-xs mr-xs btn btn-xs btn-primary'><i class='fa fa-pencil'></i></button></a></td>";
-                              echo "<td class='text-center' width='50px'><a href='oct/FORM_vitima.php?id=".$id."&veic_sel=".$d['id']."'                  ><button type='button' class='loading2 mb-xs mt-xs mr-xs btn btn-xs btn-warning'><i class='fa fa-plus'></i> <i class='fa fa-user'></i></button></a></td>";
+                              echo "<td class='text-center' width='50px'><a href='oct/FORM_veiculo_sql.php?id_workshift=".$_GET['id_workshift']."&id=".$id."&veic_sel=".$d['id']."&acao=remover'><button type='button' class='loading2 mb-xs mt-xs mr-xs btn btn-xs btn-danger'><i class='fa fa-trash'></i></button></a></td>";
+                              echo "<td class='text-center' width='50px'><a href='oct/FORM_veiculo.php?id_workshift=".$_GET['id_workshift']."&id=".$id."&veic_sel=".$d['id']."'                 ><button type='button' class='loading2 mb-xs mt-xs mr-xs btn btn-xs btn-primary'><i class='fa fa-pencil'></i></button></a></td>";
+                              echo "<td class='text-center' width='50px'><a href='oct/FORM_vitima.php?id_workshift=".$_GET['id_workshift']."&id=".$id."&veic_sel=".$d['id']."'                  ><button type='button' class='loading2 mb-xs mt-xs mr-xs btn btn-xs btn-warning'><i class='fa fa-plus'></i> <i class='fa fa-user'></i></button></a></td>";
 
                           echo "</tr>";
 
-                          echo "<tr><td colspan='10'><b>Observações: </b>".$d['observation']."</td></tr>";
+                          echo "<tr><td colspan='14'><b>Observações: </b>".$d['observation']."</td></tr>";
                       /*
                       [id] => 3
                          [description] => Renault Sandero
@@ -265,6 +309,9 @@
 </section>
 </form>
 <script>
+
+  $('.select2').select2();
+
   $("#bt_inserir_continuar").click(function(){
       $("#retorno_acao").val("continuar");
       $("#form_veiculo").submit();

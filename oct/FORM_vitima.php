@@ -187,12 +187,13 @@
 
             <div class="row">
                   <div class="col-sm-12 text-center" style="margin-top:28px">
-                      <input type="hidden" name="id"          value="<?=$id;?>">
-                      <input type="hidden" name="victim_sel"  value="<?=$victim_sel;?>">
-                      <input type="hidden" name="acao" value="<?=$acao?>">
+                      <input type="hidden" name="id_workshift"                   value="<?=$_GET['id_workshift'];?>">
+                      <input type="hidden" name="id"                             value="<?=$id;?>">
+                      <input type="hidden" name="victim_sel"                     value="<?=$victim_sel;?>">
+                      <input type="hidden" name="acao"                           value="<?=$acao?>">
                       <input type="hidden" name="retorno_acao" id="retorno_acao" value="">
                       <a href='oct/FORM.php?id=<?=$_GET['id']?>'><button type="button"  class="btn btn-default loading">Voltar</button></a>
-                      <a href="oct/FORM_veiculo.php?id=<?=$id;?>"><button type="button" class="mb-xs mt-xs mr-xs btn btn-default loading"><i class="fa fa-car"></i> Veículos</button></a>
+                      <a href="oct/FORM_veiculo.php?id_workshift=<?=$_GET['id_workshift'];?>&id=<?=$id;?>"><button type="button" class="mb-xs mt-xs mr-xs btn btn-default loading"><i class="fa fa-car"></i> Veículos</button></a>
 
                       <? if($acao == "inserir"){ ?>
                       <button id='bt_inserir_voltar'    type='submit' class="btn btn-primary loading" role="button">Inserir e voltar</button>
@@ -259,8 +260,8 @@
                           echo "<td>".$d['position_in_vehicle']."</td>";
                           echo "<td>".$d['veiculo_desc']."</td>";
 
-                          echo "<td class='text-center' width='50px'><a href='oct/FORM_vitima_sql.php?id=".$id."&victim_sel=".$d['vitima_id']."&acao=remover'><button type='button' class='mb-xs mt-xs mr-xs btn btn-xs btn-danger  loading2'><i class='fa fa-trash'></i></button></a></td>";
-                          echo "<td class='text-center' width='50px'><a href='oct/FORM_vitima.php?id=".$id."&victim_sel=".$d['vitima_id']."'                 ><button type='button' class='mb-xs mt-xs mr-xs btn btn-xs btn-primary loading2'><i class='fa fa-pencil'></i></button></a></td>";
+                          echo "<td class='text-center' width='50px'><a href='oct/FORM_vitima_sql.php?id_workshift=".$_GET['id_workshift']."&id=".$id."&victim_sel=".$d['vitima_id']."&acao=remover'><button type='button' class='mb-xs mt-xs mr-xs btn btn-xs btn-danger  loading2'><i class='fa fa-trash'></i></button></a></td>";
+                          echo "<td class='text-center' width='50px'><a href='oct/FORM_vitima.php?id_workshift=".$_GET['id_workshift']."&id=".$id."&victim_sel=".$d['vitima_id']."'                 ><button type='button' class='mb-xs mt-xs mr-xs btn btn-xs btn-primary loading2'><i class='fa fa-pencil'></i></button></a></td>";
 
                         echo "</tr>";
 

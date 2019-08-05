@@ -197,10 +197,10 @@ if($_SESSION['id']==1)
 
                   <div class="col-sm-2">
                         <div class="form-group">
-                          <label class="control-label" for="victim_inform">Envolvidos:</label>
+                          <label class="control-label" for="victim_inform">Qtd:</label>
                                 <select id="victim_inform" name="victim_inform" class="form-control changefield">
                                   <?
-                                    for($i = 0; $i <= 100; $i++)
+                                    for($i = 0; $i <= 200; $i++)
                                     {
                                       if($dados['victim_inform'] == $i){ $sel = "selected"; }else{ $sel = ""; }
                                       echo "<option value='".$i."' $sel>".$i."</option>";
@@ -891,9 +891,9 @@ function bloqueio()
 
 $(".changefield").change(function(){ bloqueio(); });
 
-$("#bt_add_prov").click(function(){ $("#wrap").load("oct/FORM_providencias.php?turno=<?=$turno_oc['id'];?>&id=<?=$id;?>"); })
-$("#bt_add_veic").click(function(){ $("#wrap").load("oct/FORM_veiculo.php?id=<?=$id;?>"); })
-$("#bt_add_vit").click(function(){ $("#wrap").load("oct/FORM_vitima.php?id=<?=$id;?>"); })
+$("#bt_add_prov").click(function(){ $("#wrap").load("oct/FORM_providencias.php?id_workshift=<?=$turno_oc['id'];?>&id=<?=$id;?>");   })
+$("#bt_add_veic").click(function(){ $("#wrap").load("oct/FORM_veiculo.php?id_workshift=<?=$turno_oc['id'];?>&id=<?=$id;?>"); })
+$("#bt_add_vit").click(function() { $("#wrap").load("oct/FORM_vitima.php?id_workshift=<?=$turno_oc['id'];?>&id=<?=$id;?>");  })
 
 $(".bt_recarregar_oc").click(function(){ $('#wrap').load("oct/FORM.php?id=<?=$id;?>"); });
 

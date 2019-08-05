@@ -103,7 +103,7 @@
     <label class="control-label">Guarnição:</label>
     <select class="form-control" name="id_garrison">
     <?
-         if($_GET['turno'] != "")
+         if($_GET['id_workshift'] != "")
          {
           $sql = "SELECT
                      U.name as user_name, U.registration, U.nickname as user_nickname,
@@ -119,7 +119,7 @@
                    JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = G.id AND GP.type = 'Motorista'
                    JOIN sepud.users U ON U.id = GP.id_user
                    WHERE
-                     G.id_workshift = '".$_GET['turno']."'";
+                     G.id_workshift = '".$_GET['id_workshift']."'";
           $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);;
 
 

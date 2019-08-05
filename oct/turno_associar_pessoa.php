@@ -200,6 +200,7 @@
                                                               <option value="ativo"    <?=($dados_user['status']=="baixado"?"selected":"");?>>Ativo</option>
                                                               <option value="baixado"  <?=($dados_user['status']=="baixado"?"selected":"");?>>Baixado</option>
                                                               <option value="folga"    <?=($dados_user['status']=="folga"?"selected":"");?>>Folga</option>
+                                                              <option value="troca"    <?=($dados_user['status']=="troca"?"selected":"");?>>Troca</option>
                                                               <option value="ferias"   <?=($dados_user['status']=="ferias"?"selected":"");?>>Férias</option>
                                                               <option value="falta"    <?=($dados_user['status']=="falta"?"selected":"");?>>Faltou</option>
                                                               <option value="atestado" <?=($dados_user['status']=="atestado"?"selected":"");?>>Atestado</option>

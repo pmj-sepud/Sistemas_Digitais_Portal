@@ -167,7 +167,16 @@
 <? if($acao=="inserir"){ ?>
                             <div class="form-group">
                             <label class="control-label">Vaga:</label>
-                              <input type="number" pattern="\d*" class="form-control input-lg text-center" id="pesquisa" placeholder="Nº da vaga">
+
+                            <div class="input-group mb-md">
+      														<input id="pesquisa" type="number" pattern="\d*" class="form-control input-lg text-center" placeholder="Nº da vaga">
+      														<span class="input-group-btn">
+      															<button id="pesquisa_btn" class="btn btn-success btn-lg" type="button"><i class="fa fa-search"></i></button>
+      														</span>
+                            </div>
+
+
+                            <!--  <input type="number" pattern="\d*" class="form-control input-lg text-center" id="pesquisa" placeholder="Nº da vaga">-->
 
                                 <div id="vagas" class="text-center">
                                         <? if($_GET['erro']=="fora_do_horario"){
@@ -425,16 +434,26 @@ $("#bt_inserir_oc").click(function(){
 });
 
              $("#pesquisa").mask('0000');
+         //$("#pesquisa_txt").mask('0000');
 $('#license_plate_numbers').mask('0000');
 $('#license_plate_letters').mask('SSS');
 
 
-$("#pesquisa").click(function(){ $(this).val('');});
+$("#pesquisa").click(function(){
+    $(this).val('');
+    $("#vagas").html("<h4 class='text-warning'><i>Digite um número de vaga.</i><span style='color:white'><br>.<br>.</span></h4>");
+});
+$("#pesquisa_btn").click(function(){
+    var query = $("#pesquisa").val();
+    $("#vagas").load("erg/app_pesquisa_vaga.php?origem=pesquisa_vaga_form&query="+query);
+});
+
+/*
 $("#pesquisa").keyup(function(){
     var query = $(this).val();
     $("#vagas").load("erg/app_pesquisa_vaga.php?origem=pesquisa_vaga_form&query="+query);
 });
-
+*/
 $('#license_plate_letters').keyup(function () {
   var letras = $(this).val();
   var letrasM = $(this).val().toUpperCase();

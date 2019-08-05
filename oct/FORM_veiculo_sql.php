@@ -8,8 +8,9 @@
     if($acao == "inserir")
     {
 
-      $id_vehicle_type = ($tipo_veiculo == "" ? "Null" : "'".$tipo_veiculo."'");
+      $id_vehicle_type = ($tipo_veiculo  == "" ? "Null" : "'".$tipo_veiculo."'");
       $data_rec_auto   = ($data_rec_auto == "" ? "Null" : "'".$data_rec_auto."'");
+      $auto_id_user    = ($auto_id_user  == "" ? "Null" : "'".$auto_id_user."'");
 
 
       $sql = "INSERT INTO sepud.oct_vehicles
@@ -23,7 +24,8 @@
                            id_vehicle_type,
                            ait,
                            cod_infra,
-                           data_rec_auto)
+                           data_rec_auto,
+                           auto_id_user)
                   VALUES ('".$description."',
                           '".$id."',
                           '".$observation."',
@@ -34,12 +36,13 @@
                            ".$id_vehicle_type.",
                           '".$ait."',
                           '".$cod_infra."',
-                          ".$data_rec_auto.")";
-      pg_query($sql)or die("Erro ".__LINE__);
+                          ".$data_rec_auto.",
+                          ".$auto_id_user.")";
+      pg_query($sql)or die("Erro ".__LINE__."SQL: ".$sql);
 
       logger("Inserção","OCT - Veículo", "Ocorrência n.".$id);
 
-      if($retorno_acao == "continuar"){ header("Location: FORM_veiculo.php?id=".$id); }
+      if($retorno_acao == "continuar"){ header("Location: FORM_veiculo.php?id_workshift=".$id_workshift."&id=".$id); }
       else                            { header("Location: FORM.php?id=".$id);         }
       exit();
     }
@@ -48,6 +51,7 @@
     {
          $id_vehicle_type = ($tipo_veiculo == "" ? "Null" : "'".$tipo_veiculo."'");
          $data_rec_auto   = ($data_rec_auto == "" ? "Null" : "'".$data_rec_auto."'");
+         $auto_id_user    = ($auto_id_user  == "" ? "Null" : "'".$auto_id_user."'");
 
          $sql = "UPDATE sepud.oct_vehicles SET
                              description     = '".$description."',
@@ -56,16 +60,17 @@
                              color           = '".$color."',
                              renavam         = '".$renavam."',
                              chassi          = '".$chassi."',
-                             id_vehicle_type = $id_vehicle_type,
+                             id_vehicle_type = ".$id_vehicle_type.",
                              ait             = '".$ait."',
                              cod_infra       = '".$cod_infra."',
-                             data_rec_auto   = ".$data_rec_auto."
+                             data_rec_auto   = ".$data_rec_auto.",
+                             auto_id_user    = ".$auto_id_user."
                 WHERE  id = '".$veic_sel."'";
        pg_query($sql)or die("Erro ".__LINE__);
 
        logger("Atualização","OCT - Veículo", "Ocorrência n.".$id.", ID: ".$veic_sel);
 
-       if($retorno_acao == "continuar"){ header("Location: FORM_veiculo.php?id=".$id); }
+       if($retorno_acao == "continuar"){ header("Location: FORM_veiculo.php?id_workshift=".$id_workshift."&id=".$id); }
        else                            { header("Location: FORM.php?id=".$id);         }
        exit();
     }
@@ -84,7 +89,7 @@
 
       logger("Remoção","OCT - Veículo", "Ocorrência n.".$id.", Dados: ".$veic);
 
-      header("Location: FORM_veiculo.php?id=".$id);
+      header("Location: FORM_veiculo.php?id_workshift=".$id_workshift."&id=".$id);
       exit();
     }
 

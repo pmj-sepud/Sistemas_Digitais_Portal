@@ -1,4 +1,4 @@
-  <?
+<?
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
@@ -32,7 +32,7 @@
                      JOIN sepud.users                      U ON U.id = WP.id_person
                   WHERE
                     WP.id_shift =  '".$turno['id']."'
-                  ORDER BY U.name ASC";
+                  ORDER BY WP.opened ASC";
         $resRecursos = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
 
         while($d = pg_fetch_assoc($resRecursos))
@@ -97,9 +97,10 @@
                 <span class="text-muted"><small><i>Data atual:</i></small> <b><?=$agora['data'];?></b></span>
                 <div class="panel-actions hidden-print" style="margin-top:5px">
                     <?
-                        if($turno_aberto)
-                        {
-                            echo " <a href='oct/turno.php?id=".$turno['id']."'><button id='bt_atualizar_turno' type='button' class='btn btn-primary'><i class='fa fa-cogs'></i> Turno</button></a>";
+
+                      if($turno['id']!="")
+                      {
+                            echo " <a href='oct/turno.php?id=".$turno['id']."'><button id='bt_atualizar_turno' type='button' class='btn btn-primary'><i class='fa fa-cogs'></i> Turno <sup>(nº ".$turno['id'].")</sup></button></a>";
                             echo " <a href='oct/turno_associar_pessoa.php?id_workshift=".$turno['id']."'><button type='button' class='btn btn-primary'><i class='fa fa-users'></i> Pessoal</button></a>";
 
                             if(isset($qtd_agentes) && $qtd_agentes > 0)
@@ -112,9 +113,11 @@
 
                             echo " <button id='bt_print' class='btn btn-primary'><i class='fa fa-print'></i> Imprimir</button>";
 
-                        }else{
-                            echo "<a href='oct/turno.php'><button type='button' class='btn btn-primary'><i class='fa fa-plus'></i> Abrir novo turno de trabalho</button></a>";
-                        }
+                            echo " <a href='oct/turno.php'><button type='button' class='btn btn-info'><i class='fa fa-file-text-o'></i> <sup><i class='fa fa-plus'></i></sup> Novo turno</button></a>";
+                      }else {
+                        echo " <a href='oct/turnos_INDEX.php'><button type='button' class='btn btn-primary'><i class='fa fa-file-text-o'></i> <sup><i class='fa fa-search'></i></sup> Visualizar turnos</button></a>";
+                        echo " <a href='oct/turno.php'><button type='button' class='btn btn-info'><i class='fa fa-file-text-o'></i> <sup><i class='fa fa-plus'></i></sup> Novo turno</button></a>";
+                      }
                   ?>
                 </div>
             </header>

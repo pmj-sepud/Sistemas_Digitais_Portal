@@ -49,7 +49,7 @@
 
       logger("Inserção","OCT - Vítima", "Ocorrência n.".$id);
 
-      if($retorno_acao == "continuar"){ header("Location: FORM_vitima.php?id=".$id);}
+      if($retorno_acao == "continuar"){ header("Location: FORM_vitima.php?id_workshift=".$id_workshift."&id=".$id);}
       else                            { header("Location: FORM.php?id=".$id);       }
 
 
@@ -82,7 +82,7 @@
 
       logger("Atualização","OCT - Vítima", "Ocorrência n.".$id.", ID: ".$victim_sel);
 
-      if($retorno_acao == "continuar"){ header("Location: FORM_vitima.php?id=".$id);}
+      if($retorno_acao == "continuar"){ header("Location: FORM_vitima.php?id_workshift=".$id_workshift."&id=".$id);}
       else                            { header("Location: FORM.php?id=".$id);       }
       exit();
     }
@@ -101,7 +101,7 @@
       logger("Remoção","OCT - Vítima", "Ocorrência n.".$id.", Dados: ".$vit);
 
       pg_query($sql)or die("Erro ".__LINE__);
-      header("Location: FORM_vitima.php?id=".$id);
+      header("Location: FORM_vitima.php?id_workshift=".$id_workshift."&id=".$id);
       exit();
     }
 ?>

@@ -3,7 +3,7 @@
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
 
-  $sql = "SELECT * FROM sepud.oct_workshift WHERE id_company = '".$_SESSION['id_company']."' ORDER BY id DESC";
+  $sql = "SELECT * FROM sepud.oct_workshift WHERE id_company = '".$_SESSION['id_company']."' ORDER BY opened DESC";
   $rs  = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
 
   $turno_aberto = false;
@@ -11,7 +11,8 @@
   {
       $dados[] = $tmp;
       if($tmp['status'] == "aberto"){ $turno_aberto = true; $id_turno = $tmp['id'];}
-
+      $turnos[$tmp['status']][] = $tmp;
+      $qtd_turno_por_datas[substr($tmp['opened'],0,10)]++;
   }
 
 ?>
@@ -24,150 +25,168 @@
         <li><a href="index_sistema.php"><i class="fa fa-home"></i></a></li>
         <li><span class='text-muted'>Turnos</span></li>
       </ol>
-      <!--<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>-->
     </div>
   </header>
 
-
-<?
-
-  if(!pg_num_rows($rs))
-  {
-    echo "<div class='col-md-12'>
-    								<section class='panel'>
-                    <header class='panel-heading'>
-                    </header>
-                      <div class='panel-body'>
-                        <div class='alert alert-warning col-md-6 col-md-offset-3 text-center'><strong>Aviso: </strong> Nenhum turno cadastrado no sistema.</div>
-                      </div>
-                    </section>
-          </div>";
-
-  }else
-  {
-?>
 <div class="col-md-12">
 								<section class="panel box_shadow">
 									<header class="panel-heading" style="height:50px">
                     <div class="panel-actions" style='margin-top:-10px;'>
-                      <?
-                        if(!$turno_aberto){
-                      ?>
-                      <a href='oct/turno.php?id=<?=$id_turno;?>'>
-                        <button type='button' class='btn btn-primary'><i class="fa fa-plus"></i> Abrir novo turno de trabalho</button>
+                      <a href='oct/turno.php'>
+                        <button type='button' class='btn btn-info'><i class="fa fa-file-text-o"></i> <sup><i class="fa fa-plus"></i></sup> Novo turno</button>
                       </a>
-                    <? } ?>
-                      <!--<a href="#" ic-get-from="sistema/logs.php" ic-target="#wrap" class="mb-xs mt-xs mr-xs btn btn-xs btn-primary"><i class="fa fa-user-plus"></i> Novo usuário !</a>-->
 									  </div>
                   </header>
 									<div class="panel-body">
-										<div class="table-responsive">
-											<table class="table table-hover mb-none">
-												<thead>
-
-												</thead>
-												<tbody>
 <?
-  $td_width = "140px";
-  if(!$turno_aberto)
-  {
-    echo "<tr class='warning'><td colspan='6'>Turno(s) fechado(s):</td></tr>";
-    echo "<tr>
-    <th><i>Turno</i></th>
-    <th><i>Período</i></th>
-    <th width='".$td_width."'><i>Abertura</i></th>
-    <th width='".$td_width."'><i>Fechamento</i></th>
-    <th><i>Observações</i></th>
-      <th class='text-center'><i class='fa fa-cogs'></i></th>
-    </tr>";
-  }
-  for($i=0; $i<count($dados);$i++)
-  {
-    $d = $dados[$i];
-
-    if($d['status'] == "aberto"){
-      echo "<tr class='success'><td colspan='6'>Turno aberto:</td></tr>";
-      echo "<tr>
-      <th><i>Turno</i></th>
-      <th><i>Período</i></th>
-      <th width='".$td_width."'><i>Abertura</i></th>
-      <th width='".$td_width."'><i>Fechamento</i></th>
-      <th><i>Observações</i></th>
-        <th class='text-center'><i class='fa fa-cogs'></i></th>
-      </tr>";
-    }
-
-
-    echo "<tr>";
-    echo "<td class='text-muted'>".$d['id']."</td>";
-    echo "<td>".ucfirst($d['period'])."</td>";
-    echo "<td>".formataData($d['opened'],1)."</td>";
-    echo "<td>".formataData($d['closed'],1)."</td>";
-    echo "<td>".$d['observation']."</td>";
-
-    if($d['status'] == "aberto"){ $icon = "fa-cogs";}
-    else                        { $icon = "fa-eye"; }
-
-    echo "<td class='actions text-center'>
-            <a href='oct/index.php?id_workshift=".$d['id']."' class='btn btn-xs btn-default loading2'><i class='fa ".$icon."'></i></a>
-          </td>";
-
-    if($d['status'] == "aberto"){
-      echo "<tr class='warning'><td colspan='6'>Turno(s) fechado(s):</td></tr>";
-      echo "<tr>
-        <th><i>Turno</i></th>
-        <th><i>Período</i></th>
-        <th width='".$td_width."'><i>Abertura</i></th>
-        <th width='".$td_width."'><i>Fechamento</i></th>
-        <th><i>Observações</i></th>
-        <th class='text-center'><i class='fa fa-cogs'></i></th>
-      </tr>";
-    }
-
-    echo "</tr>";
-
-  }
-
+  //print_r_pre($qtd_turno_por_datas);
 ?>
-								  </tbody>
-											</table>
+
+										<div class="table-responsive">
+
+                      <table class="table table-hover mb-none">
+                        <thead>
+                          <tr class='success'><td colspan='3'>Turno aberto:</td><td colspan='3' class='text-right'><b><?=(isset($turnos['aberto'])?count($turnos['aberto']):"0");?></b> turno(s)</td></tr>
+                        </thead>
+                        <tbody>
+                            <?
+                                unset($i, $d);
+                                if(isset($turnos['aberto']) && count($turnos['aberto']))
+                                {
+                                    echo "<tr>
+                                            <th width='10px'><i>Turno</i></th>
+                                            <th width='10px'><i>Grupo</i></th>
+                                            <th width='10px'><i>Abertura</i></th>
+                                            <th width='10px'><i>Fechamento</i></th>
+                                            <th><i>Observações</i></th>
+                                            <th width='10px' class='text-center'><i class='fa fa-cogs'></i></th>
+                                          </tr>";
+                                    for($i = 0; $i<count($turnos['aberto']);$i++)
+                                    {
+                                      $d = $turnos['aberto'][$i];
+                                      echo "<tr>";
+                                      echo "<td class='text-muted'>".$d['id']."</td>";
+                                      echo "<td nowrap>".ucfirst($d['workshift_group'])."</td>";
+                                      echo "<td nowrap>".formataData($d['opened'],1)."</td>";
+                                      echo "<td nowrap>".formataData($d['closed'],1)."</td>";
+                                      echo "<td>".$d['observation']."</td>";
+
+                                      if($d['status'] == "aberto"){ $icon = "fa-cogs";}
+                                      else                        { $icon = "fa-eye"; }
+
+                                      echo "<td class='actions text-center'>
+                                              <a href='oct/index.php?id_workshift=".$d['id']."' class='btn btn-xs btn-default loading2'><i class='fa ".$icon."'></i></a>
+                                            </td>";
+
+                                      echo "</tr>";
+                                  }
+                                }else {
+                                  echo "<tr><td colspan='6'><div class='alert alert-warning text-center'><i>Nenhum turno aberto.</i></div></td></tr>";
+                                }
+                            ?>
+                        </tbody>
+                      </table>
+
+                      <table class="table table-hover mb-none">
+                        <thead>
+                          <tr class='warning'><td colspan='3'>Turno(s) fechado(s):</td><td colspan='3' class='text-right'><b><?=(isset($turnos['fechado'])?count($turnos['fechado']):"0");?></b> turno(s)</td></tr>
+                        </thead>
+                        <tbody>
+                            <?
+                                unset($i, $d);
+                                if(isset($turnos['fechado']) && count($turnos['fechado']))
+                                {
+                                    echo "<tr>
+                                            <th width='10px'><i>Turno</i></th>
+                                            <th width='10px'><i>Grupo</i></th>
+                                            <th width='10px'><i>Abertura</i></th>
+                                            <th width='10px'><i>Fechamento</i></th>
+                                            <th><i>Observações</i></th>
+                                            <th width='10px' class='text-center'><i class='fa fa-cogs'></i></th>
+                                          </tr>";
+                                    for($i = 0; $i<count($turnos['fechado']);$i++)
+                                    {
+                                      $d = $turnos['fechado'][$i];
+                                      if($qtd_turno_por_datas[substr($d['opened'],0,10)] > 1){ $bg_color="background:#FFFFD0";}else{ $bg_color = "";}
+                                      echo "<tr>";
+                                      echo "<td class='text-muted'>".$d['id']."</td>";
+                                      echo "<td nowrap>".ucfirst($d['workshift_group'])."</td>";
+                                      echo "<td nowrap style='".$bg_color."'>".formataData($d['opened'],1)."</td>";
+                                      echo "<td nowrap>".formataData($d['closed'],1)."</td>";
+                                      echo "<td>".$d['observation']."</td>";
+
+                                      if($d['status'] == "aberto"){ $icon = "fa-cogs";}
+                                      else                        { $icon = "fa-eye"; }
+
+                                      echo "<td class='actions text-center'>
+                                              <a href='oct/index.php?id_workshift=".$d['id']."' class='btn btn-xs btn-default loading2'><i class='fa ".$icon."'></i></a>
+                                            </td>";
+
+                                      echo "</tr>";
+                                  }
+                                  echo "<tr><td></td><td></td><td style='background:#FFFFD0'></td><td colspan='3' calss='text-muted'><i><small><b>Legenda: </b>Mais de um turno com mesma data inicial.</small></i></td></tr>";
+                                }else {
+                                  echo "<tr><td colspan='6'><div class='alert alert-warning text-center'><i>Nenhum turno fechado.</i></div></td></tr>";
+                                }
+                            ?>
+                        </tbody>
+                      </table>
+
+                      <table class="table table-hover mb-none">
+                        <thead>
+                          <tr class='info'><td colspan='3'>Turno(s) inativo(s):</td><td colspan='3' class='text-right'><b><?=(isset($turnos['inativo'])?count($turnos['inativo']):"0");?></b> turno(s)</td></tr>
+                        </thead>
+                        <tbody>
+                            <?
+                                unset($i, $d);
+                                if(isset($turnos['inativo']) && count($turnos['inativo']))
+                                {
+                                    echo "<tr>
+                                            <th width='10px'><i>Turno</i></th>
+                                            <th width='10px'><i>Grupo</i></th>
+                                            <th width='10px'><i>Abertura</i></th>
+                                            <th width='10px'><i>Fechamento</i></th>
+                                            <th><i>Observações</i></th>
+                                            <th width='10px' class='text-center'><i class='fa fa-cogs'></i></th>
+                                          </tr>";
+                                    for($i = 0; $i<count($turnos['inativo']);$i++)
+                                    {
+                                      $d = $turnos['inativo'][$i];
+                                      if($qtd_turno_por_datas[substr($d['opened'],0,10)] > 1){ $bg_color="background:#FFFFD0";}else{ $bg_color = "";}
+                                      echo "<tr>";
+                                      echo "<td class='text-muted'>".$d['id']."</td>";
+                                      echo "<td nowrap>".ucfirst($d['workshift_group'])."</td>";
+                                      echo "<td nowrap style='".$bg_color."'>".formataData($d['opened'],1)."</td>";
+                                      echo "<td nowrap>".formataData($d['closed'],1)."</td>";
+                                      echo "<td>".$d['observation']."</td>";
+
+                                      if($d['status'] == "aberto"){ $icon = "fa-cogs";}
+                                      else                        { $icon = "fa-eye"; }
+
+                                      echo "<td class='actions text-center'>
+                                              <a href='oct/index.php?id_workshift=".$d['id']."' class='btn btn-xs btn-default loading2'><i class='fa ".$icon."'></i></a>
+                                            </td>";
+
+                                      echo "</tr>";
+                                  }
+                                  echo "<tr><td></td><td></td><td style='background:#FFFFD0'></td><td colspan='3' calss='text-muted'><i><small><b>Legenda: </b>Mais de um turno com mesma data inicial.</small></i></td></tr>";
+                                }else {
+                                  echo "<tr><td colspan='6'><div class='alert alert-warning text-center'><i>Nenhum turno inativo.</i></div></td></tr>";
+                                }
+                            ?>
+                        </tbody>
+                      </table>
+
+
+
+
+
+
 										</div>
 									</div>
 								</section>
 							</div>
 
-<? } ?>
-
-<!-- Modal Warning -->
-								<!--	<a class="mb-xs mt-xs mr-xs modal-basic btn btn-warning" href="#modalRemover" remover_id="4">Remover 1</a>
-                  <a class="mb-xs mt-xs mr-xs modal-basic btn btn-warning" href="#modalRemover" remover_id="5">Remover 2</a>-->
-
-									<div id="modalRemover" class="modal-block modal-header-color modal-block-warning mfp-hide">
-										<section class="panel">
-											<header class="panel-heading">
-												<h2 class="panel-title">Atenção</h2>
-											</header>
-											<div class="panel-body">
-												<div class="modal-wrapper">
-													<div class="modal-icon">
-														<i class="fa fa-warning"></i>
-													</div>
-													<div class="modal-text">
-														<h4>Você tem certeza que deseja remover este cadastro?</h4>
-														<p>Esta operação é permanente.</p>
-													</div>
-												</div>
-											</div>
-											<footer class="panel-footer">
-												<div class="row">
-													<div class="col-md-12 text-right">
-                            <button class="btn btn-warning modal-confirm">Remover</button>
-														<button class="btn btn-default modal-dismiss">Cancelar</button>
-													</div>
-												</div>
-											</footer>
-										</section>
-									</div>
 </section>
 <script>
 (function( $ ) {
