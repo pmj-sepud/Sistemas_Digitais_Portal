@@ -12,6 +12,8 @@
       if($age         != ""){ $age         = "'".$age."'";         }else{ $age         = "Null"; }
       if($refuse_help != ""){ $refuse_help = "'".$refuse_help."'"; }else{ $refuse_help = "Null"; }
       if($state       != ""){ $state       = "'".$state."'";       }else{ $state       = "Null"; }
+      if($refuse_redir!= ""){ $refuse_redir= "'".$refuse_redir."'";}else{ $refuse_redir= "Null"; }
+      if($death       != ""){ $death       = "'".$death."'";       }else{ $death       = "Null"; }
 
       $sql = "INSERT INTO sepud.oct_victim
                           (name,
@@ -26,7 +28,9 @@
                            rg,
                            cpf,
                            mother_name,
-                           conducted)
+                           conducted,
+                           refuse_redir,
+                           death)
                   VALUES ('".$name."',
                           '".$id."',
                           ".$age.",
@@ -39,7 +43,9 @@
                           '".$rg."',
                           '".$cpf."',
                           '".$mother_name."',
-                          '".$conducted."')";
+                          '".$conducted."',
+                          ".$refuse_redir.",
+                          ".$death.")";
       pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
 
       /*
@@ -63,6 +69,8 @@
       if($age != "")        { $age         = "'".$age."'";         }else{ $age         = "Null"; }
       if($refuse_help != ""){ $refuse_help = "'".$refuse_help."'"; }else{ $refuse_help = "Null"; }
       if($state       != ""){ $state       = "'".$state."'";       }else{ $state       = "Null"; }
+      if($refuse_redir!= ""){ $refuse_redir= "'".$refuse_redir."'";}else{ $refuse_redir= "Null"; }
+      if($death       != ""){ $death       = "'".$death."'";       }else{ $death       = "Null"; }
 
       $sql = "UPDATE sepud.oct_victim SET
                      name                = '".$name."',
@@ -76,7 +84,9 @@
                      rg                  = '".$rg."',
                      cpf                 = '".$cpf."',
                      mother_name         = '".$mother_name."',
-                     conducted           = '".$conducted."'
+                     conducted           = '".$conducted."',
+                     refuse_redir        = ".$refuse_redir.",
+                     death               = ".$death."
               WHERE id = '".$victim_sel."'";
       pg_query($sql)or die("Erro ".__LINE__);
 

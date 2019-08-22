@@ -425,6 +425,12 @@ if($_SESSION['id']==1)
               <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=e">Encaminhamento</a></li>
               <li class="divider"></li>
               <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=f">Ocorrência Terminada</a></li>
+              <li class="divider"></li>
+              <li class="text-center"><span class='text-warning'><i>Cancelar ocorrência</i></span></li>
+              <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=ce">Evadido/Não Localiz.</a></li>
+              <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=ct">Trote</a></li>
+              <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=cc">Central</a></li>
+              <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=cs">Sem recurso</a></li>
             </ul>
           </div>
           <button id='bt_atualizar_oc'  type='submit' class="btn btn-primary bt_atualizar_oc" role="button">Atualizar Ocorrência</button>
@@ -552,10 +558,6 @@ if($_SESSION['id']==1)
                                   echo "</tbody>";
                                   echo "</table>";
                                 }
-                                //print_r_pre($veics);
-                              //  echo "<hr>";
-                              //  print_r_pre($vits);
-                              //  echo "<hr>";
                             ?>
             								</div>
             							</section>
@@ -690,7 +692,14 @@ if($_SESSION['id']==1)
             <table class="table table-condensed">
               <tbody>
                 <tr><td>Abertura:</td>     <td class=""><b><?=substr(formataData($dados['date'],1),0,16);?></b></td></tr>
-                <? if($dados['arrival']!=""){
+                <?
+                    if($dados['on_way']!=""){
+                        echo "<tr><td>Deslocamento:</td><td class=''><input class='changefield' style='border-width:0px;border:none;height:15px;font-weight:bold;' type='datetime-local' name='on_way' value='".substr(str_replace(" ","T",$dados['on_way']),0,16)."'> <i class='fa fa-pencil'></i></td></tr>";
+                    }else{
+                          echo "<tr><td>Deslocamento:</td><td class='text-center'></td></tr>";
+                    }
+
+                    if($dados['arrival']!=""){
                         echo "<tr><td>Chegada:</td><td class=''><input class='changefield' style='border-width:0px;border:none;height:15px;font-weight:bold;' type='datetime-local' name='arrival' value='".substr(str_replace(" ","T",$dados['arrival']),0,16)."'> <i class='fa fa-pencil'></i></td></tr>";
                     }else{
                           echo "<tr><td>Chegada:</td><td class='text-center'></td></tr>";
@@ -744,11 +753,6 @@ if($_SESSION['id']==1)
                     {
                       while($f = pg_fetch_assoc($res))
                       {
-
-                      //  $aux = explode(".",$f['image']);
-                      //  $aux = explode("_",$aux[0]);
-                      //  $id_img = ltrim(end($aux),"0");
-
                         echo  "<img src='oct/uploads/".$id."/".$f['image']."' style='padding:2px; width:100px' data-toggle='modal' data-target='#modalFotos' />";
                         $arqs_imgs[] = "oct/uploads/".$id."/".$f['image'];
                       }
@@ -811,6 +815,12 @@ if($_SESSION['id']==1)
     							<li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=e">Encaminhamento</a></li>
     							<li class="divider"></li>
     							<li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=f">Ocorrência Terminada</a></li>
+                  <li class="divider"></li>
+                  <li class="text-center"><span class='text-warning'><i>Cancelar ocorrência</i></span></li>
+                  <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=ce">Evadido/Não Localiz.</a></li>
+                  <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=ct">Trote</a></li>
+                  <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=cc">Central</a></li>
+                  <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=cs">Sem recurso</a></li>
     						</ul>
     					</div>
               <button id='bt_atualizar_oc' type='submit' class="btn btn-primary bt_atualizar_oc" role="button">Atualizar Ocorrência</button>

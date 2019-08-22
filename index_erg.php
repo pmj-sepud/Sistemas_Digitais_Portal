@@ -11,11 +11,13 @@
 		<meta charset="UTF-8">
 
 		<title>SISTEMAS DIGITAIS</title>
+		<meta http-equiv="Pragma" content="no-cache">
+		<meta http-equiv="Expires" content="-1">
 		<meta name="mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="keywords" content="GESTÃO CONTROLE CONVÊNIO" />
 		<meta name="description" content="SISTEMA DE GESTÃO INTERNO">
-		<meta name="author" content="">
+		<meta name="author" content="PMJ-SEPUD">
 
 		<!-- Mobile Metas -->
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />

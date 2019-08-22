@@ -80,8 +80,9 @@
         if($id_addressbook  == ""){ $id_addressbook ="Null"; }else{ $id_addressbook  = "'".$id_addressbook."'";}
         if($id_garrison     == ""){ $id_garrison    ="Null"; }else{ $id_garrison     = "'".$id_garrison."'";   }
         if($id_workshift    == ""){ $id_workshift   ="Null"; }else{ $id_workshift    = "'".$id_workshift."'";  }
-        if($closure         != ""){ $sql_closure    = ",closure = '".$closure."'";  }
-        if($arrival         != ""){ $sql_arrival    = ",arrival = '".$arrival."'";  }
+        if($closure         != ""){ $sql_closure    = ",closure = '".$closure."'";  }else{ $sql_closure    = ",closure = Null"; }
+        if($arrival         != ""){ $sql_arrival    = ",arrival = '".$arrival."'";  }else{ $sql_arrival    = ",arrival = Null";}
+        if($on_way          != ""){ $sql_on_way     = ",on_way = '".$on_way."'";    }else{ $sql_on_way     = ",on_way = Null";}
 
 
 
@@ -103,6 +104,7 @@
                      id_workshift       = ".$id_workshift."
                      ".$sql_closure."
                      ".$sql_arrival."
+                     ".$sql_on_way."
                WHERE id                 = '".$id."'";
 
         pg_query($sqlCond.$sql) or die("Erro ".__LINE__."<br>SQL: ".$sql);
@@ -120,7 +122,7 @@ if($_GET['status_acao'] == "atualizar" && $_GET['id'] != "")
     switch ($_GET['status_alterar']) {
       case 'd':
         $var_status = "Em deslocamento";
-        $sqlU = "UPDATE sepud.oct_events SET active = true, closure = null, arrival = null,  status = '".$var_status."' WHERE id = '".$_GET['id']."'";
+        $sqlU = "UPDATE sepud.oct_events SET active = true, closure = null, arrival = null,  status = '".$var_status."', on_way = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
         break;
       case 'a':
         $var_status = "Em atendimento";
@@ -134,6 +136,27 @@ if($_GET['status_acao'] == "atualizar" && $_GET['id'] != "")
         $var_status = "Ocorrência terminada";
         $sqlU = "UPDATE sepud.oct_events SET status = '".$var_status."', active = false, closure = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
         break;
+
+      case 'ce':
+        $var_status = "Ocorrência cancelada - Evadido/Não localizado";
+        $sqlU = "UPDATE sepud.oct_events SET status = '".$var_status."', active = false, closure = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
+        break;
+
+      case 'ct':
+        $var_status = "Ocorrência cancelada - trote";
+        $sqlU = "UPDATE sepud.oct_events SET status = '".$var_status."', active = false, closure = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
+        break;
+
+      case 'cc':
+        $var_status = "Ocorrência cancelada - Central de atendimento";
+        $sqlU = "UPDATE sepud.oct_events SET status = '".$var_status."', active = false, closure = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
+        break;
+
+      case 'cs':
+        $var_status = "Ocorrência cancelada - Sem recurso";
+        $sqlU = "UPDATE sepud.oct_events SET status = '".$var_status."', active = false, closure = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
+        break;
+
       default:
         $var_status = "Em atendimento";
         $sqlU = "UPDATE sepud.oct_events SET active = true, closure = null, status = '".$var_status."' WHERE id = '".$_GET['id']."'";

@@ -39,7 +39,9 @@
         {
           if($d['type']=="agente")
           {
-            if($d['status']=="ativo")
+            if($d['status']=="ativo" ||
+               $d['status']=="HE-Compensação" ||
+               $d['status']=="Serviços")
             {
               $agentes_turno['ativos'][] = $d;
             }else{
@@ -74,7 +76,41 @@
     $$turno_aberto = false;
   }
 ?>
+<style>
+.pulse {
+  box-shadow: 0 0 0 rgba(0,0,255, 1);
+  animation: pulse 3s infinite;
+}
+.pulse:hover {
+  animation: none;
+}
 
+@-webkit-keyframes pulse {
+  0% {
+    -webkit-box-shadow: 0 0 0 0 rgba(240, 173, 78, 1);
+  }
+  70% {
+      -webkit-box-shadow: 0 0 0 20px rgba(240, 173, 78, 0);
+  }
+  100% {
+      -webkit-box-shadow: 0 0 0 0 rgba(240, 173, 78, 0);
+  }
+}
+@keyframes pulse {
+  0% {
+    -moz-box-shadow: 0 0 0 0 rgba(240, 173, 78, 1);
+    box-shadow: 0 0 0 0 rgba(240, 173, 78, 1);
+  }
+  70% {
+      -moz-box-shadow: 0 0 0 15px rgba(240, 173, 785, 0);
+      box-shadow: 0 0 0 15px rgba(240, 173, 78, 0);
+  }
+  100% {
+      -moz-box-shadow: 0 0 0 0 rgba(240, 173, 785, 0);
+      box-shadow: 0 0 0 0 rgba(240, 173, 78, 0);
+  }
+}
+</style>
 <section role="main" class="content-body">
   <header class="page-header hidden-print">
     <h2>Registro de Ocorrências de Trânsito e Segurança</h2>
@@ -95,7 +131,7 @@
             <header class="panel-heading" style="height:70px">
                 <?=$_SESSION['company_acron']." - ".$_SESSION['company_name'];?><br>
                 <span class="text-muted"><small><i>Data atual:</i></small> <b><?=$agora['data'];?></b></span>
-                <div class="panel-actions hidden-print" style="margin-top:5px">
+                <div class="panel-actions" style="margin-top:5px">
                     <?
 
                       if($turno['id']!="")
@@ -105,24 +141,52 @@
 
                             if(isset($qtd_agentes) && $qtd_agentes > 0)
                             {
-                              echo " <a href='oct/veiculo_turno_FORM.php?turno=".$turno['id']."'><button id='bt_atualizar_veiculo' type='button' class='btn btn-primary'><i class='fa fa-cab'></i> Guarnições</button></a>";
-                              //echo " <a href='oct/veiculo_registros_FORM.php?turno=".$turno['id']."'><button id='bt_atualizar_veiculo' type='button' class='btn btn-primary'><i class='fa fa-cab'></i> Registros da VTR</button></a>";
+                                    if($_SESSION['id']==1){
+                                        echo " <a href='oct/guarnicao_FORM.php?id_workshift=".$turno['id']."'><button id='bt_atualizar_veiculo' type='button' class='btn btn-warning'><i class='fa fa-cab'></i> Guarnições v2</button></a>";
+                                    }else{
+                                      echo " <a href='oct/veiculo_turno_FORM.php?turno=".$turno['id']."'><button id='bt_atualizar_veiculo' type='button' class='btn btn-primary'><i class='fa fa-cab'></i> Guarnições</button></a>";
+                                    }
+
+
+                                    echo "<style>";
+                                    echo ".panel-actions a,
+                                    .panel-actions .panel-action {
+                                    	text-align: left;
+                                    	width: 100%;
+                                    }";
+                                    echo "</style>";
+
+                                    echo " <div class='btn-group'>
+              												        <button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown'><i class='fa fa-file-text-o'></i> Registros do turno <small><sup><i class='fa fa-chevron-down'></i></sup></small></button>
+              												        <ul class='dropdown-menu'><span style='margin-left:5px;color:#BBBBBB'><i>Novo registro:</i></span>
+              												            <li><a href='oct/registros_de_turno_FORM.php?id_workshift=".$turno['id']."&tipo_registro=veiculo'>Veículo</a></li>
+              												            <li><a href='oct/registros_de_turno_FORM.php?id_workshift=".$turno['id']."&tipo_registro=pessoa'>Pessoa</a></li>";
+                                            echo "<li><a href='oct/registros_de_turno_FORM.php?id_workshift=".$turno['id']."&tipo_registro=guarnicao'>Guarnição</a></li>";
+                                            echo "<!--<hr style='margin-top:5px;margin-bottom:5px'>-->
+                                                  <span style='margin-left:5px;color:#BBBBBB'><i>Visualizar:</i></span>
+                                                  <li><a href='oct/registros_de_turno_VIS.php?id_workshift=".$turno['id']."'><i class='fa fa-search'></i> Registros</a></li>
+              												        </ul>
+              												    </div>";
+
                             }else {
-                              echo " <button type='button' class='btn  btn-primary disabled'><i class='fa fa-cab'></i> Inserir guarnições</button>";
+
+                                  echo " <button type='button' class='btn  btn-primary disabled'><i class='fa fa-cab'></i> Inserir guarnições</button>";
+
                             }
 
                             echo " <button id='bt_print' class='btn btn-primary'><i class='fa fa-print'></i> Imprimir</button>";
 
-                            echo " <a href='oct/turno.php'><button type='button' class='btn btn-info'><i class='fa fa-file-text-o'></i> <sup><i class='fa fa-plus'></i></sup> Novo turno</button></a>";
+                            echo " <a href='oct/turno.php'><button type='button' class='btn btn-info'><i class='fa fa-calendar'></i> <sup><i class='fa fa-plus'></i></sup> Novo turno</button></a>";
                       }else {
                         echo " <a href='oct/turnos_INDEX.php'><button type='button' class='btn btn-primary'><i class='fa fa-file-text-o'></i> <sup><i class='fa fa-search'></i></sup> Visualizar turnos</button></a>";
-                        echo " <a href='oct/turno.php'><button type='button' class='btn btn-info'><i class='fa fa-file-text-o'></i> <sup><i class='fa fa-plus'></i></sup> Novo turno</button></a>";
+                        echo " <a href='oct/turno.php'><button type='button' class='btn btn-info'><i class='fa fa-calendar'></i> <sup><i class='fa fa-plus'></i></sup> Novo turno</button></a>";
                       }
                   ?>
                 </div>
             </header>
             <div class="panel-body">
-
+<?
+?>
               <div class="row">
                 <div class="col-sm-12">
                     <h4><b>Informações gerais</b></h4>
@@ -427,11 +491,76 @@
 
               </div>
 
+<?
+if($turno_aberto)
+{
+    $sql = "SELECT
+              G.*
+            FROM
+              sepud.oct_garrison G
+            WHERE
+              G.id_workshift = '".$turno['id']."' AND G.name is not null ORDER BY G.opened ASC";
+    $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);;
+
+    echo "<div class='row'>
+            <div class='col-sm-12'>
+              <div class='table-responsive'>
+                        <table class='table table-condensed'>
+                        <thead><tr><th colspan='5'><h4><b>Guarnições <sup>(versão 2)</sup></b></h4></th></tr>";
+                        if(pg_num_rows($res))
+                        {
+                          echo "<tr><td><i><small>#</small></i></td>
+                                    <td><i><small>Grupamento</small></i></td>
+                                    <td><i><small>Início</small></i></td>
+                                    <td><i><small>Fim</small></i></td>
+                                    <td></td>
+                                </tr>";
+                          echo "</thead>";
+                          while($dG = pg_fetch_assoc($res))
+                          {
+
+                            unset($dt_opened, $dt_closed);
+                            if($dG['opened']!=""){
+                                $aux       = explode(" ",formataData($dG['opened'],1));
+                                $dt_opened = "<small>".$aux[0]."</small> <b>".$aux[1]."</b>";
+                              }else {
+                                $dt_opened = "";
+                              }
+
+                              if($dG['closed']!=""){
+                                  $aux       = explode(" ",formataData($dG['closed'],1));
+                                  $dt_closed = "<small>".$aux[0]."</small> <b>".$aux[1]."</b>";
+                                }else {
+                                  $dt_closed = "";
+                                }
+                            echo "<tr class='".($dG['closed']==""?"success":"warning")."'>";
+                              echo "<td><small><i>".number_format($dG['id'],0,'','.')."</i></small></td>";
+                              echo "<td width='90px'><b>".ucfirst($dG['name'])."</b></td>";
+                              echo "<td width='125px'>".$dt_opened."</td>";
+                              echo "<td width='125px'>".$dt_closed."</td>";
+                              echo "<td width='100px' class='text-center'>";
+                                echo "<a href='oct/guarnicao_FORM.php?id_garrison=".$dG['id']."&id_workshift=".$turno['id']."' class='btn btn-xs btn-default'><i class='fa fa-cab'></i> Atualizar</a>";
+                              echo "</td>";
+                            echo "</tr>";
+                            echo "<tr>";
+                              echo "<td colspan='5'><small class='text-muted'>Observações:</small><br>".$dG['observation']."</td>";
+                            echo "<tr>";
+                          }
+
+                        }else {
+                          echo "</thead><tbody><tr><td><small><i class='text-muted'>Aguarde, em desenvolvimento</i></small></td></tr></tbody>";
+                        }
+                        echo "</table>";
+        echo "</div>
+      </div>
+  </div>";
+}
+?>
 
               <div class="row">
                 <div class="col-sm-12">
 
-<div class="table-responsive">
+                  <div class="table-responsive">
                                   <table class='table table-condensed'>
                                   <thead><tr><th><h4><b>Guarnições</b></h4></th></tr></thead>
                                   <tbody>
@@ -525,10 +654,10 @@
                                                         }
                                                         echo "</tbody></table>";
                                                     }else {
-                                                        echo "<small class='text-muted'>Nenhuma guarnição criada.</small>";
+                                                        echo "<small class='text-muted'><i>Nenhuma guarnição criada.</i></small>";
                                                     }
                                                 }else {
-                                                  echo "<small class='text-muted'>Nenhuma guarnição criada.</small>";
+                                                  echo "<small class='text-muted'><i>Nenhuma guarnição criada.</i></small>";
                                                 }
                                             ?>
                                       </td>

@@ -77,8 +77,9 @@
         <li><a href="oct/dashboard.php">5. Evolução mensal</a></li>
 
   <?
-      if($_SESSION['id']==8 || $_SESSION['id']==1){
+      if($_SESSION['id_company']==8 || $_SESSION['id']==1){
         echo "<li><a href='oct/dashboard_SAMU.php'>5.1. Evolução mensal - SAMU</a></li>";
+        echo "<li><a href='oct/rel_olostech_SAMU.php'>5.2. Relatório Olostech - SAMU</a></li>";
       }
   ?>
 

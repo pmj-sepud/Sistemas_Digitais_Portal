@@ -55,10 +55,9 @@
                                     <div class="row">
                                         <div class="col-md-12">
                                           <?
-                                          $sql = "SELECT * FROM sepud.oct_fleet WHERE id_company = '".$_SESSION['id_company']."' ORDER BY brand DESC, model ASC";
-                                          $res = pg_query($sql)or die("Erro ".__LINE__);
-                                          while($d = pg_fetch_assoc($res)){ $autos[$d['type']][] = $d;}
-
+                                            $sql = "SELECT * FROM sepud.oct_fleet WHERE id_company = '".$_SESSION['id_company']."' ORDER BY brand DESC, model ASC";
+                                            $res = pg_query($sql)or die("Erro ".__LINE__);
+                                            while($d = pg_fetch_assoc($res)){ $autos[$d['type']][] = $d;}
                                           ?>
                                               <div class="form-group">
                                               <label class="control-label">Veículo:</label>
@@ -87,10 +86,10 @@
                                        <label class="control-label">Motorista:</label>
                                        <select id="id_user" name="id_user" class="form-control select2">
                                           <?
-                                              $sql = "SELECT U.id, U.name, U.nickname, U.registration
+                                              $sql = "SELECT DISTINCT U.id, U.name, U.nickname, U.registration
                                                       FROM sepud.oct_rel_workshift_persona W
                                                       JOIN sepud.users U ON U.id = W.id_person
-                                                      WHERE W.id_shift = '".$turno."' AND W.status = 'ativo' ORDER BY U.nickname ASC";
+                                                      WHERE W.id_shift = '".$turno."' AND W.status in ('ativo', 'HE-Compensação', 'Serviços') ORDER BY U.nickname ASC";
                                               $res = pg_query($sql)or die("<option>SQL ERROR ".__LINE__."</option>");
                                               echo "<option value=''></option>";
                                               while($d = pg_fetch_assoc($res))
@@ -134,13 +133,13 @@
                                     <div class="col-md-6">
                                       <div class="form-group">
                                        <label class="control-label">KM inicial:</label>
-                                       <input name="initial_km" type="text" class="form-control" value="<?=$dados['initial_km'];?>">
+                                       <input name="initial_km" type="number" class="form-control campo_km" value="<?=$dados['initial_km'];?>">
                                       </div>
                                     </div>
                                     <div class="col-md-6">
                                       <div class="form-group">
                                         <label class="control-label">KM final:</label>
-                                        <input name="final_km" type="text" class="form-control" value="<?=$dados['final_km'];?>">
+                                        <input name="final_km" type="number" class="form-control campo_km" value="<?=$dados['final_km'];?>">
                                       </div>
                                     </div>
                                 </div>
@@ -248,7 +247,7 @@
 <script>
 $('.select2').select2();
 $(document).ready(function(){ $(this).scrollTop(0);});
-
+$(".campo_km").mask('000000');
 
 function remove_passageiro(id_user_pass)
 {

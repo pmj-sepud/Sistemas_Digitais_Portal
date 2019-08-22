@@ -329,6 +329,7 @@ echo "</div>";
             </div>
 
     </div>
+<!--
 <div class="row">
   <div class="col-sm-12">
     <div class="form-group">
@@ -337,7 +338,7 @@ echo "</div>";
    </div>
   </div>
 </div>
-
+-->
     <footer class="panel-footer text-center" style="margin-top:20px">
 
           <input type="hidden" id="data" name="data" value="<?=$agora['data'];?>">
@@ -366,7 +367,12 @@ echo "</div>";
 </section>
 </form>
 <script>
+
+$("form :input").attr("autocomplete", "off");
+
 $(document).ready(function() {
+    $('#pesquisa').focus();
+    $('#pesquisa').click();
     document.body.scrollTop = 0;            // For Safari
     document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
 });
@@ -446,6 +452,12 @@ $("#pesquisa").click(function(){
 $("#pesquisa_btn").click(function(){
     var query = $("#pesquisa").val();
     $("#vagas").load("erg/app_pesquisa_vaga.php?origem=pesquisa_vaga_form&query="+query);
+
+    document.body.scrollTop = 275;            // For Safari
+    document.documentElement.scrollTop = 275; // For Chrome, Firefox, IE and Opera
+
+    $('#license_plate_letters').focus();
+    $('#license_plate_letters').click();
 });
 
 /*
@@ -462,6 +474,11 @@ $('#license_plate_letters').keyup(function () {
 <? } ?>
   $(this).val(letrasM);
   if(letras.length == 3){ $('#license_plate_numbers').focus();}
+});
+
+$('#license_plate_numbers').keyup(function(){
+  var num = $(this).val();
+  if(num.length == 4){ $('#license_plate_numbers').blur(); }
 });
 
 $('#license_plate_numbers_mercosul').keyup(function(){$(this).val($(this).val().toUpperCase());});

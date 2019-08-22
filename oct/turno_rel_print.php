@@ -7,6 +7,7 @@
   $id_workshift = $_GET['id_workshift'];
   logger("Acesso","OCT - Impressão do relatório de turno, turno ID: ".$id_workshift);
 
+
   if($id_workshift)
   {
 
@@ -31,18 +32,20 @@
                    JOIN sepud.users                      U ON U.id = WP.id_person
                 WHERE
                   WP.id_shift =  '".$turno['id']."'
-                ORDER BY U.name ASC";
+                ORDER BY WP.opened ASC";
       $resRecursos = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
 
       while($d = pg_fetch_assoc($resRecursos))
       {
           if($d['type']=="agente")
           {
-                if($d['status']=="ativo"){  $turno_agentes_campo['ativos'][] = $d; $qtd_agentes_ativos[] = $d["id_user"];}
-                else                     {  $turno_agentes_campo['outros'][] = $d; $qtd_agentes_afastados[] = $d["id_user"];}
+                if($d['status']=="ativo" ||
+                   $d['status']=="HE-Compensação" ||
+                   $d['status']=="Serviços"){  $turno_agentes_campo['ativos'][] = $d; $qtd_agentes_ativos[]    = $d["id_user"];}
+                else                        {  $turno_agentes_campo['outros'][] = $d; $qtd_agentes_afastados[] = $d["id_user"];}
           }else{
                 $turno_recursos[$d['type']][] = $d;
-                $qtd_agentes_ativos[] = $d["id_user"];
+                $qtd_agentes_ativos[]         = $d["id_user"];
           }
 
       }
@@ -55,7 +58,11 @@
       $garrison_info = pg_fetch_assoc($resG);
 
       $sqlOC = "SELECT
-                	E.id_garrison, S.name as logradouro, AB.name as addressbook_local, AB.obs as addressbook_ref, T.name as ocorrencia, E.description, E.date, E.closure, E.id
+                	E.id_garrison,
+                  S.name as logradouro,
+                  AB.name as addressbook_local, AB.obs as addressbook_ref,
+                  T.name as ocorrencia,
+                  E.description, E.date, E.arrival, E.closure, E.id
                 FROM
                 	sepud.oct_events E
                 JOIN sepud.oct_event_type T ON T.id = E.id_event_type
@@ -391,6 +398,102 @@ if($turno['config_rel_conducao']=="true"){
 <? } ?>
 
 
+<div class="row">
+  <div class="col-xs-12">
+    <?
+      $sqlH = "SELECT
+                	F.plate, F.type as vehicle_type, F.model, F.brand, F.nickname as vehicle_nickname,
+                	U.name, U.nickname, U.registration,
+                	H.*
+                FROM
+                	sepud.oct_workshift_history H
+                LEFT JOIN sepud.oct_fleet F ON F.id = H.id_vehicle
+                LEFT JOIN sepud.users U     ON U.id = H.id_user
+                WHERE
+                	id_workshift = '".$id_workshift."'";
+      $resH = pg_query($sqlH)or die("Sql error ".__LINE__);
+      while($dH = pg_fetch_assoc($resH))
+      {
+        $his[$dH['origin']][] = $dH;
+      }
+      /*
+      [id] => 44
+                 [id_garrison] => 1218
+                 [id_vehicle] =>
+                 [id_user] =>
+                 [obs] => Reunião das guarnições com gerente da guarda e diretora executiva da Seprot
+                 [id_workshift] => 199
+                 [km_initial] =>
+                 [km_final] =>
+                 [type] => reunião
+                 [origin] => guarnicao
+                 [opened] => 2019-08-16 14:51:00
+                 [closed] => 2019-08-16 17:45:00
+      */
+    ?>
+            <table class='table table-condensed'>
+            <thead><tr><th colspan="5"><h4>Registros do turno:</h4></th></tr>
+
+                  <?
+                    if(isset($his))
+                    {
+                      echo "<tr>
+                              <td><i>Envolvido(s)</i></td>
+                              <td><i>Registro</i></td>
+                              <td><i>Início</i></td>
+                              <td><i>Fim</i></td>
+                              <td><i>Observações</i></td>
+                            </tr></thead><tbody>";
+
+                      foreach ($his as $origem => $dHist)
+                      {
+                              for($i = 0;$i<count($dHist);$i++)
+                              {
+                                        unset($gp_hist,$sqlGP, $envolvidos);
+                                        if($dHist[$i]['id_garrison']!="")
+                                        {
+                                          $sqlGP = "SELECT
+                                                        GP.type,
+                                                        U.name, U.nickname, U.registration
+                                                      FROM
+                                                        sepud.oct_rel_garrison_persona GP
+                                                        JOIN sepud.users U ON U.ID = GP.id_user
+                                                      WHERE
+                                                        GP.id_garrison = '".$dHist[$i]['id_garrison']."' ORDER BY GP.type ASC";
+                                          $resGP = pg_query($sqlGP)or die("Erro ".__LINE__."<br>".$sqlGP);
+                                          while($dGP = pg_fetch_assoc($resGP))
+                                          {
+                                            $gp_hist[] = $dGP['nickname'];
+                                          }
+                                          $envolvidos = implode(", ",$gp_hist);
+                                        }elseif($dHist[$i]['id_user']!="")
+                                        {
+                                          $envolvidos = $dHist[$i]['name'];
+                                        }elseif($dHist[$i]['id_vehicle']!="")
+                                        {
+                                          $envolvidos = $dHist[$i]['plate']." - ".$dHist[$i]['vehicle_nickname'];
+                                        }
+
+                                echo "<tr>";
+                                echo "<td nowrap>".$envolvidos."</td>";
+                                echo "<td>".ucfirst($dHist[$i]['type'])."</td>";
+                                echo "<td><small>".str_replace(" ","<br>",formataData($dHist[$i]['opened'],1))."</small></td>";
+                                echo "<td><small>".str_replace(" ","<br>",formataData($dHist[$i]['closed'],1))."</small></td>";
+                                echo "<td>".$dHist[$i]['obs']."</td>";
+                                echo "</tr>";
+                              }
+                      }
+            echo "</tbody>";
+            }else {
+              echo "</thead><tbody><tr><td colspan='5'><i class='text-muted'>Nenhum registro neste turno.</i></td></tr></tbody>";
+            }
+                ?>
+
+            </table>
+  </div>
+</div>
+
+
           <div class="row">
             <div class="col-xs-12">
               <?
@@ -572,7 +675,7 @@ if($turno['config_rel_conducao']=="true"){
                                                           <td width='25px'><b>Ativos</b></td>
                                                           <td class='text-center' width='25px'><small><i>Matrícula</i></small></td>
                                                           <td><small><i>Nome</i></small></td>
-                                                          <td>&nbsp;</td>
+                                                          <td><small><i>Status</i></small></td>
                                                           <td class='text-center'><small><i>Entrada</i></small></td>
                                                           <td class='text-center'><small><i>Saída</i></small></td>
                                                     </tr>";
@@ -599,8 +702,7 @@ if($turno['config_rel_conducao']=="true"){
                                                           echo "<td>&nbsp;</td>";
                                                           echo "<td class='text-center'>".$agentes[$i]['registration']."</td>";
                                                           echo "<td>".$agentes[$i]['nome']."</td>";
-                                                          //echo "<td>".ucfirst($agentes[$i]['status'])."</td>";
-                                                          echo "<td>&nbsp;</td>";
+                                                          echo "<td>".ucfirst($agentes[$i]['status'])."</td>";
                                                           echo "<td width='125px' class='text-center'>".$dt_opened."</td>";
                                                           echo "<td width='125px' class='text-center'>".$dt_closed."</td>";
                                                         echo "</tr>";
@@ -751,7 +853,14 @@ if($turno['config_rel_conducao']=="true"){
                                       //echo "<td width='150px'><small class='text-muted'>Abertura:</small><br>".formataData($ocorrencias[$i]['date'],1)."</td>";
                                       //echo "<td width='150px'><small class='text-muted'>Fechamento:</small><br>".formataData($ocorrencias[$i]['closure'],1)."</td>";
 
-                                      echo "<td width='50px'><small class='text-muted'>Abertura:</small><br>".substr($ocorrencias[$i]['date'],11,5)."</td>";
+                                      if($ocorrencias[$i]['arrival']!="")
+                                      {
+                                        echo "<td width='50px'><small class='text-muted'><b>Chegada:</b></small><br>".substr($ocorrencias[$i]['arrival'],11,5)."</td>";
+                                      }else {
+                                        echo "<td width='50px'><small class='text-muted'>Abertura:</small><br>".substr($ocorrencias[$i]['date'],11,5)."</td>";
+                                      }
+
+
                                       echo "<td width='50px'><small class='text-muted'>Fechamento:</small><br>".substr($ocorrencias[$i]['closure'],11,5)."</td>";
                                     echo "</tr>";
 
@@ -770,7 +879,7 @@ if($turno['config_rel_conducao']=="true"){
                                                   echo implode(", ",$participantes);
                                                 }
                                             }else {
-                                              echo "<small class='text-danger'>Nenhuma guarnição associada a esta ocorrência.</small>";
+                                              echo "<small class='text-muted'>Nenhuma guarnição associada a esta ocorrência.</small>";
                                             }
                                       echo "</td>";
                                       echo "<td colspan='3'><small class='text-muted'>Descrição:</small><br>".$ocorrencias[$i]['description']."</td>";

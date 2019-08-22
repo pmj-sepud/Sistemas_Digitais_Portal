@@ -42,6 +42,9 @@
       </header>
       <div class="panel-body">
 
+
+<div class="row"><div class="col-sm-12"><hr><h4><i>Informações de gerais:</i></h4></div></div>
+
         <div class="row">
           <div class="col-sm-6">
             <!-- ========================================================= -->
@@ -54,24 +57,7 @@
                    </div>
                  </div>
             </div>
-            <div class="row">
-                  <div class="col-sm-8">
-                    <div class="form-group">
-                    <label class="control-label">Nome da mãe:</label>
-                        <input type="text" name="mother_name" placeholder="Nome completo" class="form-control" value="<?=$dados['mother_name'];?>">
-                   </div>
-                 </div>
 
-                 <div class="col-sm-4">
-                   <div class="form-group">
-                   <label class="control-label">Conduzido a delegacia:</label>
-                   <select name="conducted" class="form-control">
-                       <option value="f" <?=($dados['conducted']=="f"?"selected":"");?>>Não</option>
-                       <option value="t" <?=($dados['conducted']=="t"?"selected":"");?>>Sim</option>
-                   </select>
-                  </div>
-                </div>
-          </div>
 
           <div class="row">
                 <div class="col-sm-2">
@@ -106,8 +92,31 @@
             </div>
 </div>
 
+<div class="row"><div class="col-sm-12"><hr><h4><i>Informações de segurança pública:</i></h4></div></div>
+
 <div class="row">
-              <div class="col-sm-4">
+      <div class="col-sm-8">
+        <div class="form-group">
+        <label class="control-label">Nome da mãe:</label>
+            <input type="text" name="mother_name" placeholder="Nome completo" class="form-control" value="<?=$dados['mother_name'];?>">
+       </div>
+     </div>
+
+     <div class="col-sm-4">
+       <div class="form-group">
+       <label class="control-label">Conduzido a delegacia:</label>
+       <select name="conducted" class="form-control">
+           <option value="f" <?=($dados['conducted']=="f"?"selected":"");?>>Não</option>
+           <option value="t" <?=($dados['conducted']=="t"?"selected":"");?>>Sim</option>
+       </select>
+      </div>
+    </div>
+</div>
+
+<div class="row"><div class="col-sm-12"><hr><h4><i>Informações de saúde:</i></h4></div></div>
+
+<div class="row">
+              <div class="col-sm-6">
                 <div class="form-group">
                 <label class="control-label">Estado de saúde:</label>
                 <select id="state" name="state" class="form-control">
@@ -120,22 +129,48 @@
                 <!--<input type="text" name="state" class="form-control" value="<?=$dados['state'];?>">-->
                </div>
              </div>
-             <div class="col-sm-4">
+             <div class="col-sm-6">
                <div class="form-group">
-               <label class="control-label">Recusou atend. clínico:</label>
+               <label class="control-label">Óbito:</label>
+               <select id="death" name="death" class="form-control">
+                   <option value=""></option>
+                   <option value="t" <?=($dados['death']=="t"?"selected":"");?>>Sim</option>
+                   <option value="f" <?=($dados['death']=="f"?"selected":"");?>>Não</option>
+               </select>
+              </div>
+            </div>
+</div>
+<div class="row">
+             <div class="col-sm-6">
+               <div class="form-group">
+               <label class="control-label">Recusou atendimento clínico:</label>
                <select id="refuse_help" name="refuse_help" class="form-control">
                    <option value=""></option>
                    <option value="t" <?=($dados['refuse_help']=="t"?"selected":"");?>>Sim</option>
                    <option value="f" <?=($dados['refuse_help']=="f"?"selected":"");?>>Não</option>
                </select>
-               <!--<input type="text" name="genre" class="form-control" value="<?=$dados['genre'];?>">-->
               </div>
             </div>
+            <div class="col-sm-6">
+              <div class="form-group">
+              <label class="control-label">Recusou encaminhamento ao hospital/PA:</label>
+              <select id="refuse_redir" name="refuse_redir" class="form-control">
+                  <option value=""></option>
+                  <option value="t" <?=($dados['refuse_redir']=="t"?"selected":"");?>>Sim</option>
+                  <option value="f" <?=($dados['refuse_redir']=="f"?"selected":"");?>>Não</option>
+              </select>
+             </div>
            </div>
+           </div>
+
+
+           <div class="row"><div class="col-sm-12"><hr><h4><i>Informações adicionais:</i></h4></div></div>
+
+
            <div class="row">
              <div class="col-sm-8">
                    <div class="form-group">
-                     <label class="control-label" for="tipo_oc">Associar ao veículo:</label>
+                     <label class="control-label" for="tipo_oc">Associar a um veículo:</label>
                            <select id="id_vehicle" name="id_vehicle" class="form-control">
                                <option value="">- - -</option>
                              <?

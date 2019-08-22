@@ -124,14 +124,6 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
     }
  }
 
- if($_SESSION['id']==1)
- {
-   //echo "<div class='row'><div class='col-sm-6 col-sm-offset-3'>";
-   //print_r_pre($dados_garrison_passenger);
-   //echo "</div></div>";
- }
-//if($_SESSION['id']=="109"){ echo "<div class='' style='width:800px;margin-left:200px'>".$sql."</div>";}
-
  if(isset($eventos_com_providencia) && count($eventos_com_providencia))
  {
    $aux  = implode(",", $eventos_com_providencia);

@@ -52,7 +52,7 @@
                         }
 
                          $is_parking = "<br><a href='erg/app_FORM.php?id=".$d['is_parking_id']."' class='btn ".$btnclass."'>
-                                            Vaga ocupada por ".$d['is_parking']." a ".$diff." min<small style='color:white'><br>(Tolerância: ".$d['time']." min)<br>Clique para ir para o registro</small>
+                                            Vaga ocupada por ".$d['is_parking']."<br>a ".$diff." min<small style='color:white'><br>(Tolerância: ".$d['time']." min)<br>Clique para ir para o registro</small>
                                         </a>";
                         }else
                         {
