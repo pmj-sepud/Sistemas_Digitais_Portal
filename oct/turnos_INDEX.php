@@ -38,10 +38,6 @@
 									  </div>
                   </header>
 									<div class="panel-body">
-<?
-  //print_r_pre($qtd_turno_por_datas);
-?>
-
 										<div class="table-responsive">
 
                       <table class="table table-hover mb-none">
@@ -54,18 +50,18 @@
                                 if(isset($turnos['aberto']) && count($turnos['aberto']))
                                 {
                                     echo "<tr>
-                                            <th width='10px'><i>Turno</i></th>
-                                            <th width='10px'><i>Grupo</i></th>
-                                            <th width='10px'><i>Abertura</i></th>
-                                            <th width='10px'><i>Fechamento</i></th>
-                                            <th><i>Observações</i></th>
-                                            <th width='10px' class='text-center'><i class='fa fa-cogs'></i></th>
+                                            <td width='10px'><small><i>Turno</i></small></td>
+                                            <td width='10px'><small><i>Grupo</i></small></td>
+                                            <td width='10px'><small><i>Abertura</i></small></td>
+                                            <td width='10px'><small><i>Fechamento</i></small></td>
+                                            <td><small><i>Observações</i></small></td>
+                                            <td width='10px' class='text-center'><i class='fa fa-cogs'></i></td>
                                           </tr>";
                                     for($i = 0; $i<count($turnos['aberto']);$i++)
                                     {
                                       $d = $turnos['aberto'][$i];
                                       echo "<tr>";
-                                      echo "<td class='text-muted'>".$d['id']."</td>";
+                                      echo "<td><b>".$d['id']." </b></td>";
                                       echo "<td nowrap>".ucfirst($d['workshift_group'])."</td>";
                                       echo "<td nowrap>".formataData($d['opened'],1)."</td>";
                                       echo "<td nowrap>".formataData($d['closed'],1)."</td>";
@@ -75,7 +71,7 @@
                                       else                        { $icon = "fa-eye"; }
 
                                       echo "<td class='actions text-center'>
-                                              <a href='oct/index.php?id_workshift=".$d['id']."' class='btn btn-xs btn-default loading2'><i class='fa ".$icon."'></i></a>
+                                              <a href='oct/index.php?id_workshift=".$d['id']."' class='btn btn-default loading2'><i class='fa ".$icon."'></i></a>
                                             </td>";
 
                                       echo "</tr>";
@@ -97,19 +93,19 @@
                                 if(isset($turnos['fechado']) && count($turnos['fechado']))
                                 {
                                     echo "<tr>
-                                            <th width='10px'><i>Turno</i></th>
-                                            <th width='10px'><i>Grupo</i></th>
-                                            <th width='10px'><i>Abertura</i></th>
-                                            <th width='10px'><i>Fechamento</i></th>
-                                            <th><i>Observações</i></th>
-                                            <th width='10px' class='text-center'><i class='fa fa-cogs'></i></th>
+                                            <td width='10px'><small><i>Turno</i></small></td>
+                                            <td width='10px'><small><i>Grupo</i></small></td>
+                                            <td width='10px'><small><i>Abertura</i></small></td>
+                                            <td width='10px'><small><i>Fechamento</i></small></td>
+                                            <td><small><i>Observações</i></small></th>
+                                            <td width='10px' class='text-center'><i class='fa fa-cogs'></i></td>
                                           </tr>";
                                     for($i = 0; $i<count($turnos['fechado']);$i++)
                                     {
                                       $d = $turnos['fechado'][$i];
                                       if($qtd_turno_por_datas[substr($d['opened'],0,10)] > 1){ $bg_color="background:#FFFFD0";}else{ $bg_color = "";}
                                       echo "<tr>";
-                                      echo "<td class='text-muted'>".$d['id']."</td>";
+                                      echo "<td><b>".$d['id']."</b></td>";
                                       echo "<td nowrap>".ucfirst($d['workshift_group'])."</td>";
                                       echo "<td nowrap style='".$bg_color."'>".formataData($d['opened'],1)."</td>";
                                       echo "<td nowrap>".formataData($d['closed'],1)."</td>";
@@ -119,7 +115,7 @@
                                       else                        { $icon = "fa-eye"; }
 
                                       echo "<td class='actions text-center'>
-                                              <a href='oct/index.php?id_workshift=".$d['id']."' class='btn btn-xs btn-default loading2'><i class='fa ".$icon."'></i></a>
+                                              <a href='oct/index.php?id_workshift=".$d['id']."' class='btn btn-default loading2'><i class='fa ".$icon."'></i></a>
                                             </td>";
 
                                       echo "</tr>";
@@ -142,12 +138,12 @@
                                 if(isset($turnos['inativo']) && count($turnos['inativo']))
                                 {
                                     echo "<tr>
-                                            <th width='10px'><i>Turno</i></th>
-                                            <th width='10px'><i>Grupo</i></th>
-                                            <th width='10px'><i>Abertura</i></th>
-                                            <th width='10px'><i>Fechamento</i></th>
-                                            <th><i>Observações</i></th>
-                                            <th width='10px' class='text-center'><i class='fa fa-cogs'></i></th>
+                                            <td width='10px'><small><i>Turno</i></small></td>
+                                            <td width='10px'><small><i>Grupo</i></small></td>
+                                            <td width='10px'><small><i>Abertura</i></small></td>
+                                            <td width='10px'><small><i>Fechamento</i></small></td>
+                                            <td><small><i>Observações</i></small></td>
+                                            <td width='10px' class='text-center'><i class='fa fa-cogs'></i></td>
                                           </tr>";
                                     for($i = 0; $i<count($turnos['inativo']);$i++)
                                     {
@@ -164,9 +160,8 @@
                                       else                        { $icon = "fa-eye"; }
 
                                       echo "<td class='actions text-center'>
-                                              <a href='oct/index.php?id_workshift=".$d['id']."' class='btn btn-xs btn-default loading2'><i class='fa ".$icon."'></i></a>
+                                              <a href='oct/index.php?id_workshift=".$d['id']."' class='btn btn-default loading2'><i class='fa ".$icon."'></i></a>
                                             </td>";
-
                                       echo "</tr>";
                                   }
                                   echo "<tr><td></td><td></td><td style='background:#FFFFD0'></td><td colspan='3' calss='text-muted'><i><small><b>Legenda: </b>Mais de um turno com mesma data inicial.</small></i></td></tr>";

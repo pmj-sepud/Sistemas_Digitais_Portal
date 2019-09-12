@@ -38,7 +38,9 @@ if($acao=="remover_passageiro" && $turno != "" && $id_garrison != "" && $id_user
 
 if($acao=="remover" && $id!="")
 {
-  $sql = "DELETE FROM sepud.oct_rel_garrison_persona WHERE id_garrison = '".$id."'; DELETE FROM sepud.oct_garrison WHERE id = '".$id."'";
+  $sql = "DELETE FROM sepud.oct_rel_garrison_persona          WHERE id_garrison = '".$id."';
+          DELETE FROM sepud.oct_garrison                      WHERE id          = '".$id."';
+          UPDATE      sepud.oct_events SET id_garrison = null WHERE id_garrison = '".$id."';";
   pg_query($sql)or die("Error ".__LINE__."<br>".$sql);
   header("Location: index.php?id_workshift=".$id_workshift);
   exit();

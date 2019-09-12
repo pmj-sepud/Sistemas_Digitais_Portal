@@ -10,7 +10,7 @@
 
   if($_GET['id_garrison']==""){
       $acao = "Inserir";
-  }else {
+  }else{
     $acao  = "Atualizar";
     $sql   = "SELECT * FROM sepud.oct_garrison G WHERE id = '".$id_garrison."'";
     $res   = pg_query($sql)or die("SQL Error ".__LINE__);
@@ -27,14 +27,71 @@
     {
       $opt_users .= "<option value='".$d['id']."'>[".$d['nickname']."] ".$d['name']." - Matrícula: ".$d['registration']."</option>";
     }
+
+    //Veículos vinculados a guarnição//
+    $sqlVeic = "SELECT
+                 F.plate, F.type, F.model, F.brand, F.nickname,
+                 G.*
+               FROM
+                sepud.oct_rel_garrison_vehicle G
+               JOIN sepud.oct_fleet F ON F.id = G.id_fleet
+               WHERE
+                id_garrison = '".$id_garrison."'
+               ORDER BY F.brand DESC, F.model ASC, F.nickname ASC";
+    $resV    = pg_query($sqlVeic)or die("SQL error ".__LINE__."<br>Query: ".$sqlVeic);
+
+    $acao_veiculo = "associar_veiculo";
+    while($dv = pg_fetch_assoc($resV)){
+      $veic_assoc[$dv['type']][] = $dv;
+
+      if($_GET['acao']=="atualizar_veiculo" && $dv['id']==$_GET['id_rel_garrison_vehicle'])
+      {
+        $acao_veiculo  = "atualizar_veiculo";
+        $dados_veiculo = $dv;
+      }
+    }
+
+    //Agentes vinculados a guarnição//
+    $sqlPer = "SELECT
+                	G.*,
+                	U.name, U.nickname, U.registration
+                FROM
+                	sepud.oct_rel_garrison_persona G
+                JOIN sepud.users U ON U.id = G.id_user
+                WHERE
+                	id_garrison = '".$id_garrison."'";
+    $resPer   = pg_query($sqlPer)or die("SQL error ".__LINE__."<br>Query: ".$sqlPer);
+    while($dp = pg_fetch_assoc($resPer)){
+
+      if($dp['id_rel_garrison_vehicle']!="")
+      {
+        $per_assoc['veiculo'][$dp['id_rel_garrison_vehicle']][] = $dp;
+      }else {
+        $per_assoc['a_pe'][] = $dp;
+      }
+    }
+
   }
+
+  $vet_guar = array("alfa"   => true, "bravo"   => true, "charlie" => true, "delta"  => true, "echo"   => true, "fox"   => true,"golf"      => true,
+                    "hotel"  => true, "india"   => true, "juliet"  => true, "kilo"   => true, "lima"   => true, "mike"  => true, "november" => true,
+                    "oscar"  => true, "papa"    => true, "quebec"  => true, "romeo"  => true, "sierra" => true, "tango" => true,"uniform"   => true,
+                    "victor" => true, "whiskey" => true, "xray"    => true, "yankee" => true, "zulu"   => true);
+
+if($_SESSION['id']==1)
+{
+  //echo "<div class='text-center'>";
+  //print_r_pre($vet_guar);
+  //echo "</div>";
+}
+
 ?>
 <style>
 
 </style>
 <section role="main" class="content-body">
   <header class="page-header">
-    <h2>Guarnição v2</h2>
+    <h2>Guarnição <sup>(versão 2)</sup></h2>
     <div class="right-wrapper pull-right" style='margin-right:15px;'>
       <ol class="breadcrumbs">
         <li><a href="index_sistema.php"><i class="fa fa-home"></i></a></li>
@@ -45,21 +102,22 @@
     </div>
   </header>
 
-<form action="oct/guarnicao_SQL.php" method="post">
+
 <div class="col-md-12">
 								<section class="panel box_shadow">
-									<header class="panel-heading">
+									<header class="panel-heading" style="height:70px">
 
                     <div class="panel-actions" style='margin-top:-12px'>
-									  </div>
+                      <h4>Guarnicão ID: <b><?=$id_garrison;?></b></h4>
+                    </div>
                   </header>
 									<div class="panel-body">
+<form action="oct/guarnicao_SQL.php" method="post">
                     <div class="row">
-                      <div class="col-md-6">
+                      <div class="col-md-6 col-md-offset-3">
                           <h4>Guarnição:</h4>
-
                           <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-sm-12">
                                   <div class="form-group">
                                    <label class="control-label">Grupamento:</label>
                                     <select name="name" class="form-control select2">
@@ -92,27 +150,22 @@
                                     </select>
                                   </div>
                                 </div>
-                        </div>
-
-
-                    <div class="row">
-                          <div class="col-md-12">
-                                  <div class="row">
-                                    <div class="col-md-6">
-                                      <div class="form-group">
-                                       <label class="control-label">Início:</label>
-                                       <input id="opened" name="opened" type="datetime-local" class="form-control" value="<?=($dados['opened']!=""?str_replace(" ","T",$dados['opened']):substr(str_replace(" ","T",$agora['datatimesrv']),0,-3));?>">
+                              </div>
+                              <div class='row'>
+                                      <div class="col-md-6">
+                                                  <div class="form-group">
+                                                   <label class="control-label">Início:</label>
+                                                   <input id="opened" name="opened" type="datetime-local" class="form-control" value="<?=($dados['opened']!=""?str_replace(" ","T",$dados['opened']):substr(str_replace(" ","T",$agora['datatimesrv']),0,-3));?>">
+                                                  </div>
+                                                </div>
+                                      <div class="col-md-6">
+                                                  <div class="form-group">
+                                                   <label class="control-label">Fim:</label>
+                                                   <input id="closed" name="closed" type="datetime-local" class="form-control" value="<?=($dados['closed']!=""?str_replace(" ","T",$dados['closed']):"");?>">
+                                                  </div>
                                       </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                      <div class="form-group">
-                                       <label class="control-label">Fim:</label>
-                                       <input id="closed" name="closed" type="datetime-local" class="form-control" value="<?=($dados['closed']!=""?str_replace(" ","T",$dados['closed']):"");?>">
-                                      </div>
-                                    </div>
                                 </div>
-    									  </div>
-                    </div>
+
 
 
 
@@ -128,199 +181,344 @@
                     <div class="row">
                       <div class="col-md-12 text-center" style="margin-top:15px">
                           <input type="hidden" id="id_workshift" name="id_workshift" value="<?=$id_workshift;?>">
-                          <input type="hidden" id="acao" name="acao" value="<?=$acao;?>">
+                          <input type="hidden" id="acao"         name="acao"         value="<?=$acao;?>">
                           <a href="oct/index.php?id_workshift=<?=$id_workshift;?>" class="btn btn-default loading2">Voltar</a>
                           <?
                               if($acao=="Atualizar")
                               {
-                                echo "<input type='hidden' name='id' value='".$_GET['id_garrison']."'>";
-                                echo  "<a href='oct/veiculo_turno_SQL.php?id_workshift=".$id_workshift."&acao=remover&id=".$_GET['id_garrison']."' class='btn btn-danger loading2'>Remover</a>";
+                                echo "<input type='hidden' name='id_garrison' value='".$_GET['id_garrison']."'>";
+                                echo  "<a href='oct/guarnicao_SQL.php?acao=Remover&id_workshift=".$id_workshift."&id_garrison=".$_GET['id_garrison']."' class='btn btn-danger loading2'>Remover</a>";
                               }
                           ?>
                           <button type="submit" class="btn btn-primary loading"><?=$acao;?></button>
                       </div>
                    </div>
 
-							   </div>
+				   </div>
+        </div>
+</form>
+
+
 <? if($dados['id'] != ""){ ?>
 
-                      <div class="col-sm-6">
-                        <h4>Veículo(s):</h4>
-                        <div class="row">
-                          <div class="col-sm-10">
-                            <?
-                              $sql = "SELECT * FROM sepud.oct_fleet WHERE id_company = '".$_SESSION['id_company']."' ORDER BY brand DESC, model ASC, nickname ASC";
-                              $res = pg_query($sql)or die("Erro ".__LINE__);
-                              while($d = pg_fetch_assoc($res)){ $autos[$d['type']][] = $d;}
-                            ?>
-                            <div class="form-group">
-                             <label class="control-label">Associar veículo:</label>
-                             <select id="id_fleet" name="id_fleet" class="form-control select2">
-                               <?
-                                      echo "<option value=''></option>";
-                                      foreach ($autos as $tipo => $auto) {
-                                          echo "<optgroup label='".$tipo."'>";
-                                          for($i=0;$i<count($auto);$i++)
-                                          {
-                                              echo "<option value='".$auto[$i]["id"]."'>".$auto[$i]["nickname"]." [".$auto[$i]["plate"]."] - ".$auto[$i]["brand"]." ".$auto[$i]["model"]."</option>";
-                                          }
-                                          echo "</optgroup>";
-                                      }
-                               ?>
-                             </select>
-                           </div>
+
+  <div class='row' style="margin-top:20px">
+
+    <form action="oct/guarnicao_SQL.php" method="post">
+    <div class="col-sm-6 col-md-offset-3">
+        <div class="row">
+            <div class="col-sm-12">
+                                  <h4>Veículo(s):</h4>
+                                        <?
+                                        if($_GET['acao']=="atualizar_veiculo" && isset($dados_veiculo))
+                                        {
+                                            echo "<div class='form-group'>
+                                            <label class='control-label'>Atualizar veículo:</label>
+                                            <select id='id_fleet' name='id_fleet' class='form-control'>";
+                                            echo "<option value='".$dados_veiculo['id_fleet']."'>".$dados_veiculo['nickname']." [".$dados_veiculo['plate']."] - ".$dados_veiculo['brand']." ".$dados_veiculo['model']."</option>";
+                                            echo "</select></div>";
+
+                                        }else{
+                                            $sql = "SELECT * FROM sepud.oct_fleet WHERE id_company = '".$_SESSION['id_company']."' ORDER BY brand DESC, model ASC, nickname ASC";
+                                            $res = pg_query($sql)or die("Erro ".__LINE__);
+                                            while($d = pg_fetch_assoc($res)){ $autos[$d['type']][] = $d;}
+
+                                            echo "<div class='form-group'>
+                                            <label class='control-label'>Associar veículo:</label>
+                                            <select id='id_fleet' name='id_fleet' class='form-control select2'>";
+
+                                                  echo "<option value=''></option>";
+                                                  foreach ($autos as $tipo => $auto) {
+                                                      echo "<optgroup label='".$tipo."'>";
+                                                      for($i=0;$i<count($auto);$i++)
+                                                      {
+                                                          echo "<option value='".$auto[$i]["id"]."'>".$auto[$i]["nickname"]." [".$auto[$i]["plate"]."] - ".$auto[$i]["brand"]." ".$auto[$i]["model"]."</option>";
+                                                      }
+                                                      echo "</optgroup>";
+                                                  }
+
+                                            echo "</select></div>";
+                                         }
+                                        ?>
+
+            </div><!--<div class="col-sm-12">-->
+        </div><!--<div class="row">-->
+
+          <div class="row">
+                <div class="col-md-12">
+                                <div class="row">
+                                  <div class="col-md-6">
+                                    <div class="form-group">
+                                     <label class="control-label">KM inicial:</label>
+                                     <input name="initial_km" type="number" class="form-control campo_km" value="<?=$dados_veiculo['initial_km'];?>">
+                                    </div>
+                                  </div>
+                                  <div class="col-md-6">
+                                    <div class="form-group">
+                                      <label class="control-label">KM final:</label>
+                                      <input name="final_km" type="number" class="form-control campo_km" value="<?=$dados_veiculo['final_km'];?>">
+                                    </div>
+                                  </div>
+                              </div>
+              </div><!--<div class="col-md-12">-->
+          </div><!--<div class="row">-->
+
+            <div class="row">
+              <div class="col-md-12">
+                          <div class="form-group">
+                           <label class="control-label">Observações:</label>
+                           <textarea id="obs" name="obs" class="form-control" rows="5"><?=$dados_veiculo['obs'];?></textarea>
                          </div>
-                         <div class="col-sm-2" style="margin-top:27px">
-                            <button id="bt_add_veic" class="btn  btn-sm btn-primary loading2"><i class="fa fa-cab"></i><sup> <i class="fa fa-plus"></i></sup></button>
-                        </div>
-                       </div>
+             </div><!--<div class="col-md-12">-->
+            </div><!--<div class="row">-->
 
-                       <div class="row" style="margin-top:10px">
-                          <div class="col-sm-12">
-                            <?
-                                $sqlVeic = "SELECT
-                                            F.plate, F.type, F.model, F.brand, F.nickname,
-                                             G.*
-                                           FROM
-                                            sepud.oct_rel_garrison_vehicle G
-                                           JOIN sepud.oct_fleet F ON F.id = G.id_fleet
-                                           WHERE
-                                            id_garrison = '".$id_garrison."'
-                                           ORDER BY F.brand DESC, F.model ASC, F.nickname ASC";
-                                $resV    = pg_query($sqlVeic)or die("SQL error ".__LINE__."<br>Query: ".$sqlVeic);
-                                while($dv = pg_fetch_assoc($resV)){$veic_assoc[$dv['type']][] = $dv; }
 
-                                if(isset($veic_assoc))
-                                {
-                                  echo "<table class='table table-striped'>";
-                                  echo "<tbody>";
-                                    foreach ($veic_assoc as $tipo => $veics) {
-                                      for($i = 0; $i < count($veics); $i++)
-                                      {
-                                        unset($v);$v = $veics[$i];
-                                        echo "<tr>";
-                                            echo "<td>".$v["nickname"]." [".$v["plate"]."] - ".$v["brand"]." ".$v["model"]."</td>";
-                                            echo "<td width='80px'><button type='button' class='btn btn-sm btn-danger'><i class='fa fa-trash'></i></button></td>";
-                                        echo "</tr>";
-                                      }
-                                    }
-                                  echo "</tbody>";
-                                  echo "</table>";
-                                }else{
-                                  echo "<div class='alert alert-warning text-center'>Nenhum veículo associado a esta guarnição.</div>";
-                                }
-                            ?>
-                          </div>
-                       </div>
+        <div class="row">
+            <div class="col-sm-12 text-center" style="margin-top:10px">
+                          <input  type="hidden" name="id_workshift" id="id_workshift" value="<?=$id_workshift;?>">
+                          <input  type="hidden" name="id_garrison"  id="id_garrison"  value="<?=$id_garrison;?>">
+                          <input  type="hidden" name="acao"         id="acao"         value="<?=$acao_veiculo;?>">
+                          <input  type="hidden" name="id"                             value="<?=$_GET['id_rel_garrison_vehicle'];?>">
+                          <?
+                              if($acao_veiculo=="atualizar_veiculo")
+                              {
+                                  echo "<button type='submit' class='btn btn-sm btn-success loading2'><i class='fa fa-cab'></i><sup> <i class='fa fa-plus'></i></sup> Atulizar dados do veículo</button>";
+                              }else{
+                                  echo "<button type='submit' class='btn btn-sm btn-primary loading2'><i class='fa fa-cab'></i><sup> <i class='fa fa-plus'></i></sup> Associar veículo</button>";
+                              }
+                          ?>
 
-                          <hr>
-                          <h4>Integrantes(s):</h4>
-                          <div class="row">
-                            <div class="col-sm-10">
+            </div><!--<div class="col-sm-12">-->
+        </div><!--<div class="row">-->
+    </div><!--<div class="col-sm-6">-->
+    </form>
+</div>
+
+<div class='row'>
+
+    <div class="col-md-6 col-md-offset-3">
+
+      <form action="oct/guarnicao_SQL.php" method="post">
+      <div class="row">
+          <div class="col-sm-12">
+                              <h4>Integrantes(s):</h4>
                               <div class="form-group">
                                <label class="control-label">Associar integrante:</label>
-                               <select id="id_user_pass" name="id_user_pass" class="form-control select2">
+                               <select id="id_user" name="id_user" class="form-control select2">
                                   <option value=""></option>
                                   <?=$opt_users;?>
                                </select>
+                              </div>
+          </div><!--<div class="col-sm-12">-->
+      </div><!--<div class="row">-->
+      <div class="row">
+          <div class="col-sm-12">
+                              <div class="form-group">
+                               <label class="control-label">Vincular ao veículo:</label>
+                               <select id="id_rel_garrison_vehicle" name="id_rel_garrison_vehicle" class="form-control select2">
+                                   <?
+                                       echo "<option value=''></option>";
+                                       if(isset($veic_assoc))
+                                       {
+                                           foreach ($veic_assoc as $tipo => $veics) {
+                                             echo "<optgroup label='".$tipo."'>";
+                                               for($i = 0; $i < count($veics);$i++)
+                                               {
+                                                 unset($v);$v = $veics[$i];
+                                                 echo "<option value='".$v["id"]."'>".$v["nickname"]." [".$v["plate"]."] - ".$v["brand"]." ".$v["model"]."</option>";
+                                               }
+                                             echo "</optgroup>";
+                                           }
+                                       }else{
+                                         echo "<option disabled value=''>Nenhum veículo associado a esta guarnição.</option>";
+                                       }
+                                   ?>
+                               </select>
                              </div>
-                           </div>
-                           <div class="col-sm-2" style="margin-top:27px">
-                              <button id="bt_add_pass" class="btn  btn-sm btn-primary loading2"><i class="fa fa-user"></i><sup> <i class="fa fa-plus"></i></sup></button>
+          </div><!--<div class="col-sm-12">-->
+      </div><!--<div class="row">-->
+
+
+      <div class="row">
+          <div class="col-sm-12">
+                        <div class="form-group">Posição no veículo:</label>
+                         <select name="type" class="form-control select2">
+                            <option value=""></option>
+                            <option value="Motorista">Motorista</option>
+                            <option value="Passageiro">Passageiro</option>
+                         </select>
+                        </div>
+          </div><!--<div class="col-sm-12">-->
+      </div><!--<div class="row">-->
+
+
+
+      <div class="row">
+          <div class="col-sm-12 text-center" style="margin-top:10px">
+                    <input  type="hidden" name="id_workshift" id="id_workshift" value="<?=$id_workshift;?>">
+                    <input  type="hidden" name="id_garrison"  id="id_garrison"  value="<?=$id_garrison;?>">
+                    <input  type="hidden" name="acao"         id="acao"         value="associar_agente_e_veiculo">
+                    <input  type="hidden" name="id"                             value="<?=$id_garrison;?>">
+                    <button type="submit" class="btn  btn-sm btn-primary loading2"><i class="fa fa-user"></i><sup> <i class="fa fa-plus"></i></sup> Associar agente</button>
+          </div><!--<div class="col-sm-12">-->
+      </div><!--<div class="row">-->
+<? /*
+      <div class="row">
+          <div class="col-sm-12">
+
+          </div><!--<div class="col-sm-12">-->
+      </div><!--<div class="row">-->
+*/ ?>
+    </div><!--<div class="col-sm-6">-->
+  </div><!--<div class='row'>-->
+
+
+    <div class="row" style="margin-top:30px">
+        <div class="col-md-12">
+
+          <div class='row'>
+                          <div class="col-md-12">
+                            <h5>Agentes designados sem veículo:</h5>
+                            <?
+                                //print_r_pre($per_assoc['a_pe']);
+                                if(isset($per_assoc['a_pe']) && count($per_assoc['a_pe']))
+                                {
+                                  echo "<div class='table-responsive'>";
+                                  echo "<table class='table table-striped'>";
+                                  echo "<thead><tr class='text-muted'>
+                                              <td><i><small>#</small></i></td>
+                                              <td><i><small>Matrícula</small></i></td>
+                                              <td><i><small>Apelido</small></i></td>
+                                              <td><i><small>Nome</small></i></td></tr></thead>";
+                                  echo "</tbody>";
+                                    for($i=0;$i<count($per_assoc['a_pe']);$i++)
+                                    {
+                                      echo "<tr>";
+                                       echo "<td><small>".number_format($per_assoc['a_pe'][$i]['id'],0,'','.')."</small></td>";
+                                        echo "<td><small>".number_format($per_assoc['a_pe'][$i]['registration'],0,'','.')."</small></td>";
+                                        echo "<td>".$per_assoc['a_pe'][$i]['nickname']."</td>";
+                                        echo "<td>".$per_assoc['a_pe'][$i]['name']."</td>";
+                                        echo "<td class='text-center'>
+                                                  <a href='oct/guarnicao_SQL.php?acao=remover_pessoa&id=".$per_assoc['a_pe'][$i]['id']."&id_workshift=".$id_workshift."&id_garrison=".$id_garrison."'>
+                                                  <button class='btn btn-xs btn-danger'><i class='fa fa-trash'></i></button>
+                                                  </a>
+                                              </td>";
+                                      echo "</tr>";
+                                    }
+                                  echo "</tbody>";
+                                  echo "</table></div>";
+                                }else {
+                                  echo "<div class='alert alert-info text-center'>Nenhum agente designido.</div>";
+                                }
+                            ?>
                           </div>
-                         </div>
-
-
-                         <div class="row">
-                           <div class="col-sm-10">
-
-                             <div class="form-group">
-                              <label class="control-label">Vincular ao veículo:</label>
-                              <select id="id_fleet_user_assoc" name="id_fleet_user_assoc" class="form-control select2">
-                                  <?
-                                      echo "<option value=''></option>";
-                                      if(isset($veic_assoc))
-                                      {
-                                          foreach ($veic_assoc as $tipo => $veics) {
-                                            echo "<optgroup label='".$tipo."'>";
-                                              for($i = 0; $i < count($veics);$i++)
-                                              {
-                                                unset($v);$v = $veics[$i];
-                                                echo "<option value='".$v["id_fleet"]."'>".$v["nickname"]." [".$v["plate"]."] - ".$v["brand"]." ".$v["model"]."</option>";
-                                              }
-                                            echo "</optgroup>";
-                                          }
-                                      }else{
-                                        echo "<option disabled value=''>Nenhum veículo associado a esta guarnição.</option>";
-                                      }
-                                  ?>
-                              </select>
-                            </div>
-                           </div>
-                         </div>
-
-                         <div class="row" style="margin-top:10px">
-                            <div class="col-sm-12">
-                                      <?
-                                          $sql = "SELECT
-                                                    	R.id_garrison,
-                                                    	U.id, U.name, U.nickname, U.registration
-                                                    FROM
-                                                    	sepud.oct_rel_garrison_persona R
-                                                    JOIN sepud.users U ON U.id = R.id_user
-                                                    WHERE
-                                                    	R.id_garrison = '".$dados['id']."'
-                                                    	AND R.TYPE = 'Passageiro'";
-                                          $resPass = pg_query($sql)or die("SQL error ".__LINE__);
-                                          if(pg_num_rows($resPass))
-                                          {
-                                              echo "<table class='table table-striped'>";
-                                              echo "<thead><tr>
-                                                           <th class='text-muted'><small><i>Matrícula</i></small></th>
-                                                           <th class='text-muted'><small><i>Nome de guerra</i></small></th>
-                                                           <th class='text-muted'><small><i>Nome</i></small></th>
-                                                           <th class='text-muted text-center'><i class='fa fa-trash'></th>
-                                                    </tr></thead>";
-                                              while($dp = pg_fetch_assoc($resPass))
-                                              {
-                                                echo "<tr>";
-                                                  echo "<td>".$dp['registration']."</td>";
-                                                  echo "<td>".$dp['nickname']."</td>";
-                                                  echo "<td>".$dp['name']."</td>";
-                                                  echo "<td class='text-center'><button class='btn btn-xs btn-danger loading2' onClick='remove_passageiro(\"".$dp['id']."\");'><i class='fa fa-trash'></button></td>";
-                                                echo "<tr>";
-                                              }
-                                              echo "</table>";
-                                         }else {
-                                           echo "<div class='alert alert-warning text-center'>Nenhum integrante nesta guarnição.</div>";
-                                         }
-                                      ?>
-
-                            </div>
-                         </div>
-
                       </div>
-<? }else {
-  echo "<div class='col-sm-6'>
-          <h4>Passageiro(s):</h4>
-            <div class='row'>
-              <div class='col-sm-10'><div class='alert alert-warning text-center'>Após cadastrar a guarnição, será liberado para inserção de passageiros.</div>
-            </div>
-        </div>";
-} ?>
-               </div>
-             </div>
-    </section>
-</form>
+
+            <div class="row">
+                <div class="col-md-12">
+                  <h5>Veículos associados:</h5>
+                  <?
+                      if(isset($veic_assoc) && count($veic_assoc))
+                      {
+                        echo "<div class='table-responsive'><table class='table table-striped  table-condensed'>";
+
+                          foreach ($veic_assoc as $tipo => $veiculos) {
+                             for($i=0;$i<count($veiculos);$i++)
+                             {
+                                unset($veiculo,$km_rodado);$veiculo=$veiculos[$i];
+                                $km_rodado = ($veiculo['initial_km']!="" && $veiculo['final_km'] != ""?($veiculo['final_km']-$veiculo['initial_km']):0);
+                                $class='info';
+                                if($km_rodado == 0 || $km_rodado >= 100){ $class="warning";}
+                                if($km_rodado < 0)   { $class="danger"; }
+                                echo "<tr>";
+                                  echo "<td class='info'><small>".$veiculo['id']."</small></td>";
+                                  echo "<td class='info'><small><i>Tipo:</i></small><br>".$tipo."</td>";
+                                  echo "<td class='info'><small><i>Apelido:</i></small><br><b>".$veiculo['nickname']."</b></td>";
+                                  echo "<td class='info'><small><i>Placa:</i></small><br>".$veiculo['plate']."</td>";
+                                  echo "<td class='info'><small><i>Marca/Modelo:</i></small><br>".$veiculo['brand']." ".$veiculo['model']."</td>";
+                                  echo "<td class='info'><small><i>Km inicial:</i></small><br>".number_format($veiculo['initial_km'],0,'','.')."</td>";
+                                  echo "<td class='info'><small><i>Km final:</i></small><br>".number_format($veiculo['final_km'],0,'','.')."</td>";
+                                  echo "<td  class='".$class."'><small><i>Total percorrido:</i></small><br>".number_format($km_rodado,0,'','.')." km</td>";
+
+                                  if(isset($per_assoc['veiculo'][$veiculo['id']]) && count($per_assoc['veiculo'][$veiculo['id']]))
+                                  {
+                                    echo "<td class='info text-center' width='10px'>
+                                              <button class='btn btn-sm btn-default' disabled><i class='fa fa-trash'></i></button>
+                                          </td>";
+                                  }else {
+                                    echo "<td class='info text-center' width='10px'>
+                                              <a href='oct/guarnicao_SQL.php?acao=remover_veiculo&id=".$veiculo['id']."&id_workshift=".$id_workshift."&id_garrison=".$id_garrison."'>
+                                              <button class='btn btn-sm btn-danger'><i class='fa fa-trash'></i></button>
+                                              </a>
+                                          </td>";
+                                  }
+                                  echo "<td class='info text-center' width='10px'>
+                                            <a href='oct/guarnicao_FORM.php?acao=atualizar_veiculo&id_rel_garrison_vehicle=".$veiculo['id']."&id_workshift=".$id_workshift."&id_garrison=".$id_garrison."'>
+                                            <button class='btn btn-sm btn-success'><i class='fa fa-cogs'></i></button>
+                                            </a>
+                                        </td>";
+                                echo "</tr>";
+
+                                echo "<tr><td colspan='10'><small class='text-muted'><i>Observações:</i></small><br>".$veiculo['obs']."</td></tr>";
+
+                                if(isset($per_assoc['veiculo'][$veiculo['id']]) && count($per_assoc['veiculo'][$veiculo['id']]))
+                                {
+                                  unset($ocupantes);$ocupantes = $per_assoc['veiculo'][$veiculo['id']];
+                                  echo "<tr>
+                                          <td class='text-muted'>&nbsp;</td>
+                                          <td class='text-muted'><i><small>Matrícula</small></i></td>
+                                          <td class='text-muted'><i><small>Posição</small></i></td>
+                                          <td class='text-muted'><i><small>Apelido</small></i></td>
+                                          <td class='text-muted' colspan='4'><i><small>Nome</small></i></td>
+                                          <td class='text-muted' colspan='2'>Ação</td>";
+                                  for($c=0;$c<count($ocupantes);$c++)
+                                  {
+                                    echo "<tr>";
+                                    echo "<td class='text-muted'><small>".number_format($ocupantes[$c]['id'],0,'','.')."</small></td>";
+                                    echo "<td class='text-muted'><small>".number_format($ocupantes[$c]['registration'],0,'','.')."</small></td>";
+                                    echo "<td><b>".$ocupantes[$c]['type']."</b></td>";
+                                    echo "<td>".$ocupantes[$c]['nickname']."</td>";
+                                    echo "<td colspan='4'>".$ocupantes[$c]['name']."</td>";
+                                    echo "<td colspan='2' class='text-left'>
+                                              <a href='oct/guarnicao_SQL.php?acao=remover_pessoa&id=".$ocupantes[$c]['id']."&id_workshift=".$id_workshift."&id_garrison=".$id_garrison."'>
+                                              <button class='btn btn-sm btn-danger'><i class='fa fa-trash'></i></button>
+                                              </a>
+                                          </td>";
+                                    echo "</tr>";
+                                  }
+                                }else{
+                                  echo "<tr><td colspan='6' class='text-danger'><small><i><b>Atenção:</b> Veículo sem condutor, favor atualizar.</i></small></td></tr>";
+                                }
+                              }
+                          }
+                        echo "</table></div>";
+                      }else{
+                        echo "<div class='alert alert-info text-center'>Nenhum veículo associado.</div>";
+                      }
+                  ?>
+                </div>
+</div>
+
+
+        </div><!--<div class="col-sm-12">-->
+    </div><!--<div class="row">-->
+
+
+<? } ?>
+
+                </div>
+            </section>
+        </div>
+
 </section>
+
+
 <script>
 $('.select2').select2();
 $(document).ready(function(){ $(this).scrollTop(0);});
-//$(".campo_km").mask('000000');
+$(".campo_km").mask('000000');
 
-
-
-$("#bt_add_veic").click(function(){
+$("#bt_add_veic_aa").click(function(){
     <? if($acao=="Atualizar"){ ?>
     var id_garrison  = <?=$dados['id'];?>;
     var id_fleet     = $("#id_fleet").val();
@@ -343,19 +541,21 @@ function remove_passageiro(id_user_pass)
   <? } ?>
   return false;
 }
-
-$("#bt_add_pass").click(function(){
+*/
+$("#bt_add_passaaa").click(function(){
     <? if($acao=="Atualizar"){ ?>
-    var id_garrison  = <?=$dados['id'];?>;
-    var id_user_pass = $("#id_user_pass").val();
-    var turno        = <?=$id_workshift;?>;
-    //alert("ASSOCIAR Passageiro:\nTurno: "+turno+"\nID da guarnição: "+id_garrison+"\nId user passageiro: "+id_user_pass);
-    $('#wrap').load("oct/veiculo_turno_SQL.php?acao=associar_passageiro&turno="+turno+"&id_garrison="+id_garrison+"&id_user_pass="+id_user_pass);
+    var id_garrison         = <?=$dados['id'];?>;
+    var id_workshift        = <?=$id_workshift;?>;
+    var id_user             = $("#id_user").val();
+    var id_rel_garrison_vehicle = $("#id_rel_garrison_vehicle").val();
+
+  //alert("ASSOCIAR agente e veículo:\nTurno: "+id_workshift+"\nID da guarnição: "+id_garrison+"\nId user: "+id_user+"\nId rel veiculo guarn.: "+id_rel_garrison_vehicle);
+    $('#wrap').load("oct/guarnicao_SQL.php?acao=associar_agente_e_veiculo&id_workshift="+id_workshift+"&id_garrison="+id_garrison+"&id_user="+id_user+"&id_rel_garrison_vehicle="+id_rel_garrison_vehicle);
     <? } ?>
     return false;
 
 });
-*/
+
 $(".loading").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> Aguarde");});
 $(".loading2").click(function(){ $(this).addClass("disabled").html("<i class=\"fa fa-spinner fa-spin\"></i>");});
 </script>

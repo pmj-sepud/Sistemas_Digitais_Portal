@@ -478,7 +478,11 @@ $('#license_plate_letters').keyup(function () {
 
 $('#license_plate_numbers').keyup(function(){
   var num = $(this).val();
-  if(num.length == 4){ $('#license_plate_numbers').blur(); }
+  if(num.length == 4){
+    $('#license_plate_numbers').blur();
+    document.body.scrollTop = 400;            // For Safari
+    document.documentElement.scrollTop = 400; // For Chrome, Firefox, IE and Opera
+  }
 });
 
 $('#license_plate_numbers_mercosul').keyup(function(){$(this).val($(this).val().toUpperCase());});

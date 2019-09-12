@@ -98,7 +98,6 @@
                                                 echo "<option value='".$d['id']."' ".$sel.">[".$d['nickname']."] ".$d['name']." - Matrícula: ".$d['registration']."</option>";
                                                 $opt_users_pass .= "<option value='".$d['id']."'>[".$d['nickname']."] ".$d['name']." - Matrícula: ".$d['registration']."</option>";
                                               }
-
                                           ?>
                                        </select>
                                        <span class='text-muted'><sup>*</sup>Aparecerão apenas os agentes associados ao turno.</span>

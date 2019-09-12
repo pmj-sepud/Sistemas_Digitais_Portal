@@ -66,21 +66,21 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
                (SELECT COUNT(*) FROM sepud.oct_rel_events_providence WHERE id_event  = EV.id) as qtd_providencias,
                (SELECT COUNT(*) FROM sepud.oct_rel_events_images     WHERE id_events = EV.id) as qtd_fotos,
                U.NAME  as user_name,
-               UG.name as user_name_garrison, UG.nickname as nickname_garrison,
-	             F.plate, F.brand, F.model,
+               --UG.name as user_name_garrison, UG.nickname as nickname_garrison,
+	             --F.plate, F.brand, F.model,
                AB.name  as addressbook_name
          FROM
                sepud.oct_events     AS  EV
-        LEFT JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = EV.id_garrison AND GP.type = 'Motorista'
-       	LEFT JOIN sepud.users 									 UG ON UG.id = GP.id_user
+        --LEFT JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = EV.id_garrison AND GP.type = 'Motorista'
+       	--LEFT JOIN sepud.users 									 UG ON UG.id = GP.id_user
 
-       	LEFT JOIN sepud.oct_garrison 							G ON G.id  = EV.id_garrison
-       	LEFT JOIN sepud.oct_fleet                 F ON F.id  = G.id_fleet
-             JOIN  sepud.oct_event_type AS EVT ON EV.id_event_type = EVT.id
-             JOIN  sepud.users          AS   U ON U.id = EV.id_user
-         JOIN  sepud.company        AS   C ON C.id = EV.id_company
-         LEFT JOIN sepud.streets    AS   S ON S.id = EV.id_street
-         LEFT JOIN sepud.oct_addressbook AB ON AB.id = EV.id_addressbook
+       	--LEFT JOIN sepud.oct_garrison 							G ON G.id  = EV.id_garrison
+       	--LEFT JOIN sepud.oct_fleet                 F ON F.id  = G.id_fleet
+             JOIN  sepud.oct_event_type  as EVT ON EV.id_event_type = EVT.id
+             JOIN  sepud.users           as   U ON U.id             = EV.id_user
+         JOIN  sepud.company             as   C ON C.id             = EV.id_company
+         LEFT JOIN sepud.streets         as   S ON S.id             = EV.id_street
+         LEFT JOIN sepud.oct_addressbook as  AB ON AB.id            = EV.id_addressbook
          WHERE ";
 
          if($filtro_placa != "")
@@ -92,7 +92,7 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
          $sql .= " ORDER BY EV.id DESC";
 
 
- $rs  = pg_query($conn_neogrid,$sql);
+ $rs  = pg_query($sql);
  $total_oc = 0;
  while($d = pg_fetch_assoc($rs))
  {
@@ -104,24 +104,6 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
      if($d['id_garrison']!=""){ $garrison_passenger[] = $d['id_garrison'];}
 
      $total_oc++;
- }
-
- if(isset($garrison_passenger) && count($garrison_passenger))
- {
-   $garrison_passenger = array_values(array_unique($garrison_passenger));
-   $sqlGP = "SELECT
-            	GP.*, U.name, U.nickname
-            FROM
-            	   sepud.oct_rel_garrison_persona GP
-            JOIN sepud.users U ON U.id = GP.id_user
-            WHERE
-                GP.type = 'Passageiro'
-            AND GP.id_garrison IN (".implode(",",$garrison_passenger).")";
-    $resGP = pg_query($sqlGP)or die("SQL Error ".__LINE__);
-    while($dGP = pg_fetch_assoc($resGP))
-    {
-      $dados_garrison_passenger[$dGP['id_garrison']][] = $dGP['nickname'];
-    }
  }
 
  if(isset($eventos_com_providencia) && count($eventos_com_providencia))
@@ -161,6 +143,120 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
 
 
  if(!isset($dados) && !isset($dados_baixados)){ $txt_oc_abertas = "Nenhuma ocorrência gerada neste dia."; unset($txt_oc_baixadas); }
+
+ function guarnicoes($id_garrison, $id_workshift, $modelo)
+ {
+
+        if($id_garrison != "")//Buscando uma guarnição especifica
+        {
+               $sql = "SELECT
+                         F.nickname, F.plate, F.model, F.brand,
+                         G.*
+                       FROM
+                         sepud.oct_garrison G
+                       LEFT JOIN sepud.oct_fleet F ON F.id = G.id_fleet
+                       WHERE
+                         G.id = '".$id_garrison."'";
+               $res = pg_query($sql)or die("SQL error ".__LINE__);
+               while($aux = pg_fetch_assoc($res))
+               {
+                   $guarnicao_empenhada = $aux;
+               }
+
+
+               if($guarnicao_empenhada['name']!="") //Guarnições no modelo novo//
+               {
+                      //Busca os veículos
+                       $sql = "SELECT
+                                 F.nickname,
+                                 F.brand,
+                                 F.model,
+                                 F.plate,
+                                 V.*
+                               FROM
+                                 sepud.oct_rel_garrison_vehicle V
+                                 JOIN sepud.oct_fleet F ON F.ID = V.id_fleet
+                               WHERE
+                                 V.id_garrison = '".$id_garrison."'";
+
+                       $res = pg_query($sql)or die("SQL error ".__LINE__);
+                       while($aux = pg_fetch_assoc($res)){ $guarnicao_empenhada['veiculos'][$aux['id']] = $aux;  }
+              }
+                      //Buscando as pessoas integrantes da guarnição//
+                      $sql = "SELECT
+                                U.NAME,
+                                U.nickname,
+                                U.registration,
+                                P.*
+                              FROM
+                                sepud.oct_rel_garrison_persona P
+                                JOIN sepud.users U ON U.ID = P.id_user
+                              WHERE
+                                P.id_garrison = '".$id_garrison."'
+                              ORDER BY U.nickname ASC";
+
+                      $res = pg_query($sql)or die("SQL error ".__LINE__);
+                      while($aux = pg_fetch_assoc($res))
+                      {
+                              if($guarnicao_empenhada['name']!="") //Guarnições no modelo novo//
+                              {
+                                    if($aux['id_rel_garrison_vehicle']!="")
+                                    {
+                                      $guarnicao_empenhada['veiculos'][$aux['id_rel_garrison_vehicle']]['pessoas'][] = $aux;
+                                    }else{
+                                      $guarnicao_empenhada['pessoas_a_pe'][] = $aux;
+                                    }
+                              }else{
+                                      $guarnicao_empenhada['pessoas'][] = $aux;
+                              }
+                      }
+
+               if($modelo == "resumido")
+               {
+                     if($guarnicao_empenhada['name']!="")//Modelo novo de guarnição//
+                     {
+                         if(isset($guarnicao_empenhada['veiculos']))
+                         {
+                               foreach($guarnicao_empenhada['veiculos'] as $id_rel_garrison_vehicle => $d)
+                               {
+                                    if(isset($info)){$info .= " | ";}
+                                    $info .= $d['nickname'].": ";
+                                    unset($pessoas);
+                                    for($i=0;isset($d['pessoas']) && $i<count($d['pessoas']);$i++)
+                                    {
+                                      $pessoas[] = $d['pessoas'][$i]['nickname'];
+                                    }
+                                    if(isset($pessoas) && count($pessoas)){ $info .= implode(", ",$pessoas); }
+                                    else                                  { $info .= "<span class='text-danger'><i>Nenhum integrante</i></span>";}
+                               }
+                         }
+                         //Verificando se há pessoas a pé na guarnição//
+                         if(isset($guarnicao_empenhada['pessoas_a_pe']) && count($guarnicao_empenhada['pessoas_a_pe']))
+                         {
+                           if(isset($info)){$info .= " | ";}
+                           $info .= "A PÉ: ";
+                           unset($pessoas);
+                           for($i=0;isset($guarnicao_empenhada['pessoas_a_pe']) && $i<count($guarnicao_empenhada['pessoas_a_pe']);$i++)
+                           {
+                             $pessoas[] = $guarnicao_empenhada['pessoas_a_pe'][$i]['nickname'];
+                           }
+                           $info .= implode(", ",$pessoas);
+                         }
+
+                         return array("name" => $guarnicao_empenhada['name'], "info" => $info);
+
+                    }else{ //Guarnição no modelo antigo//
+                          $info = $guarnicao_empenhada['nickname'].": ";
+                          for($i=0;isset($guarnicao_empenhada['pessoas']) && $i<count($guarnicao_empenhada['pessoas']);$i++)
+                          {
+                            $pessoas[] = $guarnicao_empenhada['pessoas'][$i]['nickname'];
+                          }
+                          $info .= implode(", ",$pessoas);
+                          return array("name" => number_format($id_garrison,0,'','.'), "info" => $info);
+                    }
+               }
+         }
+ }
 ?>
 
 <section role="main" class="content-body">
@@ -286,21 +382,22 @@ if(isset($dados) && count($dados))
                             <tr>
                               <td colspan='2'><small><i class="text-muted">Responsável:</i></small><br><?=$dados[$i]['user_name'];?></td>
                               <td colspan='6'>
-                                <? unset($passenger, $garrison_txt);
+                                <?
+                                  unset($passenger, $garrison_txt, $guarnicao_empenhada, $str, $info);
                                   if($dados[$i]['id_garrison']!="")
                                   {
 
-                                   if(isset($dados_garrison_passenger[$dados[$i]['id_garrison']]) && count($dados_garrison_passenger[$dados[$i]['id_garrison']]))
-                                   {
-                                     $passenger = "<i class='text-muted'>, Passageiro(s): </i><b>".implode(" | ",$dados_garrison_passenger[$dados[$i]['id_garrison']])."</b>";
-                                   }
-                                   $garrison_txt  = "<br><b>".$dados[$i]['plate']."</b> - ".$dados[$i]['brand']." ".$dados[$i]['brand'];
-                                   $garrison_txt .= "<br><i class='text-muted'>Motorista: </i><b>".$dados[$i]['nickname_garrison']."</b>".$passenger;
+                                        unset($guarnicao_empenhada);
+                                        $guarnicao_empenhada = guarnicoes($dados[$i]['id_garrison'],"","resumido");
+                                        echo "<small><i class='text-muted'>Guarnição empenhada:</i></small> ";
+                                        echo "<small><b>Grupamento ".strtoupper($guarnicao_empenhada['name'])."</b></small><br>";
+                                        echo $guarnicao_empenhada['info'];
+
                                  }else{
-                                   $garrison_txt = "<br><i class='text-muted'>Nenhuma guarnição empenhada.</i>";
+                                   echo  "<small><i class='text-danger'>Nenhuma guarnição empenhada.</i></small>";
                                  }
+
                                 ?>
-                                <small><i class="text-muted">Guarnição empenhada:</i></small><?=$garrison_txt;?>
                               </td>
                             </tr>
     <? }
@@ -361,21 +458,19 @@ if(isset($dados_baixados) && count($dados_baixados))
         <tr>
           <td colspan='2'><small><i class="text-muted">Responsável:</i></small><br><?=$dados[$i]['user_name'];?></td>
           <td colspan='6'>
-            <? unset($passenger, $garrison_txt);
-              if($dados[$i]['id_garrison']!="")
-              {
+            <?
+                    if($dados[$i]['id_garrison']!="")
+                    {
+                          unset($guarnicao_empenhada);
+                          $guarnicao_empenhada = guarnicoes($dados[$i]['id_garrison'],"","resumido");
+                          echo "<small><i class='text-muted'>Guarnição empenhada:</i></small> ";
+                          echo "<small><b>Grupamento ".strtoupper($guarnicao_empenhada['name'])."</b></small><br>";
+                          echo $guarnicao_empenhada['info'];
 
-               if(isset($dados_garrison_passenger[$dados[$i]['id_garrison']]) && count($dados_garrison_passenger[$dados[$i]['id_garrison']]))
-               {
-                 $passenger = "<i class='text-muted'>, Passageiro(s): </i><b>".implode(" | ",$dados_garrison_passenger[$dados[$i]['id_garrison']])."</b>";
-               }
-               $garrison_txt  = "<br><b>".$dados[$i]['plate']."</b> - ".$dados[$i]['brand']." ".$dados[$i]['brand'];
-               $garrison_txt .= "<br><i class='text-muted'>Motorista: </i><b>".$dados[$i]['nickname_garrison']."</b>".$passenger;
-             }else{
-               $garrison_txt = "<br><i class='text-muted'>Nenhuma guarnição empenhada.</i>";
-             }
+                    }else{
+                          echo  "<small><i class='text-danger'>Nenhuma guarnição empenhada.</i></small>";
+                    }
             ?>
-            <small><i class="text-muted">Guarnição empenhada:</i></small><?=$garrison_txt;?>
           </td>
         </tr>
 

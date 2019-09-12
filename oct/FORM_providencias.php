@@ -16,6 +16,9 @@
     $margin_upd = "15px";
     $acao       = "inserir";
   }
+
+
+  
 ?>
 <form id="form_providencias" name="form_providencias" action="oct/FORM_providencias_sql.php" method="post">
 <section role="main" class="content-body">
@@ -99,48 +102,173 @@
 
 <div class="row">
   <div class="col-sm-12">
-    <div class="form-group">
-    <label class="control-label">Guarnição:</label>
-    <select class="form-control" name="id_garrison">
     <?
-         if($_GET['id_workshift'] != "")
+     $turno_aberto['id'] = $_GET['id_workshift'];
+     if($turno_aberto['id']!="")
+     {
+       $sql = "SELECT
+                 F.nickname, F.plate, F.model, F.brand,
+                 G.*
+               FROM
+                 sepud.oct_garrison G
+               LEFT JOIN sepud.oct_fleet F ON F.id = G.id_fleet
+               WHERE
+                 G.id_workshift = '".$turno_aberto['id']."' AND G.closed is null AND G.name is not null";
+       $res = pg_query($sql)or die("SQL error ".__LINE__);
+       while($aux = pg_fetch_assoc($res)){
+         if($aux['name']!=""){ //Nome da guarnição, novo modelo de gestão//
+           $vetor_nova_guarnicao[$aux['id']] = $aux;
+         }
+       }
+
+       $sql = "SELECT
+                 F.nickname,
+                 F.brand,
+                 F.model,
+                 F.plate,
+                 V.*
+               FROM
+                 sepud.oct_rel_garrison_vehicle V
+                 JOIN sepud.oct_fleet F ON F.ID = V.id_fleet
+               WHERE
+                 V.id_garrison IN (SELECT G.ID FROM sepud.oct_garrison G WHERE G.id_workshift = '".$turno_aberto['id']."' AND G.closed is null AND G.name is not null)";
+
+       $res = pg_query($sql)or die("SQL error ".__LINE__);
+       while($aux = pg_fetch_assoc($res)){
+         $vetor_nova_guarnicao[$aux['id_garrison']]['veiculos'][$aux['id']] = $aux;
+       }
+
+       $sql = "SELECT
+                 U.NAME,
+                 U.nickname,
+                 U.registration,
+                 P.*
+               FROM
+                 sepud.oct_rel_garrison_persona
+                 P JOIN sepud.users U ON U.ID = P.id_user
+               WHERE
+                 P.id_garrison IN (SELECT G.ID FROM sepud.oct_garrison G WHERE G.id_workshift = '".$turno_aberto['id']."' AND G.closed is null AND G.name is not null)
+               ORDER BY U.nickname ASC";
+
+       $res = pg_query($sql)or die("SQL error ".__LINE__);
+       while($aux = pg_fetch_assoc($res)){
+
+         if($aux['id_rel_garrison_vehicle']!="")
          {
-          $sql = "SELECT
-                     U.name as user_name, U.registration, U.nickname as user_nickname,
-                     G.*,
-                     F.plate,
-                     F.TYPE,
-                     F.model,
-                     F.brand,
-                     F.nickname
-                   FROM
-                     sepud.oct_garrison G
-                   JOIN sepud.oct_fleet F ON F.id = G.id_fleet
-                   JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = G.id AND GP.type = 'Motorista'
-                   JOIN sepud.users U ON U.id = GP.id_user
-                   WHERE
-                     G.id_workshift = '".$_GET['id_workshift']."'";
-          $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);;
+           $vetor_nova_guarnicao[$aux['id_garrison']]['veiculos'][$aux['id_rel_garrison_vehicle']]['pessoas'][] = $aux;
+         }else {
+           $vetor_nova_guarnicao[$aux['id_garrison']]['pessoas_a_pe'][] = $aux;
+         }
+       }
+       echo "<div class='form-group'>
+             <label class='control-label'>Guarnição</label>
+             <select class='form-control select2' name='id_garrison'>
+               <option value=''></option>";
+               if($dados['closed_garrison']!="")
+               {
+                   if($dados['name_garrison']=="")//Guarnição modelo antigo//
+                   {
+                     echo "<optgroup label='Guarnição empenhada (baixada):'>
+                           <option value='".$dados['id_garrison']."' selected>".$dados['fleet_nickname']." - ".$dados['plate'].": ".$dados['nickname_garrison']."</option>
+                           </optgroup>";
+                   }else{
+                     /*
+
+                     SELECT G.name, P.* FROM sepud.oct_rel_garrison_persona P, sepud.oct_garrison G WHERE id_garrison = '1974' AND P.id_garrison = G.id;
+                     */
+                     $sql = "SELECT F.nickname as fleet_nickname, G.name, R.* FROM sepud.oct_rel_garrison_vehicle R, sepud.oct_garrison G, sepud.oct_fleet F WHERE R.id_fleet = F.id AND id_garrison = '".$dados['id_garrison']."' AND R.id_garrison = G.id";
+                     $res = pg_query($sql)or die("Erro ".__LINE__);
+                     while($auxg = pg_fetch_assoc($res)){
+                         $guarnicao_nova_baixada[$auxg['id_garrison']]['name']=$auxg['name'];
+                         $guarnicao_nova_baixada[$auxg['id_garrison']]['veiculos'][$auxg['id']] = $auxg;
+                     }
+                     $sql = "SELECT G.name, P.*, U.nickname FROM sepud.oct_rel_garrison_persona P, sepud.oct_garrison G, sepud.users U WHERE id_garrison = '".$dados['id_garrison']."' AND P.id_garrison = G.id AND P.id_user = U.id";
+                     $res = pg_query($sql)or die("Erro ".__LINE__);
+                     while($auxg = pg_fetch_assoc($res)){
+                         $guarnicao_nova_baixada[$auxg['id_garrison']]['veiculos'][$auxg['id_rel_garrison_vehicle']]['pessoas'][] = $auxg;
+                     }
+                     unset($str);
+                     foreach ($guarnicao_nova_baixada as $id_garrison_baixada => $info_veic) {
+                     echo "<optgroup label='Guarnição ".strtoupper($info_veic['name'])." (baixada):'>";
+                       foreach ($info_veic['veiculos'] as $id_rel_gar_veic => $values)
+                       {
+                         if(isset($str)){ $str .= " | ";}
+                         $str .= $values['fleet_nickname'].": ";
+                         unset($straux);
+                         for($i=0;$i<count($values['pessoas']);$i++)
+                         {
+                           $straux[] = $values['pessoas'][$i]['nickname'];
+                         }
+                         $str .= implode(", ",$straux);
+                       }
+                       echo "<option value='".$id_garrison_baixada."' selected>".$str."</option>";
+                     echo "</optgroup>";
+                     }
+                   }
+               }
+             foreach ($vetor_nova_guarnicao as $id_garrison => $info)
+             {
+               echo "<optgroup label='Guarnição ".strtoupper($info['name'])."'>";
+               unset($str_veic, $str_pess);
+               foreach ($info['veiculos'] as $id_fleet => $info_veic)
+               {
+                 if(isset($str_veic)){ $str_veic .= " | "; }
+                 $str_veic .= $info_veic['nickname'].": ";
+                 unset($str_pess);
+                 for($i=0;$i<count($info_veic['pessoas']);$i++)
+                 {
+                   $str_pess[] = $info_veic['pessoas'][$i]['nickname'];
+                 }
+                 $str_veic .= implode(", ",$str_pess);
+               }
+               if(count($info['pessoas_a_pe'])){
+                 unset($str_pess);
+                 for($i=0;$i<count($info['pessoas_a_pe']);$i++)
+                 {
+                   $str_pess[] = $info['pessoas_a_pe'][$i]['nickname'];
+                 }
+                 if(isset($str_veic)){ $str_veic .= " | ";}
+                 $str_veic .= "A PÉ: ".implode(", ",$str_pess);
+               }
+               if($dados['id_garrison']==$id_garrison){ $sel = "selected";}else{$sel="";}
+               echo "<option value='".$id_garrison."' ".$sel.">".strtoupper($info['name'])." - ".$str_veic."</option>";
+               echo "</optgroup>";
+             }
+
+             $sql = "SELECT
+                        U.name as user_name, U.registration, U.nickname as user_nickname,
+                        G.*,
+                        F.plate,
+                        F.TYPE,
+                        F.model,
+                        F.brand,
+                        F.nickname
+                      FROM
+                        sepud.oct_garrison G
+                      JOIN sepud.oct_fleet F ON F.id = G.id_fleet
+                      JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = G.id AND GP.type = 'Motorista'
+                      JOIN sepud.users U ON U.id = GP.id_user
+                      WHERE
+                          G.id_workshift = '".$turno_aberto['id']."'
+                      AND G.closed is null";
+             $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);;
+             if(pg_num_rows($res))
+             {
+               echo "<optgroup label='Guarnições ativas - Modelo antigo:'>";
+               while($dg = pg_fetch_assoc($res))
+               {
+                 if($dados['id_garrison']==$dg['id']){ $sel = "selected";}else{$sel="";}
+                 echo "<option value='".$dg['id']."' ".$sel.">".$dg['nickname']." - ".$dg['plate'].": ".$dg['user_nickname']."</option>";
+               }
+               echo "</optgroup>";
+             }
+
+       echo "</select></div>";
 
 
-          if(pg_num_rows($res))
-          {
-            echo "<option value=''></option>";
-            echo "<optgroup label='Guarnições montadas no turno ativo:'>";
-            while($dg = pg_fetch_assoc($res))
-            {
-              echo "<option value='".$dg['id']."'>".$dg['plate']." - [".$dg['user_nickname']."] ".$dg['user_name']." - Matrícula: ".$dg['registration']."</option>";
-            }
-            echo "</optgroup>";
-          }else{
-            echo "<option value=''>Nenhuma guarnição empenhada.</option>";
-          }
-        }else {
-          echo "<option value=''>Nenhum turno aberto ou ID do turno não informado.</option>";
-        }
+     }
+
     ?>
-  </select>
-   </div>
   </div>
 </div>
 

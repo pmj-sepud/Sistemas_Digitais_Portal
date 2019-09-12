@@ -39,7 +39,7 @@
         {
           if($d['type']=="agente")
           {
-            if($d['status']=="ativo" ||
+            if($d['status']=="ativo"          ||
                $d['status']=="HE-Compensação" ||
                $d['status']=="Serviços")
             {
@@ -71,6 +71,20 @@
           if($dOc['active']=='t'){ $status_ocs['abertas'] = $dOc['qtd']; }else{ $status_ocs['fechadas'] = $dOc['qtd']; }
           $status_ocs['total'] += $dOc['qtd'];
         }
+
+
+  //Quantidade de ocorrencias e providencias por guarnição//
+  $sql = "SELECT id_garrison, count(*) as qtd_oc FROM sepud.oct_events E WHERE E.id_workshift = '".$turno['id']."' GROUP BY id_garrison";
+  $res = pg_query($sql)or die("SQL Error: ".$sql);
+  while($aux = pg_fetch_assoc($res)){
+      $produtividade_guarnicoes[$aux['id_garrison']]['qtd_oc'] = $aux['qtd_oc'];
+      $produtividade_guarnicoes[$aux['id_garrison']]['total']  = $aux['qtd_oc']; }
+
+  $sql = "SELECT id_garrison, count(*) as qtd_prov FROM	sepud.oct_rel_events_providence WHERE id_garrison in (SELECT id FROM sepud.oct_garrison WHERE id_workshift = '".$turno['id']."') GROUP BY id_garrison";
+  $res = pg_query($sql)or die("SQL Error: ".__LINE__);
+  while($aux = pg_fetch_assoc($res)){ $produtividade_guarnicoes[$aux['id_garrison']]['qtd_prov'] = $aux['qtd_prov'];
+                                      $produtividade_guarnicoes[$aux['id_garrison']]['total']   += $aux['qtd_prov']; }
+
 
   }else{
     $$turno_aberto = false;
@@ -110,6 +124,48 @@
       box-shadow: 0 0 0 0 rgba(240, 173, 78, 0);
   }
 }
+
+#custom-bootstrap-menu.navbar-default .navbar-brand {
+    color: rgba(214, 213, 211, 1);
+}
+#custom-bootstrap-menu.navbar-default {
+    font-size: 14px;
+    background-color: rgba(255, 255, 255, 1);
+    background: -webkit-linear-gradient(top, rgba(250, 250, 250, 1) 0%, rgba(255, 255, 255, 1) 100%);
+    background: linear-gradient(to bottom, rgba(250, 250, 250, 1) 0%, rgba(255, 255, 255, 1) 100%);
+    border-width: 1px;
+    border-radius: 9px;
+}
+#custom-bootstrap-menu.navbar-default .navbar-nav>li>a {
+    color: rgba(119, 119, 119, 1);
+    background-color: rgba(248, 248, 248, 0);
+}
+#custom-bootstrap-menu.navbar-default .navbar-nav>li>a:hover,
+#custom-bootstrap-menu.navbar-default .navbar-nav>li>a:focus {
+    color: rgba(51, 51, 51, 1);
+    background-color: rgba(222, 222, 222, 1);
+}
+#custom-bootstrap-menu.navbar-default .navbar-nav>.active>a,
+#custom-bootstrap-menu.navbar-default .navbar-nav>.active>a:hover,
+#custom-bootstrap-menu.navbar-default .navbar-nav>.active>a:focus {
+    color: rgba(85, 85, 85, 1);
+    background-color: rgba(230, 230, 230, 1);
+}
+#custom-bootstrap-menu.navbar-default .navbar-toggle {
+    border-color: #e6e6e6;
+}
+#custom-bootstrap-menu.navbar-default .navbar-toggle:hover,
+#custom-bootstrap-menu.navbar-default .navbar-toggle:focus {
+    background-color: #e6e6e6;
+}
+#custom-bootstrap-menu.navbar-default .navbar-toggle .icon-bar {
+    background-color: #e6e6e6;
+}
+#custom-bootstrap-menu.navbar-default .navbar-toggle:hover .icon-bar,
+#custom-bootstrap-menu.navbar-default .navbar-toggle:focus .icon-bar {
+    background-color: #ffffff;
+}
+
 </style>
 <section role="main" class="content-body">
   <header class="page-header hidden-print">
@@ -123,9 +179,63 @@
       <!--<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>-->
     </div>
   </header>
+<?
+   echo '<nav id="custom-bootstrap-menu" class="navbar navbar-default">
+            <div class="container-fluid">
+                  <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                          <span class="icon-bar"></span>
+                          <span class="icon-bar"></span>
+                          <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand text-muted" href="#"><small><i>Menu de ações:</i></small></a>
+                  </div>
 
 
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav navbar-right">';
 
+      if($turno['id']!="")
+      {
+        echo "<li><a href='oct/turno.php?id=".$turno['id']."'><i class='fa fa-cogs'></i> Turno <sup>(nº ".$turno['id'].")</sup></a></li>";
+        echo "<li><a href='oct/turno_associar_pessoa.php?id_workshift=".$turno['id']."'><i class='fa fa-users'></i> Pessoal</a></li>";
+
+
+        if(isset($qtd_agentes) && $qtd_agentes > 0)
+        {
+
+                echo "<li><a href='oct/guarnicao_FORM.php?id_workshift=".$turno['id']."'><i class='fa fa-cab'></i> Guarnições</a></li>";
+                echo "<li class='dropdown'>
+                          <a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'><i class='fa fa-file-text-o'></i> Registros do turno <span class='caret'></span></a>
+
+                          <ul class='dropdown-menu'>
+                              <li class='dropdown-header'><i>Novo registro:</i></li>
+                              <!--<span style='margin-left:5px;color:#BBBBBB'><i>Novo registro:</i></span>-->
+                              <li><a href='oct/registros_de_turno_FORM.php?id_workshift=".$turno['id']."&tipo_registro=veiculo'>Veículo</a></li>
+                              <li><a href='oct/registros_de_turno_FORM.php?id_workshift=".$turno['id']."&tipo_registro=pessoa'>Pessoa</a></li>";
+                        echo "<li><a href='oct/registros_de_turno_FORM.php?id_workshift=".$turno['id']."&tipo_registro=guarnicao'>Guarnição</a></li>";
+                        echo "<li role='separator' class='divider'></li>
+                              <li class='dropdown-header'><i>Visualizar:</i></li>
+                              <!--<span style='margin-left:5px;color:#BBBBBB'><i>Visualizar:</i></span>-->
+                              <li><a href='oct/registros_de_turno_VIS.php?id_workshift=".$turno['id']."'><i class='fa fa-search'></i> Registros</a></li>
+                          </ul>
+                      </li>";
+        }else{
+                echo "<li><i class='fa fa-cab'></i> Inserir guarnições</li>";
+        }
+        echo "<li><a id='bt_print_2' href='#'><i class='fa fa-print'></i> Imprimir</a></li>";
+        echo "<li><a href='oct/turno.php'><i class='fa fa-calendar'></i> <sup><i class='fa fa-plus'></i></sup> Novo turno</a></li>";
+      }else{
+        echo "<li><a href='oct/turnos_INDEX.php'><i class='fa fa-file-text-o'></i> <sup><i class='fa fa-search'></i></sup> Visualizar turnos</a></li>";
+        echo "<li><a href='oct/turno.php'><i class='fa fa-calendar'></i> <sup><i class='fa fa-plus'></i></sup> Novo turno</a></li>";
+      }
+
+      echo '</ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>';
+
+?>
   <div class="col-md-12">
         <section class="panel box_shadow">
             <header class="panel-heading" style="height:70px">
@@ -134,6 +244,7 @@
                 <div class="panel-actions" style="margin-top:5px">
                     <?
 
+                    /*
                       if($turno['id']!="")
                       {
                             echo " <a href='oct/turno.php?id=".$turno['id']."'><button id='bt_atualizar_turno' type='button' class='btn btn-primary'><i class='fa fa-cogs'></i> Turno <sup>(nº ".$turno['id'].")</sup></button></a>";
@@ -141,12 +252,8 @@
 
                             if(isset($qtd_agentes) && $qtd_agentes > 0)
                             {
-                                    if($_SESSION['id']==1){
-                                        echo " <a href='oct/guarnicao_FORM.php?id_workshift=".$turno['id']."'><button id='bt_atualizar_veiculo' type='button' class='btn btn-warning'><i class='fa fa-cab'></i> Guarnições v2</button></a>";
-                                    }else{
-                                      echo " <a href='oct/veiculo_turno_FORM.php?turno=".$turno['id']."'><button id='bt_atualizar_veiculo' type='button' class='btn btn-primary'><i class='fa fa-cab'></i> Guarnições</button></a>";
-                                    }
 
+                                    echo " <a href='oct/guarnicao_FORM.php?id_workshift=".$turno['id']."'><button id='bt_atualizar_veiculo' type='button' class='btn btn-primary'><i class='fa fa-cab'></i> Guarnições</button></a>";
 
                                     echo "<style>";
                                     echo ".panel-actions a,
@@ -168,7 +275,7 @@
               												        </ul>
               												    </div>";
 
-                            }else {
+                            }else{
 
                                   echo " <button type='button' class='btn  btn-primary disabled'><i class='fa fa-cab'></i> Inserir guarnições</button>";
 
@@ -181,6 +288,8 @@
                         echo " <a href='oct/turnos_INDEX.php'><button type='button' class='btn btn-primary'><i class='fa fa-file-text-o'></i> <sup><i class='fa fa-search'></i></sup> Visualizar turnos</button></a>";
                         echo " <a href='oct/turno.php'><button type='button' class='btn btn-info'><i class='fa fa-calendar'></i> <sup><i class='fa fa-plus'></i></sup> Novo turno</button></a>";
                       }
+
+                    */
                   ?>
                 </div>
             </header>
@@ -257,7 +366,7 @@
 
               <div class="row">
                 <div class="col-sm-12">
-
+                  <div class="table-responsive">
                   <table class='table table-condensed'>
                   <thead><tr><th><h4><b>Coordenação:</h4></b></th></tr></thead>
                   <tbody>
@@ -308,7 +417,7 @@
                           </tr>
                                       </tbody>
                                     </table>
-
+                          </div>
 
 
                 </div>
@@ -506,18 +615,46 @@ if($turno_aberto)
             <div class='col-sm-12'>
               <div class='table-responsive'>
                         <table class='table table-condensed'>
-                        <thead><tr><th colspan='5'><h4><b>Guarnições <sup>(versão 2)</sup></b></h4></th></tr>";
+                        <thead><tr><th colspan='5'><h4><b>Guarnições</b></h4></th></tr>";
                         if(pg_num_rows($res))
                         {
-                          echo "<tr><td><i><small>#</small></i></td>
-                                    <td><i><small>Grupamento</small></i></td>
-                                    <td><i><small>Início</small></i></td>
-                                    <td><i><small>Fim</small></i></td>
-                                    <td></td>
-                                </tr>";
+
                           echo "</thead>";
                           while($dG = pg_fetch_assoc($res))
                           {
+
+                            //veiculos da guarnição//
+                            $sqlv = "SELECT F.plate, F.type, F.model, F.brand, F.nickname,
+                                      			G.*
+                                     FROM sepud.oct_rel_garrison_vehicle G
+                                     JOIN sepud.oct_fleet F ON F.id = G.id_fleet
+                                     WHERE id_garrison = '".$dG['id']."' ORDER BY F.nickname";
+                            $resv = pg_query($sqlv) or die("SQL error ".__LINE__."<br>Query: ".$sqlv);
+                            unset($aux, $veiculos_da_guarnicao, $pessoas_sem_veiculo);
+                            while($aux = pg_fetch_assoc($resv))
+                            {
+                              $veiculos_da_guarnicao[$aux['id']] = $aux;
+                            }
+                            //pessoas da guarnição//
+                            $sqlp = "SELECT
+                                        U.nickname, U.name, U.registration,
+                                        G.*
+                                     FROM
+                                        sepud.oct_rel_garrison_persona G
+                                     JOIN sepud.users U ON U.id = G.id_user
+                                     WHERE
+                                      id_garrison = '".$dG['id']."'";
+                            $resp = pg_query($sqlp) or die("SQL error ".__LINE__."<br>Query: ".$sqlp);
+                            while($aux = pg_fetch_assoc($resp))
+                            {
+                              if($aux['id_rel_garrison_vehicle']!="")
+                              {
+                                $veiculos_da_guarnicao[$aux['id_rel_garrison_vehicle']]['pessoas'][] = $aux;
+                              }else {
+                                $pessoas_sem_veiculo[] = $aux;
+                              }
+                            }
+
 
                             unset($dt_opened, $dt_closed);
                             if($dG['opened']!=""){
@@ -533,22 +670,76 @@ if($turno_aberto)
                                 }else {
                                   $dt_closed = "";
                                 }
+                                if($produtividade_guarnicoes[$dG['id']]['qtd_oc']=="")  {$produtividade_guarnicoes[$dG['id']]['qtd_oc']  =0;}
+                                if($produtividade_guarnicoes[$dG['id']]['qtd_prov']==""){$produtividade_guarnicoes[$dG['id']]['qtd_prov']=0;}
                             echo "<tr class='".($dG['closed']==""?"success":"warning")."'>";
-                              echo "<td><small><i>".number_format($dG['id'],0,'','.')."</i></small></td>";
-                              echo "<td width='90px'><b>".ucfirst($dG['name'])."</b></td>";
-                              echo "<td width='125px'>".$dt_opened."</td>";
-                              echo "<td width='125px'>".$dt_closed."</td>";
-                              echo "<td width='100px' class='text-center'>";
-                                echo "<a href='oct/guarnicao_FORM.php?id_garrison=".$dG['id']."&id_workshift=".$turno['id']."' class='btn btn-xs btn-default'><i class='fa fa-cab'></i> Atualizar</a>";
+                              echo "<td style='vertical-align:middle;'><i class='fa fa-cab'></i> <i class='fa fa-user'></i><br><small><i>".number_format($dG['id'],0,'','.')."</i></small></td>";
+                              echo "<td><small><i>Grupamento:</i></small><br><b>".ucfirst($dG['name'])."</b></td>";
+                              echo "<td><small><i>Ocorrências + Providências:</i></small><br>".$produtividade_guarnicoes[$dG['id']]['qtd_oc']." + ".$produtividade_guarnicoes[$dG['id']]['qtd_prov']." = ".$produtividade_guarnicoes[$dG['id']]['total']."</td>";
+                              echo "<td width='130px'><small><i>Abertura:</i></small><br>".$dt_opened."</td>";
+                              echo "<td width='130px'><small><i>Fechamento:</i></small><br>".$dt_closed."</td>";
+                              echo "<td width='130px'><small><i>Status:</i></small><br>".($dt_closed!=""?"Encerrada":"Em operação")."</td>";
+                              echo "<td width='130px' class='text-center' style='vertical-align:middle;'>";
+                                echo "<a href='oct/guarnicao_FORM.php?id_garrison=".$dG['id']."&id_workshift=".$turno['id']."' class='btn btn-sm btn-default'><i class='fa fa-cab'></i> Atualizar</a>";
                               echo "</td>";
                             echo "</tr>";
                             echo "<tr>";
-                              echo "<td colspan='5'><small class='text-muted'>Observações:</small><br>".$dG['observation']."</td>";
+                              echo "<td colspan='7'><small class='text-muted'><i>Observações gerais:</i></small><br>".$dG['observation']."</td>";
                             echo "<tr>";
+                            if(isset($veiculos_da_guarnicao))
+                            {
+                              foreach ($veiculos_da_guarnicao as $id_rel => $veic)
+                              {
+
+                                unset($km_rodado,$class);
+                                $km_rodado = ($veic['initial_km']!=""&&$veic['final_km']!=""?($veic['final_km']-$veic['initial_km']):0);
+                                $class='info';
+                                if($km_rodado == 0 || $km_rodado >= 100){ $class="warning";}
+                                if($km_rodado < 0)   { $class="danger"; }
+                                echo "<tr>";
+                                  echo "<td class='info'><small><i>Apelido:</i></small><br><b>".$veic['nickname']."</b></td>";
+                                  echo "<td class='info'><small><i>Placa:</i></small><br>".$veic['plate']."</td>";
+                                  echo "<td class='info' colspan='2'>".$veic['brand']." ".$veic['model']."</td>";
+                                  echo "<td class='info'><small><i>Km inicial:</i></small><br>".number_format($veic['initial_km'],0,'','.')."</td>";
+                                  echo "<td class='info'><small><i>Km final:</i></small><br>".number_format($veic['final_km'],0,'','.')."</td>";
+                                  echo "<td class='".$class."'><small><i>Total percorrido:</i></small><br>".number_format($km_rodado,0,'','.')." km</td>";
+                                echo "</tr>";
+                                echo "<tr>";
+                                  echo "<td colspan='7'><small class='text-muted'><i>Observações da viatura:</i></small><br>".$veic['obs']."</td>";
+                                echo "</tr>";
+
+                                if(isset($veic['pessoas']) && count($veic['pessoas']))
+                                {
+                                  for($cp=0;$cp<count($veic['pessoas']);$cp++)
+                                  {
+                                    echo "<tr>";
+                                      echo "<td><b>".$veic['pessoas'][$cp]['nickname']."</b></td>";
+                                      echo "<td colspan='5'>".$veic['pessoas'][$cp]['name']."</td>";
+                                      echo "<td><b>".$veic['pessoas'][$cp]['type']."</b></td>";
+                                    echo "</tr>";
+                                  }
+                                }else{
+                                    echo "<tr><td colspan='3' class='text-danger'><small><i><b>Atenção:</b> Veículo sem condutor, favor atualizar.</i></small></td></tr>";
+                                }
+                              }
+
+                            }
+                            if(isset($pessoas_sem_veiculo) && count($pessoas_sem_veiculo))
+                            {
+                              echo "<tr class='info'><td colspan='7'><b>AGENTE(S) SEM VEÍCULO:</b></td></tr>";
+                              for($cpsv=0;$cpsv<count($pessoas_sem_veiculo);$cpsv++)
+                              {
+                                echo "<tr>";
+                                  echo "<td><b>".$pessoas_sem_veiculo[$cpsv]['nickname']."</b></td>";
+                                  echo "<td colspan='6'>".$pessoas_sem_veiculo[$cpsv]['name']."</td>";
+                                echo "</tr>";
+                              }
+                            }
+
                           }
 
-                        }else {
-                          echo "</thead><tbody><tr><td><small><i class='text-muted'>Aguarde, em desenvolvimento</i></small></td></tr></tbody>";
+                        }else{
+                          echo "</thead><tbody><tr><td><small><i class='text-muted'>Nenhuma guarnição configurada.</i></small></td></tr></tbody>";
                         }
                         echo "</table>";
         echo "</div>
@@ -683,6 +874,11 @@ if($turno_aberto)
 
 <script>
 $("#bt_print").click(function(){
+	var vw = window.open('oct/turno_rel_print.php?id_workshift=<?=$turno['id'];?>',
+									     'popup',
+								 	     'width=800, height=600, top=10, left=10, scrollbars=no,location=no,status=no');
+});
+$("#bt_print_2").click(function(){
 	var vw = window.open('oct/turno_rel_print.php?id_workshift=<?=$turno['id'];?>',
 									     'popup',
 								 	     'width=800, height=600, top=10, left=10, scrollbars=no,location=no,status=no');
