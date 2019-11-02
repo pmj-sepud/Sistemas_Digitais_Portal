@@ -143,7 +143,7 @@
 
 }
 
-function guarnicoes($id_garrison, $id_workshift, $modelo)
+function guarnicoes($id_garrison, $id_workshift, $modelo = "resumido")
 {
 
        if($id_garrison != "")//Buscando uma guarnição especifica
@@ -509,6 +509,12 @@ if($turno['config_rel_conducao']=="true"){
                             echo "<td>".$dCond['name']."</td>";
                             echo "<td>".$dCond['description']."</td>";
                             echo "<td>";
+                            unset($auxg);
+                            $auxg = guarnicoes($dCond['id_garrison'],"","resumido");
+                            //print_r($auxg);
+                            echo "<b>Guarnição ".ucfirst($auxg['name'])."</b> - ".$auxg['info'];
+                            //print_r($dCond);
+/*
                                     unset($txt_integrantes_guarnicao);
                                     if(isset($guarnicoes_participantes[$dCond['id_garrison']]))
                                     {
@@ -522,6 +528,7 @@ if($turno['config_rel_conducao']=="true"){
                                     }else {
                                         echo "<small class='text-muted'><i>Nenhuma guarnição associada para esta ocorrência de condução</i></small>";
                                     }
+*/
                             echo "</td>";
                           echo "</tr>";
                         }
@@ -618,8 +625,8 @@ if($turno['config_rel_conducao']=="true"){
                                 echo "<tr>";
                                 echo "<td nowrap>".$envolvidos."</td>";
                                 echo "<td>".ucfirst($dHist[$i]['type'])."</td>";
-                                echo "<td><small>".str_replace(" ","<br>",formataData($dHist[$i]['opened'],1))."</small></td>";
-                                echo "<td><small>".str_replace(" ","<br>",formataData($dHist[$i]['closed'],1))."</small></td>";
+                                echo "<td nowrap><small>".substr(formataData($dHist[$i]['opened'],1),0,16)."</small></td>";
+                                echo "<td nowrap><small>".substr(formataData($dHist[$i]['closed'],1),0,16)."</small></td>";
                                 echo "<td>".$dHist[$i]['obs']."</td>";
                                 echo "</tr>";
                               }
@@ -1009,16 +1016,47 @@ if(isset($guarnicoes) && count($guarnicoes))
             <div class="col-xs-12">
               <table class='table table-condensed'>
               <thead>
-                <tr><td colspan="4"><h4>Coordenação:</h4></td></tr>
+                <tr><td colspan="4"><h4>Gerência/Coordenação:</h4></td></tr>
                 <tr class='text-muted'>
                   <td class='text-center' width='25px'><small><i>Matrícula</i></smalltdth>
                   <td><small><i>Nome</i></small></td>
+                  <td><small><i>Área</i></small></td>
                   <td class='text-center'><small><i>Entrada</i></small></td>
                   <td class='text-center'><small><i>Saída</i></small></td>
                 </tr>
               </thead>
               <tbody>
                 <?
+
+                            if(isset($turno_recursos['gerencia']) && count($turno_recursos['gerencia']))
+                            {
+                                      $ger = $turno_recursos['gerencia'];
+                                      for($i=0;$i<count($ger);$i++)
+                                      {
+                                        if($ger[$i]['opened']!=""){
+                                            $aux       = explode(" ",formataData($ger[$i]['opened'],1));
+                                            $dt_opened = "<small>".$aux[0]."</small> <b>".$aux[1]."</b>";
+                                          }else{
+                                            $dt_opened = "";
+                                          }
+
+                                          if($ger[$i]['closed']!=""){
+                                              $aux       = explode(" ",formataData($ger[$i]['closed'],1));
+                                              $dt_closed = "<small>".$aux[0]."</small> <b>".$aux[1]."</b>";
+                                            }else{
+                                              $dt_closed = "";
+                                            }
+
+                                        echo "<tr>";
+                                          echo "<td class='text-center'>".$ger[$i]['registration']."</td>";
+                                          echo "<td>".$ger[$i]['nome']."</td>";
+                                          echo "<td>Gerência</td>";
+                                          echo "<td width='125px' class='text-center'>".$dt_opened."</td>";
+                                          echo "<td width='125px' class='text-center'>".$dt_closed."</td>";
+                                        echo "</tr>";
+                                      }
+                            }
+
 
                             if(isset($turno_recursos['coordenacao']) && count($turno_recursos['coordenacao']))
                             {
@@ -1042,6 +1080,7 @@ if(isset($guarnicoes) && count($guarnicoes))
                                         echo "<tr>";
                                           echo "<td class='text-center'>".$coord[$i]['registration']."</td>";
                                           echo "<td>".$coord[$i]['nome']."</td>";
+                                          echo "<td>Coordenação</td>";
                                           echo "<td width='125px' class='text-center'>".$dt_opened."</td>";
                                           echo "<td width='125px' class='text-center'>".$dt_closed."</td>";
                                         echo "</tr>";

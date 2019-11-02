@@ -4,9 +4,6 @@
   require_once("../libs/php/conn.php");
 
 
-
-  logger("Acesso","OCT", "Sistema - página inicial");
-
   $agora = now();
 
   if($_GET['id_workshift']=="")
@@ -23,6 +20,7 @@
   {
         $turno = pg_fetch_assoc($res);
         $ano   = substr($turno['opened'],0,4);
+        logger("Acesso","OCT", "Sistema - página inicial, Turno nº ".$turno['id']);
 
         $sql = "SELECT
                     U.name as nome, U.id as id_user, U.registration, U.nickname,
@@ -88,6 +86,7 @@
 
   }else{
     $$turno_aberto = false;
+    logger("Acesso","OCT", "Sistema - página inicial, nenhum turno aberto");
   }
 ?>
 <style>
@@ -169,7 +168,7 @@
 </style>
 <section role="main" class="content-body">
   <header class="page-header hidden-print">
-    <h2>Registro de Ocorrências de Trânsito e Segurança</h2>
+    <h2>ROTSS</h2>
     <div class="right-wrapper pull-right" style='margin-right:15px;'>
       <ol class="breadcrumbs">
         <li><a href="index_sistema.php"><i class="fa fa-home"></i></a></li>
@@ -221,7 +220,7 @@
                           </ul>
                       </li>";
         }else{
-                echo "<li><i class='fa fa-cab'></i> Inserir guarnições</li>";
+                echo "<li class='disabled'><a href='#'><i class='fa fa-cab'></i> Inserir guarnições</a></li>";
         }
         echo "<li><a id='bt_print_2' href='#'><i class='fa fa-print'></i> Imprimir</a></li>";
         echo "<li><a href='oct/turno.php'><i class='fa fa-calendar'></i> <sup><i class='fa fa-plus'></i></sup> Novo turno</a></li>";
@@ -368,46 +367,82 @@
                 <div class="col-sm-12">
                   <div class="table-responsive">
                   <table class='table table-condensed'>
-                  <thead><tr><th><h4><b>Coordenação:</h4></b></th></tr></thead>
+                  <thead><tr><th><h4><b>Gerência/Coordenação:</h4></b></th></tr></thead>
                   <tbody>
                     <tr>
                       <td style="vertical-align: middle;">
                                               <?
-                                                if(isset($dados_turno['coordenacao']))
+                                                if(isset($dados_turno['coordenacao']) || isset($dados_turno['gerencia']))
                                                 {
+
+                                                  //print_r($dados_turno['gerencia']);
                                                   echo "<table class='table table-condensed'>
                                                         <thead><tr>
                                                           <th class='text-center' width='25px'><small><i>Matrícula</i></small></th>
                                                           <th><small><i>Nome</i></small></th>
+                                                          <th><small><i>Área</i></small></th>
                                                           <th class='text-center'><small><i>Entrada</i></small></th>
                                                           <th class='text-center'><small><i>Saída</i></small></th>
                                                         </tr>
                                                   <tbody>";
 
-                                                  $coord = $dados_turno['coordenacao'];
-                                                  for($i=0;$i<count($coord);$i++)
+                                                  if(isset($dados_turno['gerencia']))
                                                   {
-                                                    if($coord[$i]['opened']!=""){
-                                                        $aux       = explode(" ",formataData($coord[$i]['opened'],1));
-                                                        $dt_opened = "<small>".$aux[0]."</small> <b>".$aux[1]."</b>";
-                                                      }else {
-                                                        $dt_opened = "";
-                                                      }
-
-                                                      if($coord[$i]['closed']!=""){
-                                                          $aux       = explode(" ",formataData($coord[$i]['closed'],1));
-                                                          $dt_closed = "<small>".$aux[0]."</small> <b>".$aux[1]."</b>";
+                                                    $ger = $dados_turno['gerencia'];
+                                                    for($i=0;$i<count($ger);$i++)
+                                                    {
+                                                      if($ger[$i]['opened']!=""){
+                                                          $aux       = explode(" ",formataData($ger[$i]['opened'],1));
+                                                          $dt_opened = "<small>".$aux[0]."</small> <b>".$aux[1]."</b>";
                                                         }else {
-                                                          $dt_closed = "";
+                                                          $dt_opened = "";
                                                         }
 
-                                                    echo "<tr>";
-                                                      echo "<td class='text-center'>".$coord[$i]['registration']."</td>";
-                                                      echo "<td>".$coord[$i]['nome']."</td>";
-                                                      echo "<td width='125px' class='text-center'>".$dt_opened."</td>";
-                                                      echo "<td width='125px' class='text-center'>".$dt_closed."</td>";
-                                                    echo "</tr>";
+                                                        if($ger[$i]['closed']!=""){
+                                                            $aux       = explode(" ",formataData($ger[$i]['closed'],1));
+                                                            $dt_closed = "<small>".$aux[0]."</small> <b>".$aux[1]."</b>";
+                                                          }else {
+                                                            $dt_closed = "";
+                                                          }
+
+                                                      echo "<tr>";
+                                                        echo "<td class='text-center'>".$ger[$i]['registration']."</td>";
+                                                        echo "<td>".$ger[$i]['nome']."</td>";
+                                                        echo "<td>Gerência</td>";
+                                                        echo "<td width='125px' class='text-center'>".$dt_opened."</td>";
+                                                        echo "<td width='125px' class='text-center'>".$dt_closed."</td>";
+                                                      echo "</tr>";
+                                                    }
                                                   }
+
+                                                  if(isset($dados_turno['coordenacao']))
+                                                  {
+                                                        $coord = $dados_turno['coordenacao'];
+                                                        for($i=0;$i<count($coord);$i++)
+                                                        {
+                                                          if($coord[$i]['opened']!=""){
+                                                              $aux       = explode(" ",formataData($coord[$i]['opened'],1));
+                                                              $dt_opened = "<small>".$aux[0]."</small> <b>".$aux[1]."</b>";
+                                                            }else {
+                                                              $dt_opened = "";
+                                                            }
+
+                                                            if($coord[$i]['closed']!=""){
+                                                                $aux       = explode(" ",formataData($coord[$i]['closed'],1));
+                                                                $dt_closed = "<small>".$aux[0]."</small> <b>".$aux[1]."</b>";
+                                                              }else {
+                                                                $dt_closed = "";
+                                                              }
+
+                                                          echo "<tr>";
+                                                            echo "<td class='text-center'>".$coord[$i]['registration']."</td>";
+                                                            echo "<td>".$coord[$i]['nome']."</td>";
+                                                            echo "<td>Coordenação</td>";
+                                                            echo "<td width='125px' class='text-center'>".$dt_opened."</td>";
+                                                            echo "<td width='125px' class='text-center'>".$dt_closed."</td>";
+                                                          echo "</tr>";
+                                                        }
+                                                    }
                                                   echo "</tbody></table>";
                                                 }else {
                                                   echo "<small class='text-muted'>Nenhum coordenador designado.</small>";

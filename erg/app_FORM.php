@@ -102,7 +102,14 @@
           $hist_linhas_foot = "<tr><td class='danger'>&nbsp;</td><td colspan='6' class='text-danger'>Veículo irregular, já ocupou esta vaga.</td></tr>";
       }
 
+      $data_inicial = date2mkt(formataData($dados['timestamp'],1));
+      $tempo_passado = $agora['mkt']-$data_inicial;
 
+      if($tempo_passado <= 60) //Primeiro minuto
+      {
+        $status = $status_hist = "notificar";
+        $hist_linhas_foot = "<tr><td class='warning'>&nbsp;</td><td colspan='6' class='text-danger'>Primeiro minuto, notificação liberada em caso de irregularidade.</td></tr>";
+      }
 
       logger("Acesso","SERP - Registro",$txt_bread.", Placa do veículo: ".$dados['licence_plate']);
 
@@ -162,7 +169,6 @@
 
                     <div class="row">
                         <div class="col-sm-12">
-
 
 <? if($acao=="inserir"){ ?>
                             <div class="form-group">
@@ -228,7 +234,7 @@ echo "</div>";
                         <? } ?>
                      </div>
                   </div>
-<? }else {
+<? }else{
     echo "<div class='row'>
             <div class='col-xs-12 text-center'>";
     echo    "<h2><span class='text-muted'>Placa: </span><b>".$dados['licence_plate']."</b></h2>";
@@ -254,12 +260,8 @@ echo "</div>";
                                         if($status != "notificar" && $status_hist != "notificar")
                                         {
                                           echo "<button type='button' class='btn btn-lg btn-block btn-default disabled' role='button' style='margin-bottom:5px'><span class='text-muted'>Notificar</span></button>";
-
-                                        }else {
+                                        }else{
                                           echo "<a href='erg/app_FORM_sql.php?id=".$id."&acao=notificar'><button type='button' class='btn btn-lg btn-block  btn-dark  loading' role='button' style='margin-bottom:5px'>Notificar</button></a>";
-
-
-
                                         }
                               echo "<button type='button' class='btn btn-lg btn-block btn-default disabled' role='button' style='margin-bottom:5px'><span class='text-muted'>Guinchar</span></button>";
                               echo "<a href='erg/app_FORM_sql.php?id=".$id."&acao=baixar'><button type='button' class='btn btn-lg btn-block btn-primary loading' role='button'>Baixar</button></a>";

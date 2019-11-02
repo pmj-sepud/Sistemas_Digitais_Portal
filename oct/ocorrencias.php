@@ -38,7 +38,7 @@
   }else {
     $anterior = $hoje - (24*3600);
     $proximo  = $hoje + (24*3600);
-    $filtro_ativo = " OR (EV.id_company = '".$_SESSION['id_company']."' AND EV.active = 't')";
+    //$filtro_ativo = " OR (EV.id_company = '".$_SESSION['id_company']."' AND EV.active = 't')";
   }
 
 if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " OR  EV.active = 't'";*/ }else{ $bt_prox = true; }
@@ -91,7 +91,6 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
          }
          $sql .= " ORDER BY EV.id DESC";
 
-
  $rs  = pg_query($sql);
  $total_oc = 0;
  while($d = pg_fetch_assoc($rs))
@@ -125,6 +124,10 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
      if($p["id"]==25) //ID 25 - Prov. adminstrativa
      {
         $providencias[$p["id_event"]]["adm"] = true;
+     }
+     if($p["id"]==14 || $p["id"]==15) //ID 14 - Colocação de cones, 15 - Remoção de cones
+     {
+        $providencias[$p["id_event"]]["mat"] = true;
      }
    }
 
@@ -278,18 +281,58 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
 ?>
 <div class="col-md-12">
 								<section class="panel box_shadow">
-									<header class="panel-heading" style="height:70px">
+
+  <header class="panel-heading visible-xs" style="height:120px">
+    <div class="text-center">
+        <a href="oct/FORM.php">
+          <button type="button" class="mb-xs mt-xs mr-xs btn  btn-danger"><i class="fa fa-exclamation-triangle"></i> Nova ocorrência</button>
+        </a>
+
+        <button type='button' class='btn btn-primary' data-toggle='modal' data-target='#modalFiltro'><i class='fa fa-search'></i></button><br>
+        <?
+        if(!$bt_filtro_placa){ ?>
+          <a href="oct/ocorrencias.php?filtro_data=<?=$anterior;?>">
+            <button type="button" class="mb-xs mt-xs mr-xs btn btn-success"><i class="fa fa-play fa-rotate-180"></i></button>
+          </a>
+        <? }else{
+          echo "<button type='button' class='mb-xs mt-xs mr-xs btn btn-success disabled'><i class='fa fa-play fa-rotate-180'></i></button>";
+        }
+
+
+        ?>
+          <? if($bt_prox || $bt_filtro_placa){ ?>
+          <a href="oct/ocorrencias.php?filtro_data=">
+            <button type="button" class="mb-xs mt-xs mr-xs btn btn-success">Ir para hoje</button>
+          </a>
+        <? if(!$bt_filtro_placa){ ?>
+          <a href="oct/ocorrencias.php?filtro_data=<?=$proximo;?>">
+            <button type="button" class="mb-xs mt-xs mr-xs btn btn-success"><i class="fa fa-play"></i></button>
+          </a>
+        <? }else {
+          echo "<button type='button' class='mb-xs mt-xs mr-xs btn btn-success disabled'><i class='fa fa-play'></i></button>";
+        }
+      }else{
+          echo "<button type='button' class='mb-xs mt-xs mr-xs btn btn-success disabled'>Ir para hoje</button>";
+          echo "<button type='button' class='mb-xs mt-xs mr-xs btn btn-success disabled'><i class='fa fa-play'></i></button>";
+          } ?>
+    </div>
+  </header>
+
+                  <header class="panel-heading hidden-xs" style="height:120px">
                     <span class="text-muted"> Data de referência: </span><b><?=$data_atual;?></b>
-                    <br><small class="text-muted"><?=$txt_oc_abertas;?><?=($txt_oc_baixadas!=""?", ".$txt_oc_baixadas:"");?>
+                    <br><small class="text-muted"><?=$txt_oc_abertas;?><?=($txt_oc_baixadas!=""?",<br>".$txt_oc_baixadas:"");?>
                         </small>
                     <div class="panel-actions" style='margin-top:0px;'>
 
+                      <a href="oct/FORM.php">
+                        <button type="button" class="mb-xs mt-xs mr-xs btn  btn-danger"><i class="fa fa-exclamation-triangle"></i> Nova ocorrência</button>
+                      </a>
 
   <?
 
     echo "<button type='button' class='btn btn-primary' data-toggle='modal' data-target='#modalFiltro'>
           <i class='fa fa-search'></i>
-          </button>";
+          </button><br>";
 
 if(!$bt_filtro_placa){ ?>
   <a href="oct/ocorrencias.php?filtro_data=<?=$anterior;?>">
@@ -321,9 +364,7 @@ if(!$bt_filtro_placa){ ?>
   } ?>
 
 
-                      <a href="oct/FORM.php">
-                        <button type="button" class="mb-xs mt-xs mr-xs btn  btn-danger"><i class="fa fa-exclamation-triangle"></i> Abrir nova ocorrência</button>
-                      </a>
+
                       <!--<a href="#" ic-get-from="sistema/logs.php" ic-target="#wrap" class="mb-xs mt-xs mr-xs btn btn-xs btn-primary"><i class="fa fa-user-plus"></i> Novo usuário !</a>-->
 									  </div>
                   </header>
@@ -349,12 +390,15 @@ if(isset($dados) && count($dados))
       else{                                           $prov_adm = "<span class='text-center text-muted'>-</span>";}
       if($providencias[$dados[$i]["id"]]["guin"]==1){ $prov_gui = "<span class='text-center mb-xs mt-xs mr-xs btn btn-info'>GUI</span>";    }
       else{                                           $prov_gui = "<span class='text-center text-muted'>-</span>";}
+      if($providencias[$dados[$i]["id"]]["mat"]==1){  $prov_mat = "<span class='text-center mb-xs mt-xs mr-xs btn btn-warning'>MAT</span>";    }
+      else{                                           $prov_mat = "<span class='text-center text-muted'>-</span>";}
 
+      if($dados[$i]['status']=="Inativa"){$class_status="info";}else{ $class_status = "success"; }
 
     ?>
                           <tr>
-                              <td rowspan="3" style="vertical-align: middle;" class="text-center success"><?=$dados[$i]['id']; if($dados[$i]['id_workshift']!=""){ echo ".".$dados[$i]['id_workshift'];}?></td>
-                              <td colspan="8" style="background-color:#e2fee2"><b><?=$dados[$i]['event_type'];?></b></td>
+                              <td rowspan="3" style="vertical-align: middle;" class="text-center <?=$class_status;?>"><?=$dados[$i]['id']; if($dados[$i]['id_workshift']!=""){ echo ".".$dados[$i]['id_workshift'];}?></td>
+                              <td colspan="9" style="background-color:#e2fee2"><b><?=$dados[$i]['event_type'];?></b></td>
                             </tr>
                             <tr>
 
@@ -364,7 +408,7 @@ if(isset($dados) && count($dados))
                                   if($dados[$i]["addressbook_name"] != "")
                                   {
                                     if($dados[$i]["street_name"]!=""){$local .= " - ".$dados[$i]['street_name'];}
-                                  }else {
+                                  }else{
                                     if($dados[$i]["street_name"]!=""){$local = $dados[$i]['street_name'];}
                                   }
                               ?>
@@ -372,16 +416,17 @@ if(isset($dados) && count($dados))
                               <td><small><i class="text-muted">Logradouro:</i></small><br><?=$local;?></td>
                               <td><small><i class="text-muted">Data de abertura:</i></small><br><?=$dt_abertura;?></td>
                               <td><small><i class="text-muted">Origem:</i></small><br><?=$dados[$i]['company_acron'];?></td>
-                              <td><small><i class="text-muted">Status:</i></small><br><?=$dados[$i]['status'];?></td>
+                              <td><small><i class="text-muted">Status:</i></small><br><?=($dados[$i]['status']=="Inativa"?"<b class='text-info'>Inativa</b>":$dados[$i]['status']);?></td>
 
                               <td style="vertical-align: middle;" class="text-center"><?=$prov_adm;?></td>
                               <td style="vertical-align: middle;" class="text-center"><?=$prov_gui;?></td>
+                              <td style="vertical-align: middle;" class="text-center"><?=$prov_mat;?></td>
                               <td style="vertical-align: middle;" class="text-center"><?=$qtd_fotos;?></td>
                               <td style="vertical-align: middle;" class="text-center"><a href='oct/FORM.php?id=<?=$dados[$i]['id'];?>' class='mb-xs mt-xs mr-xs btn btn-default loading2'><i class='fa fa-pencil'></i></a></td>
                             </tr>
                             <tr>
                               <td colspan='2'><small><i class="text-muted">Responsável:</i></small><br><?=$dados[$i]['user_name'];?></td>
-                              <td colspan='6'>
+                              <td colspan='7'>
                                 <?
                                   unset($passenger, $garrison_txt, $guarnicao_empenhada, $str, $info);
                                   if($dados[$i]['id_garrison']!="")
@@ -427,7 +472,8 @@ if(isset($dados_baixados) && count($dados_baixados))
         else{                                           $prov_adm = "<span class='text-center text-muted'>-</span>";}
         if($providencias[$dados[$i]["id"]]["guin"]==1){ $prov_gui = "<span class='text-center mb-xs mt-xs mr-xs btn btn-info'>GUI</span>";    }
         else{                                           $prov_gui = "<span class='text-center text-muted'>-</span>";}
-
+        if($providencias[$dados[$i]["id"]]["mat"]==1){  $prov_mat = "<span class='text-center mb-xs mt-xs mr-xs btn btn-warning'>MAT</span>";    }
+        else{                                           $prov_mat = "<span class='text-center text-muted'>-</span>";}
 
       ?>
       <tr>
@@ -452,12 +498,13 @@ if(isset($dados_baixados) && count($dados_baixados))
 
           <td style="vertical-align: middle;" class="text-center"><?=$prov_adm;?></td>
           <td style="vertical-align: middle;" class="text-center"><?=$prov_gui;?></td>
+          <td style="vertical-align: middle;" class="text-center"><?=$prov_mat;?></td>
           <td style="vertical-align: middle;" class="text-center"><?=$qtd_fotos;?></td>
           <td style="vertical-align: middle;" class="text-center"><a href='oct/FORM.php?id=<?=$dados[$i]['id'];?>' class='mb-xs mt-xs mr-xs btn btn-default loading2'><i class='fa fa-pencil'></i></a></td>
         </tr>
         <tr>
           <td colspan='2'><small><i class="text-muted">Responsável:</i></small><br><?=$dados[$i]['user_name'];?></td>
-          <td colspan='6'>
+          <td colspan='7'>
             <?
                     if($dados[$i]['id_garrison']!="")
                     {

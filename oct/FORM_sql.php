@@ -17,6 +17,9 @@
       if($id_workshift    == ""){ $id_workshift   ="Null"; }else{ $id_workshift    = "'".$id_workshift."'";  }
       if($id_addressbook  == ""){ $id_addressbook ="Null"; }else{ $id_addressbook  = "'".$id_addressbook."'";}
       if($id_garrison     == ""){ $id_garrison    ="Null"; }else{ $id_garrison     = "'".$id_garrison."'";   }
+      if($victim_inform   == ""){ $victim_inform  ="0";    }else{ $victim_inform   =     $victim_inform;     }
+      if($region          == ""){ $region         ="Null"; }else{ $region          = "'".$region."'";        }
+
 
         $sql = "INSERT INTO sepud.oct_events
                     (date,
@@ -35,14 +38,15 @@
                      requester,
                      requester_phone,
                      id_addressbook,
-                     id_garrison)
+                     id_garrison,
+                     region)
               VALUES ('".$datafinal."',
                       '".$description."',
                       '".$endereco."',
                       '".$endereco_complemento."',
                       '".$coordenadas."',
                       '".$tipo_oc."',
-                      'Em deslocamento',
+                      '".$initial_status."',
                       '".$victim_inform."',
                       '".$userid."',
                       ".$id_street.",
@@ -52,7 +56,8 @@
                       '".$requester."',
                       '".$requester_phone."',
                       ".$id_addressbook.",
-                      ".$id_garrison.") returning id";
+                      ".$id_garrison.",
+                      ".$region.") returning id";
 
         $res = pg_query($sql) or die("Erro ".__LINE__."SQL: ".$sql);
         $aux = pg_fetch_assoc($res);
@@ -83,8 +88,8 @@
         if($closure         != ""){ $sql_closure    = ",closure = '".$closure."'";  }else{ $sql_closure    = ",closure = Null"; }
         if($arrival         != ""){ $sql_arrival    = ",arrival = '".$arrival."'";  }else{ $sql_arrival    = ",arrival = Null";}
         if($on_way          != ""){ $sql_on_way     = ",on_way = '".$on_way."'";    }else{ $sql_on_way     = ",on_way = Null";}
-
-
+        if($victim_inform   == ""){ $victim_inform  ="Null"; }else{ $victim_inform = "'".$victim_inform."'";  }
+        if($region          == ""){ $region         ="Null"; }else{ $region        = "'".$region."'";         }
 
         $sql = "UPDATE sepud.oct_events SET
                      date               = '".$datafinal."',
@@ -94,14 +99,15 @@
                      geoposition        = '".$coordenadas."',
                      id_event_type      = '".$tipo_oc."',
                      status             = '".$status."',
-                     victim_inform      = '".$victim_inform."',
+                     victim_inform      = ".$victim_inform.",
                      id_street          = ".$id_street.",
                      street_number      = ".$street_number.",
                      requester          = '".$requester."',
                      requester_phone    = '".$requester_phone."',
                      id_addressbook     = ".$id_addressbook.",
                      id_garrison        = ".$id_garrison.",
-                     id_workshift       = ".$id_workshift."
+                     id_workshift       = ".$id_workshift.",
+                     region             = ".$region."
                      ".$sql_closure."
                      ".$sql_arrival."
                      ".$sql_on_way."
@@ -120,6 +126,14 @@ if($_GET['status_acao'] == "atualizar" && $_GET['id'] != "")
 {
     $agora = now();
     switch ($_GET['status_alterar']) {
+      case 'ab':
+        $var_status = "Aberta";
+        $sqlU = "UPDATE sepud.oct_events SET active = true, closure = null, arrival = null,  status = '".$var_status."', on_way = null, date = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
+        break;
+      case 'in':
+        $var_status = "Inativa";
+        $sqlU = "UPDATE sepud.oct_events SET active = true, closure = null, arrival = null,  status = '".$var_status."', on_way = null WHERE id = '".$_GET['id']."'";
+        break;
       case 'd':
         $var_status = "Em deslocamento";
         $sqlU = "UPDATE sepud.oct_events SET active = true, closure = null, arrival = null,  status = '".$var_status."', on_way = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";

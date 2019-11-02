@@ -10,6 +10,7 @@
 
   if($_GET['id_garrison']==""){
       $acao = "Inserir";
+      logger("Acesso - Inserção","OCT - Guarnição");
   }else{
     $acao  = "Atualizar";
     $sql   = "SELECT * FROM sepud.oct_garrison G WHERE id = '".$id_garrison."'";
@@ -70,21 +71,8 @@
         $per_assoc['a_pe'][] = $dp;
       }
     }
-
+    logger("Acesso - Atualização","OCT - Guarnição", "Guarnição ID:".$_GET['id_garrison']);
   }
-
-  $vet_guar = array("alfa"   => true, "bravo"   => true, "charlie" => true, "delta"  => true, "echo"   => true, "fox"   => true,"golf"      => true,
-                    "hotel"  => true, "india"   => true, "juliet"  => true, "kilo"   => true, "lima"   => true, "mike"  => true, "november" => true,
-                    "oscar"  => true, "papa"    => true, "quebec"  => true, "romeo"  => true, "sierra" => true, "tango" => true,"uniform"   => true,
-                    "victor" => true, "whiskey" => true, "xray"    => true, "yankee" => true, "zulu"   => true);
-
-if($_SESSION['id']==1)
-{
-  //echo "<div class='text-center'>";
-  //print_r_pre($vet_guar);
-  //echo "</div>";
-}
-
 ?>
 <style>
 
@@ -120,7 +108,8 @@ if($_SESSION['id']==1)
                                 <div class="col-sm-12">
                                   <div class="form-group">
                                    <label class="control-label">Grupamento:</label>
-                                    <select name="name" class="form-control select2">
+                                    <select class="form-control" disabled>
+                                        <option value=""                                                         >O nome será atribuido automaticamente</option>
                                         <option value="alfa"     <?=($dados['name']=='alfa'?"selected":"");?>    >Alfa</option>
                                         <option value="bravo"    <?=($dados['name']=='bravo'?"selected":"");?>   >Bravo</option>
                                         <option value="charlie"  <?=($dados['name']=='charlie'?"selected":"");?> >Charlie</option>
@@ -187,7 +176,9 @@ if($_SESSION['id']==1)
                               if($acao=="Atualizar")
                               {
                                 echo "<input type='hidden' name='id_garrison' value='".$_GET['id_garrison']."'>";
+                                echo "<input type='hidden' name='name' value='".$dados['name']."'>";
                                 echo  "<a href='oct/guarnicao_SQL.php?acao=Remover&id_workshift=".$id_workshift."&id_garrison=".$_GET['id_garrison']."' class='btn btn-danger loading2'>Remover</a>";
+
                               }
                           ?>
                           <button type="submit" class="btn btn-primary loading"><?=$acao;?></button>
@@ -514,7 +505,13 @@ if($_SESSION['id']==1)
 
 
 <script>
-$('.select2').select2();
+$('.select2').select2({
+  language: {
+        noResults: function() {
+          return 'Nenhum resultado encontrado.';
+        }
+      }
+});
 $(document).ready(function(){ $(this).scrollTop(0);});
 $(".campo_km").mask('000000');
 

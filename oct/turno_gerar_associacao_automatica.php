@@ -85,10 +85,8 @@
 
                   $dia_da_semana = date('N', date2mkt(formataData($dados_workshift['opened'],1)));
 
-
-
                   echo     "01. ID Turno: <b>".$id_workshift."</b>";
-                  echo "<br>02. Turno corrente: <b>".$workshift_group."</b>";
+                  echo "<br>02. Turno corrente: <b>".$dados_workshift['workshift_group']."</b>";
                   echo "<br>03. Data de abertura: <span style='font-size:18px'><b>".formataData($dados_workshift['opened'],1)."</b></span>";
                   echo "<br>03.1. Data de fechamento: <span style='font-size:18px'><b>".formataData($dados_workshift['closed'],1)."</b></span>";
                   echo "<br>04. Dia da semana do início do turno: <b>[".$dia_da_semana_txt[$dia_da_semana]['abreviado']."] ".$dia_da_semana_txt[$dia_da_semana]['completo']."</b>";
@@ -96,7 +94,7 @@
                   echo "<br>06. Preparando  colaboradores para inserção neste turno de trabalho: ";
 
                   $sql = "SELECT
-                          		id, name, nickname, workshift_group_time_init, workshift_group_time_finish
+                          		id, name, nickname, workshift_group_time_init, workshift_group_time_finish, initial_workshift_position
                           FROM
                           	sepud.users
                           WHERE
@@ -105,7 +103,7 @@
                           	AND workshift_group IS NOT NULL
                           	AND workshift_group_time_init IS NOT NULL
                           	AND workshift_group_time_finish IS NOT NULL
-                          	AND workshift_group = '".$dados_workshift['workshift_group']."'
+                          	AND (workshift_group = '".$dados_workshift['workshift_group']."' OR workshift_subgroup = '".$dados_workshift['workshift_group']."')
                           ORDER BY
                           	workshift_group_time_init ASC, name ASC";
                   $res = pg_query($sql) or die("SQL error ".__LINE__);
@@ -117,19 +115,17 @@
                     echo "<small class='text-muted'>";
                     while($us = pg_fetch_assoc($res))
                     {
-                        $usuarios_a_incluir[$us['id']]['ini'] = substr($dados_workshift['opened'],0,10)." ".$us['workshift_group_time_init'];
-                        $usuarios_a_incluir[$us['id']]['fim'] = substr($dados_workshift['opened'],0,10)." ".$us['workshift_group_time_finish'];
-                        echo "<br>&nbsp;&nbsp;06.".$c++.". ".$us['workshift_group_time_init']." a ".$us['workshift_group_time_finish']." - [UID: ".$us['id']."] ".$us['name'];
+                        $usuarios_a_incluir[$us['id']]['ini']  = substr($dados_workshift['opened'],0,10)." ".$us['workshift_group_time_init'];
+                        $usuarios_a_incluir[$us['id']]['fim']  = substr($dados_workshift['opened'],0,10)." ".$us['workshift_group_time_finish'];
+                        $usuarios_a_incluir[$us['id']]['type'] = ($us['initial_workshift_position']!=""?$us['initial_workshift_position']:"agente");
+                        echo "<br>&nbsp;&nbsp;06.".$c++.". ".$us['workshift_group_time_init']." a ".$us['workshift_group_time_finish']." - [UID: ".$us['id']."] ".$us['name']." - Inicia como <b>".$usuarios_a_incluir[$us['id']]['type']."</b>";
                     }
                     echo "</small>";
 
                     echo "<br>07. Inserindo a associação do colaborador ao turno:<br><small class='text-muted'>";
-                    unset($sql);
-                    $type = "agente";
                     $c=1;$total=pg_num_rows($res);
-                    foreach($usuarios_a_incluir as $uid => $datas)
+                    foreach($usuarios_a_incluir as $uid => $info)
                     {
-
                       $sql = "INSERT INTO sepud.oct_rel_workshift_persona(
                                           id_shift,
                                           id_person,
@@ -139,14 +135,12 @@
                                           status)
                               VALUES ('".$id_workshift."',
                                       '".$uid."',
-                                      '".$datas['ini']."',
-                                      '".$datas['fim']."',
-                                      '".$type."',
+                                      '".$info['ini']."',
+                                      '".$info['fim']."',
+                                      '".$info['type']."',
                                       'ativo')";
                       echo $c++."/".$total;
-
                       $res = pg_query($sql);
-
                       if($res){ echo ", ok ";}else{ echo ", <span class='text-danger'><b>, error</b></span>";}
                       echo " | ";
                     }

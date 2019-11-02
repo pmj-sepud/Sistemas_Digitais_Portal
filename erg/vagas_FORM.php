@@ -81,7 +81,7 @@
                         <div class="form-group">
                           <label class="col-md-2 control-label" for="ativa">Logradouro:</label>
                           <div class="col-md-10">
-                            <select class="form-control" name="street">
+                            <select class="form-control select2" name="street">
                                 <?
                                     $sql = "SELECT * FROM sepud.streets WHERE is_rotate_parking = 't' ORDER BY name ASC";
                                     $res = pg_query($conn_neogrid,$sql)or die("Erro ".__LINE__);
@@ -93,6 +93,25 @@
                                       echo "</option>";
                                     }
                                 ?>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div class="form-group">
+                          <label class="col-md-2 control-label" for="ativa">Área:</label>
+                          <div class="col-md-10">
+                            <select class="form-control" name="area">
+                                <option value="">- - -</option>
+                                <option value="area1"   <?=($dados['area']=="area1"?"selected":"");?>>Área 1</option>
+                                <option value="area2"   <?=($dados['area']=="area2"?"selected":"");?>>Área 2</option>
+                                <option value="area3"   <?=($dados['area']=="area3"?"selected":"");?>>Área 3</option>
+                                <option value="area4"   <?=($dados['area']=="area4"?"selected":"");?>>Área 4</option>
+                                <option value="area5"   <?=($dados['area']=="area5"?"selected":"");?>>Área 5</option>
+                                <option value="area6"   <?=($dados['area']=="area6"?"selected":"");?>>Área 6</option>
+                                <option value="area7"   <?=($dados['area']=="area7"?"selected":"");?>>Área 7</option>
+                                <option value="area8"   <?=($dados['area']=="area8"?"selected":"");?>>Área 8</option>
+                                <option value="area9"   <?=($dados['area']=="area9"?"selected":"");?>>Área 9</option>
+                                <option value="area10"  <?=($dados['area']=="area10"?"selected":"");?>>Área 10</option>
                             </select>
                           </div>
                         </div>
@@ -176,6 +195,7 @@
 </div>
 </section>
 <script>
+$('.select2').select2();
 $(document).scrollTop(0);
 $(".loading").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> <small>Aguarde</small>"); });
 </script>

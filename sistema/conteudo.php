@@ -183,9 +183,6 @@ Array
                                   </div>
                                 </div>
                               </section>
-
-
-
 <?
 
 ?>
@@ -214,16 +211,13 @@ Array
                                   </div>
                                 </div>
                               </section>
-
-
                         </div>
 
-</div>
-<div class="row">
-							<div class="col-md-6">
 
-							</div>
+                        
+
 </div>
+
 <script>
 
 </script>

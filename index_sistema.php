@@ -63,7 +63,9 @@
 
 
 		<link  href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+		<link  href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css" rel="stylesheet" />
 
+		<link rel='stylesheet' type='text/css' href='https://api.tomtom.com/maps-sdk-for-web/cdn/5.x/5.36.1/maps/maps.css'>
 
 		<style>
 			.select2-container { width: 100% !important;}
@@ -153,9 +155,18 @@
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 
+<!--
+		<script src="assets/vendor/jquery-datatables/media/js/jquery.dataTables.js"></script>
+		<script src="assets/vendor/jquery-datatables/extras/TableTools/js/dataTables.tableTools.min.js"></script>
+		<script src="assets/vendor/jquery-datatables-bs3/assets/js/datatables.js"></script>
+-->
+		<script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+		<script src="//cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
 
 		<!--<script src="assets/javascripts/jquery-html5-uploader/jquery.html5uploader.js"></script>-->
 
+		<script src="https://api.tomtom.com/maps-sdk-for-web/cdn/5.x/5.36.1/maps/maps-web.min.js"></script>
+		<script src="https://api.tomtom.com/maps-sdk-for-web/cdn/5.x/5.36.1/services/services-web.min.js"></script>
 
 		<!-- Examples -->
 		<!--<script src="assets/javascripts/dashboard/examples.dashboard.js"></script>-->
@@ -186,14 +197,19 @@
 
 		$(document.body).on('click', 'a' ,function(event)
 		{
-			var url    = $(this).attr('href');
-			var ajax   = $(this).attr('ajax');
-			var alvo   = $(this).attr('alvo');
+			var url           = $(this).attr('href');
+			var ajax          = $(this).attr('ajax');
+			var alvo          = $(this).attr('alvo');
+			var menuautoclose = $(this).attr('menuautoclose');
 
-			if(url != "#" && (typeof ajax === "undefined"))
+			if(url != "#" && (typeof ajax === "undefined") && (typeof url !== "undefined"))
 			{
 				//$('#wrap').load(url);
 				//$('#wrap').load(url,function(){}).hide().fadeIn();
+				//Fechar o menu quando estiver no dispositivo móvel ou de pequena resolução
+				//if( $("#menu_bt_top").is(":visible")){ $("#menu_bt_top").click(); }
+				if(menuautoclose == "true" && $("#menu_bt_top").is(":visible")){ $("#menu_bt_top").click(); }
+
 				$('#wrap').load(url);
 				return false;
 			}

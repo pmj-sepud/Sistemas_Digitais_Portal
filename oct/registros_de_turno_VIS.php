@@ -89,18 +89,21 @@
 
                                     case 'guarnicao':
                                       unset($nome, $apelido, $garr);
-                                      $sql = "SELECT
-                                                G.id_garrison,
-                                                U.id, U.name, U.nickname, U.registration
-                                               FROM
-                                                sepud.oct_rel_garrison_persona G
-                                               JOIN sepud.users U ON U.id = G.id_user
-                                               WHERE
-                                                id_garrison = '".$d['id_garrison']."'";
-                                      $resG = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
-                                      while($g = pg_fetch_assoc($resG)){ $garr[] = $g['nickname']; }
-                                      $apelido = "Guarnição";
-                                      $nome    = implode(", ",$garr);
+                                      if($d['id_garrison']!="")
+                                      {
+                                            $sql = "SELECT
+                                                      G.id_garrison,
+                                                      U.id, U.name, U.nickname, U.registration
+                                                     FROM
+                                                      sepud.oct_rel_garrison_persona G
+                                                     JOIN sepud.users U ON U.id = G.id_user
+                                                     WHERE
+                                                      id_garrison = '".$d['id_garrison']."'";
+                                            $resG = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql."<hr>".print_r($d,true));
+                                            while($g = pg_fetch_assoc($resG)){ $garr[] = $g['nickname']; }
+                                            $apelido = "Guarnição";
+                                            $nome    = implode(", ",$garr);
+                                      }
                                       break;
 
                                     default:

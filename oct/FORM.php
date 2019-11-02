@@ -111,7 +111,6 @@
       <header class="panel-heading">
         <h4><span class="text-muted">Status: </span><strong><i id='txt_status'><?=$dados['status'];?></i></strong>
                   <?
-
                     if(isset($turno_oc))
                     {
                       echo "<br><small class='text-muted'>Turno nº <b>".str_pad($turno_oc['id'],5,"0",STR_PAD_LEFT)."</b> - ".$turno_oc['period']. " - ";
@@ -133,7 +132,6 @@
                         echo "<br><small class='text-danger'>Nenhum turno de trabalho aberto.</small>";
                       }
                     }
-
                   ?>
        </h4>
         <input type="hidden" id="status" name="status" value="<?=$dados['status'];?>" >
@@ -194,6 +192,8 @@
                   <div class="col-sm-2">
                         <div class="form-group">
                           <label class="control-label" for="victim_inform">Qtd:</label>
+                          <input type="number" id="victim_inform" name="victim_inform" class="form-control changefield" value="<?=$dados['victim_inform'];?>">
+<!--
                                 <select id="victim_inform" name="victim_inform" class="form-control changefield">
                                   <?
                                     for($i = 0; $i <= 200; $i++)
@@ -203,6 +203,7 @@
                                     }
                                   ?>
                                 </select>
+-->
                         </div>
                   </div>
             </div>
@@ -264,24 +265,49 @@
                  <div class="col-sm-6">
                    <div class="form-group">
                    <label class="control-label">Complemento do endereço/pontos de referencia:</label>
-                       <input type="text" name="endereco_complemento" class="form-control changefield" value="<?=$dados['address_complement'];?>">
+                       <input type="text" id="endereco_complemento" name="endereco_complemento" class="form-control changefield" value="<?=$dados['address_complement'];?>">
                   </div>
                  </div>
 
 
-                 <div class="col-md-6">
+                 <div class="col-md-4">
+                   <script>
+                    var livro_de_endereco = [];
+                   <?
+                        //$sql = "SELECT * FROM sepud.oct_addressbook WHERE id_company = '".$_SESSION['id_company']."' ORDER BY name ASC";
+
+                        $sql = "SELECT
+                                	S.name as street_name, A.*
+                                FROM
+                                	sepud.oct_addressbook A
+                                LEFT JOIN sepud.streets S ON S.id = A.id_street
+                                --WHERE A.id_company = '".$_SESSION['id_company']."'
+                                WHERE active = 't'
+                                ORDER BY
+                                A.NAME ASC";
+
+                         $res = pg_query($sql)or die("Erro ".__LINE__);
+                         if(pg_num_rows($res))
+                         {
+                             while($d = pg_fetch_assoc($res))
+                             {
+                               $vet_livro_end[$d['neighborhood']][] = $d;
+
+                               if($d['id_street']!=""){
+                                 //echo "livro_de_endereco.push({id_street:'".$d['id_street']."', street_name: '".$d['street_name']."'});";
+                                 echo "livro_de_endereco[".$d['id']."] = {id_street:'".$d['id_street']."', street_name: '".$d['street_name']."', num_ref: '".$d['num_ref']."', geoposition: '".$d['geoposition']."'};";
+                               }
+                             }
+                         }
+                   ?>
+                   </script>
                                  <div class="form-group">
                                  <label class="control-label">Agenda de Endereço:</label>
                                  <select id="id_addressbook" name="id_addressbook" class="form-control select2 changefield">
                                     <?
-                                          $sql = "SELECT * FROM sepud.oct_addressbook WHERE id_company = '".$_SESSION['id_company']."' ORDER BY name ASC";
-                                          $res = pg_query($sql)or die("Erro ".__LINE__);
-                                          if(pg_num_rows($res))
-                                          {
-                                              while($d = pg_fetch_assoc($res))
-                                              {
-                                                $vet_livro_end[$d['neighborhood']][] = $d;
-                                              }
+
+                                            if(isset($vet_livro_end) && count($vet_livro_end))
+                                            {
                                                echo "<option value=''></option>";
                                                foreach ($vet_livro_end as $bairro => $livro_end) {
                                                    echo "<optgroup label='".$bairro."'>";
@@ -299,7 +325,24 @@
                                 </div>
                </div>
 
-            </div>
+                 <div class="col-md-2">
+                   <div class="form-group">
+                   <label class="control-label">Região:</label>
+                   <select id="region" name="region" class="form-control changefield">
+                     <option value="">- - -</option>
+                     <option value="Norte"    <?=($dados['region']=="Norte"?"selected":"");?>   >Norte</option>
+                     <option value="Sul"      <?=($dados['region']=="Sul"?"selected":"");?>     >Sul</option>
+                     <option value="Leste"    <?=($dados['region']=="Leste"?"selected":"");?>   >Leste</option>
+                     <option value="Oeste"    <?=($dados['region']=="Oeste"?"selected":"");?>   >Oeste</option>
+                     <option value="Nordeste" <?=($dados['region']=="Nordeste"?"selected":"");?>>Nordeste</option>
+                     <option value="Sudeste"  <?=($dados['region']=="Sudeste"?"selected":"");?> >Sudeste</option>
+                     <option value="Noroeste" <?=($dados['region']=="Noroeste"?"selected":"");?>>Noroeste</option>
+                     <option value="Sudoeste" <?=($dados['region']=="Sudoeste"?"selected":"");?>>Sudoeste</option>
+                   </select>
+                 </div>
+               </div>
+
+             </div>
 
            <div class="row">
 
@@ -375,7 +418,7 @@
                                       <option value='".$dados['id_garrison']."' selected>".$dados['fleet_nickname']." - ".$dados['plate'].": ".$dados['nickname_garrison']."</option>
                                       </optgroup>";
                               }else{
-                              
+
                                 $sql = "SELECT F.nickname as fleet_nickname, G.name, R.* FROM sepud.oct_rel_garrison_vehicle R, sepud.oct_garrison G, sepud.oct_fleet F WHERE R.id_fleet = F.id AND id_garrison = '".$dados['id_garrison']."' AND R.id_garrison = G.id";
                                 $res = pg_query($sql)or die("Erro ".__LINE__);
                                 while($auxg = pg_fetch_assoc($res)){
@@ -410,25 +453,30 @@
                         {
                           echo "<optgroup label='Guarnição ".strtoupper($info['name'])."'>";
                           unset($str_veic, $str_pess);
-                          foreach ($info['veiculos'] as $id_fleet => $info_veic)
+
+                          if(isset($info['veiculos']) && count($info['veiculos']))
                           {
-                            if(isset($str_veic)){ $str_veic .= " | "; }
-                            $str_veic .= $info_veic['nickname'].": ";
-                            unset($str_pess);
-                            for($i=0;$i<count($info_veic['pessoas']);$i++)
-                            {
-                              $str_pess[] = $info_veic['pessoas'][$i]['nickname'];
-                            }
-                            $str_veic .= implode(", ",$str_pess);
+                                foreach ($info['veiculos'] as $id_fleet => $info_veic)
+                                {
+                                  if(isset($str_veic)){ $str_veic .= " | "; }
+                                  $str_veic .= $info_veic['nickname'].": ";
+                                  unset($str_pess);
+                                  for($i=0;$i<count($info_veic['pessoas']);$i++)
+                                  {
+                                    $str_pess[] = $info_veic['pessoas'][$i]['nickname'];
+                                  }
+                                  $str_veic .= implode(", ",$str_pess);
+                                }
                           }
-                          if(count($info['pessoas_a_pe'])){
-                            unset($str_pess);
-                            for($i=0;$i<count($info['pessoas_a_pe']);$i++)
-                            {
-                              $str_pess[] = $info['pessoas_a_pe'][$i]['nickname'];
-                            }
-                            if(isset($str_veic)){ $str_veic .= " | ";}
-                            $str_veic .= "A PÉ: ".implode(", ",$str_pess);
+                          if(isset($info['pessoas_a_pe']) && count($info['pessoas_a_pe']))
+                          {
+                                unset($str_pess);
+                                for($i=0;$i<count($info['pessoas_a_pe']);$i++)
+                                {
+                                  $str_pess[] = $info['pessoas_a_pe'][$i]['nickname'];
+                                }
+                                if(isset($str_veic)){ $str_veic .= " | ";}
+                                $str_veic .= "A PÉ: ".implode(", ",$str_pess);
                           }
                           if($dados['id_garrison']==$id_garrison){ $sel = "selected";}else{$sel="";}
                           echo "<option value='".$id_garrison."' ".$sel.">".strtoupper($info['name'])." - ".$str_veic."</option>";
@@ -466,6 +514,8 @@
                   echo "</select></div>";
 
 
+                }else {
+                  //echo "<br><span class='text-center text-muted'>Nenhuma guarnição e turno de trabalho ativo.</span>";
                 }
 
                ?>
@@ -493,7 +543,21 @@
                  </div>
           </div>
 
-<? if($acao != "inserir"){ ?>
+<? if($acao == "inserir"){ ?>
+  <div class="row">
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <label class="control-label">Status inicial da ocorrência:</label>
+                    <select name="initial_status" class="form-control">
+                        <option value="Aberta">Aberta</option>
+                        <option value="Em deslocamento">Em deslocamento</option>
+                        <option value="Inativa">Inativa (futura)</option>
+                    </select>
+                  </div>
+                </div>
+  </div>
+
+<? }else{ ?>
            <div class="row">
                          <div class="col-sm-8">
                            <div class="form-group">
@@ -503,18 +567,21 @@
                          </div>
 
                          <div class="col-sm-4">
+                           <?
+                           $sql = "SELECT * FROM sepud.oct_event_conditions ORDER BY subtype ASC";
+                           $res = pg_query($conn_neogrid,$sql)or die("Error: ".__LINE__);
+                           while($d = pg_fetch_assoc($res)){ $v[$d['type']][] = $d; }
+                           unset($d);
+                           ?>
                            <div class="form-group">
                                  <label class="control-label" for="condicoes[]">Condições:</label>
                                    <select size='10' multiple data-plugin-selectTwo id="condicoes[]" name="condicoes[]" class="form-control populate changefield">
                                      <?
-                                       $sql = "SELECT * FROM sepud.oct_event_conditions ORDER BY subtype ASC";
-                                       $res = pg_query($conn_neogrid,$sql)or die("Error: ".__LINE__);
-                                       while($d = pg_fetch_assoc($res)){ $v[$d['type']][] = $d; }
                                        foreach($v as $optg => $d){
                                          echo "<optgroup label='".$optg."'>";
                                            for($i = 0; $i < count($d); $i++){
-                                              if(in_array($d[$i]['id'],$dadosCondicoes)){ $sel = "selected"; }
-                                              else                                      { $sel = "";         }
+                                              if(isset($dadosCondicoes) && in_array($d[$i]['id'],$dadosCondicoes)){ $sel = "selected"; }
+                                              else                                                                { $sel = "";         }
                                               echo "<option value='".$d[$i]['id']."' ".$sel.">".ucfirst($d[$i]['subtype'])."</option>";
                                            }
                                          echo "</optgroup>";
@@ -536,11 +603,15 @@
             <!--<a class="btn btn-warning dropdown-toggle" data-toggle="dropdown"><?=$dados['status'];?> <span class="caret"></span></a>-->
             <button type="button" id="bt_status" class="btn btn-warning dropdown-toggle disable_button" data-toggle="dropdown" ajax="false">Alterar Status <span class="caret"></span></button>
             <ul class="dropdown-menu" role="menu">
+              <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=ab">Aberta</a></li>
               <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=d">Em deslocamento</a></li>
               <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=a">Em atendimento</a></li>
               <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=e">Encaminhamento</a></li>
               <li class="divider"></li>
               <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=f">Ocorrência Terminada</a></li>
+              <li class="divider"></li>
+              <li class="divider"></li>
+              <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=in">Oc. Inativa (Futura)</a></li>
               <li class="divider"></li>
               <li class="text-center"><span class='text-warning'><i>Cancelar ocorrência</i></span></li>
               <li><a class="bt_status_action" href="oct/FORM_sql.php?id=<?=$id;?>&status_acao=atualizar&status_alterar=ce">Evadido/Não Localiz.</a></li>
@@ -969,10 +1040,10 @@
         <div class="row">
           <div class="col-sm-4" style="">
             <?
-                for($i = 0; $i < count($arqs_imgs); $i++)
+                for($i = 0; isset($arqs_imgs) && $i < count($arqs_imgs); $i++)
                 {
-                  $aux = explode(".",$arqs_imgs[$i]);
-                  $aux = explode("_",$aux[0]);
+                  $aux    = explode(".",$arqs_imgs[$i]);
+                  $aux    = explode("_",$aux[0]);
                   $id_img = ltrim(end($aux),"0");
                   echo  "<img id='".$id_img."' class='loadimage img-responsive img-rounded img-thumbnail' src='".$arqs_imgs[$i]."' style='max-width:100px; max-height:90px' />";
                 }
@@ -1003,6 +1074,30 @@
 </div>
 
 <script>
+
+$("#id_addressbook").change(function(){
+  $("#street_number").val('');
+  $("#coordenadas").val('');
+  $('#id_street').val(null).trigger('change');
+
+  if(typeof (livro_de_endereco[$("#id_addressbook").val()]) !== "undefined")
+  {
+      var address = livro_de_endereco[$("#id_addressbook").val()];
+      console.log(address);
+      if(address.id_street)
+      {
+        $("#id_street").val(address.id_street).trigger('change');
+      }
+      if(address.num_ref)
+      {
+        $("#street_number").val(address.num_ref);
+      }
+      if(address.geoposition)
+      {
+        $("#coordenadas").val(address.geoposition);
+      }
+  }
+});
 
 $(".campo_hora").mask('00:00');
 $(".campo_data").mask('00/00/0000');
@@ -1132,7 +1227,13 @@ $("#input_img_files").change(function(e){
 
 //$('#id_street').select2();
 //$('#tipo_oc').select2();
-$('.select2').select2();
+$('.select2').select2({
+  language: {
+        noResults: function() {
+          return 'Nenhum resultado encontrado.';
+        }
+      }
+});
 
 $("#geocode").click(function(){geocode();});
 $("#bt_inserir_oc").click(function(){ $("#bt_inserir_oc").html("<i class=\"fa fa-spinner fa-spin\"></i> <small>Aguarde, inserindo ocorrência</small>");});

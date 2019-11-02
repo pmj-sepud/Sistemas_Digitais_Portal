@@ -471,7 +471,13 @@ if($show_guarnicao){
 </form>
 </section>
 <script>
-$(".select2").select2();
+$(".select2").select2({
+  language: {
+        noResults: function() {
+          return 'Nenhum resultado encontrado.';
+        }
+      }
+});
 $(".loading").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> Aguarde");});
 $(".loading2").click(function(){ $(this).addClass("disabled").html("<i class=\"fa fa-spinner fa-spin\"></i>");});
 </script>

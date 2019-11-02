@@ -6,11 +6,9 @@ require_once("../libs/php/conn.php");
 
 $filtro = ($_GET['filtro']!=""?$_GET['filtro']:"todos");
 $class_filtro[$filtro] = "active";
-
 logger("Acesso","Logs");
-
 ?>
-				<section role="main" class="content-body has-toolbar">
+				<section role="main" class="content-body">
 					<header class="page-header">
 						<h2>Visualizador de Log</h2>
 						<div class="right-wrapper pull-right" style='margin-right:15px;'>
@@ -22,57 +20,30 @@ logger("Acesso","Logs");
 						</div>
 					</header>
 
-					<!-- start: page -->
-<!--
-					<div class="inner-toolbar clearfix">
-						<ul>
-							<li class="right">
-								<ul class="nav nav-pills nav-pills-primary">
-									<li>
-										<label>Filtros:</label>
-									</li>
-									<li class="<?=$class_filtro['todos'];?>">
-										<a href="#" ic-get-from="sistema/logviewer.php" ic-target="#wrap">Todos</a>
-									</li>
-									<li class="<?=$class_filtro['DEBUG'];?>">
-										<a href="#" ic-get-from="sistema/logviewer.php?filtro=DEBUG" ic-target="#wrap">Debug</a>
-									</li>
-									<li class="<?=$class_filtro['INFO'];?>">
-										<a href="#" ic-get-from="sistema/logviewer.php?filtro=INFO" ic-target="#wrap">Info</a>
-									</li>
-									<li class="<?=$class_filtro['WARNING'];?>">
-										<a href="#" ic-get-from="sistema/logviewer.php?filtro=WARNING" ic-target="#wrap">Warning</a>
-									</li>
-									<li class="<?=$class_filtro['DANGER'];?>">
-										<a href="#" ic-get-from="sistema/logviewer.php?filtro=DANGER" ic-target="#wrap">Danger</a>
-									</li>
-								</ul>
-							</li>
-						</ul>
-					</div>
--->
 					<section class="panel">
-						<div class="panel-body">
+						<div class="panel-body box_shadow">
 <?
-	//if($filtro != "todos"){  $sql_filtro = " WHERE tipo = '".$filtro."'";}
-	$sql = "SELECT U.name, L.id_user, L.timestamp, L.ip, L.module, L.action, L.obs
-					FROM sepud.logs L
-					LEFT JOIN sepud.users U ON U.id = L.id_user
-					--WHERE id_user = 110
-					--WHERE L.obs like '%Baixou o%'
-					ORDER BY L.timestamp DESC
-					LIMIT 250";
+	$agora = now();
+		$sql = "SELECT U.name, L.id_user, L.timestamp, L.ip, L.module, L.action, L.obs
+						FROM sepud.logs L
+						LEFT JOIN sepud.users U ON U.id = L.id_user
+						--WHERE id_user = 110
+						--WHERE L.obs like '%Baixou o%'
+						WHERE L.module <> 'Logs'
+						AND L.timestamp >= '".$agora['datasrv']." 00:00:00'
+						ORDER BY L.timestamp DESC
+						--LIMIT 2500";
 	$rs  = pg_query($sql)or die("Erro ".__LINE__);
 	while($aux = pg_fetch_assoc($rs)){ $d[] = $aux; }
 	unset($sql,$rs);
 	if(count($d)){
 ?>
 
-<table class="table table-striped table-no-more table-bordered  mb-none">
+<table class="table table-striped" id="tabela_dinamica">
 	<thead>
 		<tr>
 			<th width="300px"><span class="text-weight-normal text-sm">Usuário</span></th>
-			<th width="180px"><span class="text-weight-normal text-sm">data</span></th>
+			<th width="180px"><span class="text-weight-normal text-sm">Data</span></th>
 	<!--		<th><span class="text-weight-normal text-sm">IP</span></th>-->
 			<th width="180px"><span class="text-weight-normal text-sm">Módulo</span></th>
 			<th width="250px"><span class="text-weight-normal text-sm">Ação</span></th>
@@ -123,3 +94,32 @@ logger("Acesso","Logs");
 
  </div>
 </section>
+<script>
+$(document).ready( function () {
+    $('#tabela_dinamica').DataTable({
+      responsive: true,
+      language: {
+        processing:     "Pesquisando...",
+        search:         "Pesquisar:",
+        lengthMenu:     "_MENU_ &nbsp;Registros por página.",
+        info:           "Mostrando _START_ a _END_ de um total de  _TOTAL_ registros.",
+        infoEmpty:      "0 registros encontrado.",
+        infoFiltered:   "(_MAX_ registros pesquisados)",
+        infoPostFix:    "",
+        loadingRecords: "Carregando registros...",
+        zeroRecords:    "Nenhum registro encontrado com essa característica.",
+        emptyTable:     "Nenhuma informação nesta tabela de dados.",
+        paginate: {
+            first:      "Primeiro",
+            previous:   "Anterior",
+            next:       "Próximo",
+            last:       "Último"
+        },
+        aria: {
+            sortAscending:  ": Ordem ascendente.",
+            sortDescending: ": Ordem decrescente."
+        }
+    }
+    });
+});
+</script>

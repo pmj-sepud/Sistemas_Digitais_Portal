@@ -137,18 +137,29 @@
                             <label class="control-label">Livro diário:</label>
                                 <select name="workshift_group" class="form-control">
                                   <?
-                                        $sql = "SELECT workshift_groups FROM sepud.company WHERE id = '".$_SESSION['id_company']."'";
+                                        $sql = "SELECT workshift_groups, workshift_subgroups FROM sepud.company WHERE id = '".$_SESSION['id_company']."'";
                                         $res = pg_query($sql)or die("<option>SQL Error: ".__LINE__."</option>");
                                         if(pg_num_rows($res))
                                         {
                                           $wg = pg_fetch_assoc($res);
-                                          $workshift_groups = json_decode($wg['workshift_groups']);
+                                          $workshift_groups    = json_decode($wg['workshift_groups']);
+                                          $workshift_subgroups = json_decode($wg['workshift_subgroups']);
 
+
+                                          echo "<optgroup label='Turno'>";
                                           for($i = 0; $i<count($workshift_groups);$i++)
                                           {
                                             if($dados['workshift_group'] == $workshift_groups[$i]){ $sel = "selected"; }else{$sel="";}
                                             echo "<option value='".$workshift_groups[$i]."' ".$sel.">".$workshift_groups[$i]."</option>";
                                           }
+                                          echo "</optgroup>";
+                                          echo "<optgroup label='Turno: Sub-grupo'>";
+                                          for($i = 0; $i<count($workshift_subgroups);$i++)
+                                          {
+                                            if($dados['workshift_group'] == $workshift_subgroups[$i]){ $sel = "selected"; }else{$sel="";}
+                                            echo "<option value='".$workshift_subgroups[$i]."' ".$sel.">".$workshift_subgroups[$i]."</option>";
+                                          }
+                                          echo "</optgroup>";
                                         }else{
                                             echo "<option value=''>Nenhum horário de turno configurado</option>";
                                         }

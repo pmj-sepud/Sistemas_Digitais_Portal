@@ -1,10 +1,7 @@
 <?
 	session_start();
 	$error = $_SESSION['error'];
-	if($_SESSION['error']!="")
-	{
-		print_r($_SESSION['error']);
-	}
+	if($_SESSION['error']!=""){$error = $_SESSION['error'];}
 	session_destroy();
 ?>
 <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
@@ -53,9 +50,12 @@ margin-top: 50px;
   </style>
 </head>
 <body>
-
+<?
+	echo "<div id='error' align='center' style='display:none;padding:30px;z-index:1000;position:absolute;background-color:#FFD700;color:#555555;width:100%'><h6>[AVISO]</h6>".$error."</div>";
+?>
 <div class="container">
-<? /*
+<?
+/*
 	<div class="row justify-content-center align-items-center">
 				<div class="col-sm text-center">
 							<div class="row">
@@ -73,6 +73,7 @@ margin-top: 50px;
 					COLUNA 01<br>AAA
 				</div>
 	</div>
+
 */ ?>
 	<div class="row">
 		<div class="col-sm-6 text-center">
@@ -143,7 +144,7 @@ margin-top: 50px;
 						<div class="col-sm">
 								<h4 class="titulo">Aplicações</h4>
 								<a href="index2.php?param=rot" class="btn btn-danger btn-lg btn-block">Registro de ocorrência de trânsito</a>
-								<a href="index2.php?param=erg" class="btn btn-warning btn-lg btn-block"><span style="color:white">Sistema de Estacionamento Rotativo Público - SERP</span></a>
+								<a href="index2.php?param=serp" class="btn btn-warning btn-lg btn-block"><span style="color:white">Sistema de Estacionamento Rotativo Público - SERP</span></a>
 								<a href="index2.php?param=smart" class="btn btn-success btn-lg btn-block">Smart Mobility</a>
 								<a href="index2.php?param=portal" class="btn btn-primary btn-lg btn-block">Portal de gestão</a>
 						</div>
@@ -155,5 +156,7 @@ margin-top: 50px;
 </body>
 </html>
 <script>
-
+<?	if($error!=""){ ?>
+		$("#error").toggle("slow").delay(5000).toggle('slow');
+<?	} ?>
 </script>

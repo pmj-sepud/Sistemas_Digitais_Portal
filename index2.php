@@ -29,11 +29,11 @@
 				$subtitulo = "Mobilidade Urbana";
 				$modulo    = "Opendata";
 				break;
-			case "erg":
+			case "serp":
 					$param 		 = "estacionamento";
 					$titulo    = "Estacionamento";
 					$subtitulo = "Rotativo Público";
-					$modulo    = "ERG";
+					$modulo    = "SERP";
 					break;
 			default:
 				header("Location: index3.php");

@@ -14,7 +14,66 @@ function setenvs()
     }
   }
 }
+function check_perm($perm, $tipo="")
+{
+    $offset = array("C"=>0, "R"=>1, "U"=>2, "D"=>3);
+    if($tipo=="") //Permissão do tipo ação (1 byte)
+    {
+      if(strlen($_SESSION['permissoes'][$perm])==1) //Permissão do tipo acao (1 byte)
+      {
+        return ($_SESSION['permissoes'][$perm]?true:false);
+      }else{
+        return false;
+      }
+    }else{ //Permissão do tipo CRUD (4 bytes)
+      return ($_SESSION['permissoes'][$perm][$offset[$tipo]]?true:false);
+    }
+
+}
 //////////////////////////////////////////////////////////////////////////////
+function codificar($dados,$funcao,$debug=0)
+{
+  //$cipher    = "aes-256-ccm";
+  $cipher    = "aes-256-gcm";
+  $key       = getenv("SECRET_KEY");
+  if (in_array($cipher, openssl_get_cipher_methods()) && isset($key) && strlen($key) && isset($dados) && strlen($dados))
+  {
+    switch ($funcao) {
+      case 'c':
+          $iv         = openssl_random_pseudo_bytes(openssl_cipher_iv_length($cipher));
+          $ciphertext = openssl_encrypt($dados, $cipher, $key, $options=0, $iv, $tag);
+          $retorno    = base64_encode(bin2hex($tag).".".bin2hex($iv).".".bin2hex($ciphertext));
+          if($debug)
+          {
+            echo "<pre>Criptografia:<br>";
+            if($key!=""){ echo "<br>Secret key ok !"; }
+            echo "<br>TAG: ".bin2hex($tag)."<br>IV: ".bin2hex($iv)."<br>Cipher: ".bin2hex($ciphertext);
+            echo "<br>Retorno: ".$retorno;
+            echo "</pre>";
+
+          }
+          return $retorno;
+        break;
+      case 'd':
+          $auxb64             = explode(".",base64_decode($dados));
+          $original_plaintext = openssl_decrypt(hex2bin($auxb64[2]), $cipher, $key, $options=0, hex2bin($auxb64[1]), hex2bin($auxb64[0]));
+          if($debug)
+          {
+            echo "<pre>Descriptografia:<br>";
+            if($key!=""){ echo "<br>Secret key ok !"; }
+            echo "<br>TAG: ".$auxb64[0]."<br>IV: ".$auxb64[1]."<br>Cipher: ".$auxb64[2];
+            echo "<br>Retorno: ".$original_plaintext;
+            echo "</pre>";
+          }
+          return $original_plaintext;
+        break;
+      default:
+        return null;
+        break;
+    }
+  }
+  return null;
+}
 
 function logger($action, $module = "Null", $obs = "Null")
 {

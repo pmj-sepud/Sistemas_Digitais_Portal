@@ -12,7 +12,8 @@ if($active != "" && $type != "" && $street !=  "" && $id != "")
           active          = ".$active.",
           id_parking_type = '".$type."',
           id_street       = '".$street."',
-          description     = '".$description."'
+          description     = '".$description."',
+          area            = '".$area."'
           WHERE id = '".$id."'";
   pg_query($conn_neogrid,$sql)or die("Erro ".__LINE__."<br>".$sql);
 

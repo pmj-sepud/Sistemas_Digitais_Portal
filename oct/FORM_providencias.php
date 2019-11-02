@@ -8,17 +8,19 @@
 
   logger("Acesso","OCT - Providencias", "Ocorrência n.".$_GET['id']);
 
-  if($prov_sel)
+  if($_GET['id_providence'])
   {
-    $acao       = "atualizar";
-    $margin_upd = "-19px";
+    $acao  = "atualizar";
+    $sql   = "SELECT * FROM sepud.oct_rel_events_providence WHERE id = '".$_GET['id_providence']."'";
+    $res   = pg_query($sql)or die("SQL Error ".__LINE__);
+    $dados = pg_fetch_assoc($res);
   }else{
-    $margin_upd = "15px";
+
     $acao       = "inserir";
   }
 
+  $margin_upd = "15px";
 
-  
 ?>
 <form id="form_providencias" name="form_providencias" action="oct/FORM_providencias_sql.php" method="post">
 <section role="main" class="content-body">
@@ -44,13 +46,12 @@
         <div class="row">
           <div class="col-sm-6">
             <!-- ========================================================= -->
-
           <div class="row">
 
                <div class="col-sm-12">
                  <div class="form-group">
                  <label class="control-label">Providência:</label>
-                 <select id="id_providence" name="id_providence" class="form-control">
+                 <select id="id_providence_type" name="id_providence_type" class="form-control">
                     <?
                           $sql = "SELECT * FROM sepud.oct_providence ORDER BY area, providence ASC";
                           $res = pg_query($sql)or die("Erro ".__LINE__);
@@ -65,7 +66,11 @@
                               for($i=0;$i<count($prov);$i++)
                               {
 
-                                if($prov[$i]["id"] == 26){ $sel = "selected"; }else{ $sel = "";}
+                                if(isset($dados['id_providence']) && $dados['id_providence']==$prov[$i]["id"]){ $sel = "selected"; }
+                                else {
+                                  if($prov[$i]["id"] == 26){ $sel = "selected"; }else{ $sel = ""; }
+                                }
+
                                 echo "<option value='".$prov[$i]["id"]."' $sel>".$prov[$i]["providence"]."</option>";
                               }
                             echo "</optgroup>";
@@ -85,13 +90,14 @@
                <div class="form-group">
                  <label class="control-label">Responsável:</label>
                  <select class="form-control select2" name="id_user_resp">
-                    <option value=""></option>
+                    <option value="">- - -</option>
                     <?
                         $sql = "SELECT id, nickname, name, registration FROM sepud.users U WHERE id_company = '".$_SESSION['id_company']."' AND active = 't' ORDER BY name ASC";
                         $res = pg_query($sql)or die("<option value=''>Erro: ".$sql."</option>");
                         while($u = pg_fetch_assoc($res))
                         {
-                          echo "<option value='".$u['id']."'>".$u['nickname']." - ".$u['name'].", Matricula: ".$u['registration']."</option>";
+                          if($dados['id_user_resp']==$u['id']){ $sel = "selected"; }else{$sel="";}
+                          echo "<option value='".$u['id']."' ".$sel.">".$u['nickname']." - ".$u['name'].", Matricula: ".$u['registration']."</option>";
                         }
                     ?>
                  </select>
@@ -120,7 +126,6 @@
            $vetor_nova_guarnicao[$aux['id']] = $aux;
          }
        }
-
        $sql = "SELECT
                  F.nickname,
                  F.brand,
@@ -163,7 +168,7 @@
        echo "<div class='form-group'>
              <label class='control-label'>Guarnição</label>
              <select class='form-control select2' name='id_garrison'>
-               <option value=''></option>";
+               <option value=''>- - -</option>";
                if($dados['closed_garrison']!="")
                {
                    if($dados['name_garrison']=="")//Guarnição modelo antigo//
@@ -292,8 +297,9 @@
                               $res = pg_query($sql) or die("Erro ".__LINE__);
                               while($d = pg_fetch_assoc($res))
                               {
+                                if($dados['id_vehicle']==$d['id']){ $sel = "selected"; }else{ $sel = "";}
                                 if($d['licence_plate'] != ""){ $placa =  " (Placa: ".$d['licence_plate'].")"; }else{ $placa = "";}
-                                echo "<option value='".$d['id']."'>".$d['description'].$placa."</option>";
+                                echo "<option value='".$d['id']."' ".$sel.">".$d['description'].$placa."</option>";
                               }
                           ?>
                       </select>
@@ -303,28 +309,33 @@
 
 
              <div class="col-sm-6">
+               <?
+
+
+               ?>
                <div class="form-group">
                    <label class="control-label">Envolvido:</label>
                     <select id="id_victim" name="id_victim" class="form-control">
                       <option value="">- - -</option>
                       <?
-                          $sql = "SELECT
-                                      VI.id as vitima_id,
-                                      VI.description as vitima_desc,
-                                      VE.id as veiculo_id,
-                                      VE.description as veiculo_desc,
-                                      *
-                                    FROM
-                                      sepud.oct_victim VI
-                                    LEFT JOIN sepud.oct_vehicles VE ON VE.ID = VI.id_vehicle
-                                    WHERE
-                                      VI.id_events = '".$id."'";
+                            $sql = "SELECT
+                                       VI.id as vitima_id,
+                                       VI.description as vitima_desc,
+                                       VE.id as veiculo_id,
+                                       VE.description as veiculo_desc,
+                                       *
+                                     FROM
+                                       sepud.oct_victim VI
+                                     LEFT JOIN sepud.oct_vehicles VE ON VE.ID = VI.id_vehicle
+                                     WHERE
+                                       VI.id_events = '".$id."'";
+                            $res = pg_query($sql) or die("Erro ".__LINE__);
 
-                          $res = pg_query($sql) or die("Erro ".__LINE__);
-                          while($d = pg_fetch_assoc($res))
-                          {
-                            echo "<option value='".$d['vitima_id']."'>".$d['name']."</option>";
-                          }
+                            while($d = pg_fetch_assoc($res))
+                            {
+                              if($dados['id_victim']==$d['vitima_id']){ $sel = "selected"; }else{ $sel = "";}
+                              echo "<option value='".$d['vitima_id']."' ".$sel.">".$d['name']."</option>";
+                            }
                       ?>
                     </select>
                </div>
@@ -350,7 +361,8 @@
                               $res = pg_query($sql) or die("Erro ".__LINE__);
                               while($d = pg_fetch_assoc($res))
                               {
-                                echo "<option value='".$d['id']."'>".$d['name']."</option>";
+                                if($dados['id_hospital']==$d['id']){ $sel = "selected"; }else{ $sel = ""; }
+                                echo "<option value='".$d['id']."' ".$sel.">".$d['name']."</option>";
                               }
                           ?>
                       </select>
@@ -375,7 +387,8 @@
                           $res = pg_query($sql) or die("Erro ".__LINE__);
                           while($d = pg_fetch_assoc($res))
                           {
-                            echo "<option value='".$d['id']."'>".$d['acron']." - ".$d['name']."</option>";
+                            if($dados['id_company_requested']==$d['id']){ $sel = "selected"; }else{ $sel = ""; }
+                            echo "<option value='".$d['id']."' ".$sel.">".$d['acron']." - ".$d['name']."</option>";
                           }
                       ?>
                     </select>
@@ -391,14 +404,14 @@
                <div class="col-sm-6">
                  <div class="form-group">
                      <label class="control-label">Data:</label>
-                     <input onclick="$(this).val('');" type="text" id="data" name="data" value="<?=$agora['data'];?>" class="form-control campo_data"/>
+                     <input onclick="$(this).val('');" type="text" id="data" name="data" value="<?=($dados['opened_date']!=""?substr(formataData($dados['opened_date'],1),0,10):$agora['data']);?>" class="form-control campo_data"/>
                   </div>
               </div>
 
               <div class="col-sm-6">
                 <div class="form-group">
                     <label class="control-label">Hora:</label>
-                    <input onclick="$(this).val('');" type="text" id="hora" name="hora" value="<?=$agora["hm"];?>" class="form-control campo_hora"/>
+                    <input onclick="$(this).val('');" type="text" id="hora" name="hora" value="<?=($dados['opened_date']!=""?substr(formataData($dados['opened_date'],1),11,5):$agora['hm']);?>" class="form-control campo_hora"/>
                  </div>
              </div>
 
@@ -412,16 +425,17 @@
                   <div class="col-sm-12">
                     <div class="form-group">
                     <label class="control-label">Observações:</label>
-                        <textarea name="description" placeholder="Descrição detalhada providência tomada." rows="7" class="form-control"><?=$dados['description'];?></textarea>
+                        <textarea name="description" placeholder="Descrição detalhada providência tomada." rows="7" class="form-control"><?=$dados['observation'];?></textarea>
                    </div>
                  </div>
             </div>
 
             <div class="row">
                   <div class="col-sm-12 text-center" style="margin-top:28px">
-                      <input type="hidden" name="id"                            value="<?=$id;?>">
-                      <input type="hidden" name="turno"                          value="<?=$_GET['turno'];?>">
-                      <input type="hidden" name="victim_sel"                     value="<?=$victim_sel;?>">
+                      <input type="hidden" name="id"                             value="<?=$id;?>">
+                      <input type="hidden" name="id_providence"                  value="<?=$_GET['id_providence'];?>">
+                      <input type="hidden" name="id_workshift"                   value="<?=$_GET['id_workshift'];?>">
+                    <!--  <input type="hidden" name="victim_sel"                     value="<?=$victim_sel;?>">-->
                       <input type="hidden" name="acao"                           value="<?=$acao?>">
                       <input type="hidden" name="retorno_acao" id="retorno_acao" value="">
                       <a class="btn btn-default loading" href='oct/FORM.php?id=<?=$_GET['id']?>'>Voltar</a>
@@ -430,9 +444,9 @@
                       <button id='bt_inserir_voltar'    type='submit' class="btn btn-primary loading" role="button">Inserir e voltar</button>
                       <button id='bt_inserir_continuar' type='button' class="btn btn-primary loading" role="button">Inserir e continuar</button>
                       <? }else{ ?>
-                        <a href="oct/FORM_vitima.php?id=<?=$id;?>"  class="mb-xs mt-xs mr-xs btn btn-default"><i class="fa fa-user"></i> Nova vítima</a><br>
-                        <button id='bt_inserir_voltar'    type='submit' class="btn btn-primary loading" role="button">Atualizar e voltar</button>
-                        <button id='bt_inserir_continuar' type='button' class="btn btn-primary loading" role="button">Atualizar e continuar</button>
+                        <a href="oct/FORM_providencias.php?id_workshift=<?=$_GET['id_workshift'];?>&id=<?=$id;?>"  class="mb-xs mt-xs mr-xs btn btn-default"><i class="fa fa-user"></i> Nova providencia</a><br>
+                        <button id='bt_atualizar_voltar'    type='submit' class="btn btn-primary loading" role="button">Atualizar e voltar</button>
+                        <button id='bt_atualizar_continuar' type='button' class="btn btn-primary loading" role="button">Atualizar e continuar</button>
                       <? } ?>
                   </div>
             </div>
@@ -481,13 +495,13 @@
                                                   while($p = pg_fetch_assoc($res))
                                                   {
 
-                                                    echo "<table class='table table-bordered table-condensed'>";
+                                                    echo "<table class='table table-condensed'>";
                                                       echo "<tr bgcolor='#dbe9ff'>";
-                                                        echo "<td width='10px' class='text-muted'>".$p['area']."</td>";
-                                                        echo "<td><b>".$p['providence']."</b></td>";
+                                                        echo "<td>ID: ".$p['id']." - ".$p['area']." - ";
+                                                        echo "<b>".$p['providence']."</b></td>";
                                                         echo "<td  width='150px' align='center'>".formataData($p['opened_date'],1)."</td>";
                                                         //echo "<td  width='150px' align='center'>".formataData($p['closed_date'],1)."</td>";
-                                                      echo "<td class='text-center'>Ações</td></tr>";
+                                                      echo "<td colspan='3' class='text-center'>Ações</td></tr>";
                                                       echo "<tr>";
                                                         echo "<td colspan='3'>";
 
@@ -518,13 +532,14 @@
                                                                     }
                                                                     echo "</table>";
 
-                                                            echo "<td class='text-center' width='50px'><a href='oct/FORM_providencias_sql.php?turno=".$_GET['turno']."&id=".$id."&id_providence=".$p['id']."&acao=remover'><button type='button' class='mb-xs mt-xs mr-xs btn btn-xs btn-danger'><i class='fa fa-trash'></i></button></a></td>";
-
+                                                            echo "<td class='text-center' width='50px'><a href='oct/FORM_providencias_sql.php?id_workshift=".$_GET['id_workshift']."&id=".$id."&id_providence=".$p['id']."&acao=remover'><button type='button' class='mb-xs mt-xs mr-xs btn btn-xs btn-danger'><i class='fa fa-trash'></i></button></a></td>";
+                                                            echo "<td class='text-center' width='50px'><a href='oct/FORM_providencias.php?id_workshift=".$_GET['id_workshift']."&id=".$id."&id_providence=".$p['id']."'><button type='button' class='mb-xs mt-xs mr-xs btn btn-xs btn-primary'><i class='fa fa-cogs'></i></button></a></td>";
+                                                            
                                                         echo "</td>";
                                                       echo "</tr>";
 
                                                       echo "<tr bgcolor='#eeeeee'>";
-                                                        echo "<td colspan='4' align='right'>".$p['name']."<br><small>".$p['acron']." - ".$p["company"]."</small></td>";
+                                                        echo "<td colspan='5' align='right'>".$p['name']."<br><small>".$p['acron']." - ".$p["company"]."</small></td>";
                                                       echo "</tr>";
 
 
@@ -560,6 +575,10 @@ $(".loading").click(function(){ $(this).addClass("disabled").html("<i class=\"fa
 $(".loading2").click(function(){ $(this).addClass("disabled").html("<i class=\"fa fa-spinner fa-spin\"></i>");});
 
 $("#bt_inserir_continuar").click(function(){
+    $("#retorno_acao").val("continuar");
+    $("#form_providencias").submit();
+});
+$("#bt_atualizar_continuar").click(function(){
     $("#retorno_acao").val("continuar");
     $("#form_providencias").submit();
 });

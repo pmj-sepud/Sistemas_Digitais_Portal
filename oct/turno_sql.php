@@ -23,7 +23,7 @@ if($_POST['acao']=="atualizar_associado" && $_POST['id_user']!="" && $_POST['id_
           WHERE id = '".$id_rel_workshift_persona."'";
 
   pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
-  header("location: turno_associar_pessoa.php?id_workshift=".$id_workshift."&id_user=".$id_user);
+  header("location: turno_associar_pessoa.php?id_rel_workshift=".$id_rel_workshift_persona."&id_workshift=".$id_workshift);
   exit();
 }
 
@@ -86,6 +86,7 @@ if($_POST['acao'] == "novo_associado")
   $dt_abertura   = $opened." ".$opened_hour;
   $dt_fechamento = ($closed    != ""                        ? "'".$closed." ".$closed_hour."'" : "Null");
 
+  $sqlupdshift = "UPDATE sepud.oct_workshift SET is_populate = 't' WHERE id = '".$id_workshift."';";
 
   $sql = "INSERT INTO sepud.oct_rel_workshift_persona(
                       id_shift,
@@ -101,9 +102,10 @@ if($_POST['acao'] == "novo_associado")
                   ".$dt_fechamento.",
                   '".$type."',
                   '".$status."',
-                  '".$observation."')";
-  pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
-  header("location: turno_associar_pessoa.php?id_workshift=".$id_workshift."&id_user=".$id_user);
+                  '".$observation."')RETURNING id;";
+  $res = pg_query($sqlupdshift.$sql)or die("Erro ".__LINE__."<br>Query 01: ".$sqlupdshift."<br>Query 02: ".$sql);
+  $aux = pg_fetch_assoc($res);
+  header("location: turno_associar_pessoa.php?id_workshift=".$id_workshift."&id_rel_workshift=".$aux['id']);
 }
 
 
@@ -138,8 +140,13 @@ if($_POST['acao'] == "atualizar" && $_POST['id_workshift'] != "")
 
 if($_GET['acao']=="remover_associado" && $_GET['id']!="" && $_GET["id_workshift"]!="")
 {
-  $sql = "DELETE FROM sepud.oct_rel_workshift_persona WHERE id = '".$_GET['id']."'";
-  pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
+  $sql = "DELETE FROM sepud.oct_rel_workshift_persona WHERE id = '".$_GET['id']."' RETURNING (SELECT count(*) as registros FROM sepud.oct_rel_workshift_persona WHERE id_shift = '".$_GET["id_workshift"]."');";
+  $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
+  $aux = pg_fetch_assoc($res);
+  if(($aux['registros']-1) <= 0){ //Não possui mais funcionarios associados ao turno, libera botão para população automatica do turno//
+    $sqlu = "UPDATE sepud.oct_workshift SET is_populate = 'f' WHERE id = '".$_GET["id_workshift"]."'";
+    pg_query($sqlu)or die("SQL Error ".__LINE__."<br>Query: ".$sqlu);
+  }
   header("location: turno_associar_pessoa.php?id_workshift=".$_GET['id_workshift']);
   exit();
 }

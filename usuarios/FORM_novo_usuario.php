@@ -146,7 +146,13 @@
 														<div class="col-md-12"  style="margin-bottom:20px">
                             <input type="hidden" name="acao" value="inserir" />
                             <a href="usuarios/index.php"><button type="button" class="btn btn-default loading">Voltar</button></a>
-														<button type="submit" class="btn btn-primary loading">Inserir</button>
+
+                            <?
+                                if(check_perm("1_1","C")){
+                                  echo "<button type='submit' class='btn btn-primary loading'>Inserir</button>";
+                                }
+                            ?>
+
 													</div>
 												</div>
 											</div>

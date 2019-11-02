@@ -69,8 +69,12 @@
                          '$tipo_registro',
                          $opened,
                          $closed) RETURNING id";
-        $res =  pg_query($sql)or die("<div class='row'><div class='col-md-6 col-md-offset-3'><pre>SQL error ".__LINE__."<br>SQL: ".$sql."</div></div>");
-        $id  = pg_fetch_assoc($res);
+
+
+          $res =  pg_query($sql)or die("<div class='row'><div class='col-md-6 col-md-offset-3'><pre>SQL error ".__LINE__."<br>SQL: ".$sql."</div></div>");
+          $id  = pg_fetch_assoc($res);
+
+        //print_r_pre($_POST);
         header("Location: registros_de_turno_FORM.php?id=".$id['id']."&tipo_registro=".$tipo_registro."&gotoback=".$gotoback."&id_workshift=".$id_workshift);
         exit();
 
@@ -126,7 +130,7 @@ Guarnição:
     [acao] => Inserir
 
 */
-    print_r_pre($_POST);
+  //print_r_pre($_POST);
 
   echo "</pre></div></div>";
 

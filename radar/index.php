@@ -82,7 +82,7 @@
                   </header>
 									<div class="panel-body">
 										<div class="table-responsive">
-											<table class="table table-hover mb-none">
+											<table class="table table-hover mb-none" id="tabela_dinamica">
 												<thead>
 													<tr>
 														<th>#</th>
@@ -124,8 +124,8 @@ if(isset($eqps))
     echo "<tr id='".$info['id']."'>";
     echo "<td class='text-muted'>".$info['id']."</td>";
     echo "<td class=''>".$info['equipment']."</td>";
-    echo "<td class=''>".$info['address']."</td>";
-    echo "<td class='text-center ".$classtd."'>".formataData($info['last_file_imported'],1)." <sup>(".$interval->format('%R%a dias').")</sup></td>";
+    echo "<td nowrap class=''>".$info['address']."</td>";
+    echo "<td nowrap class='text-center ".$classtd."'>".formataData($info['last_file_imported'],1)." <sup>(".$interval->format('%R%a dias').")</sup></td>";
     echo "<td class='text-center'>".number_format($info['contador_veiculos'],0,'','.')."</td>";
 
     echo "<td class='actions text-center'>
@@ -151,6 +151,35 @@ if(isset($eqps))
 
 </section>
 <script>
+$(document).ready( function () {
+    $('#tabela_dinamica').DataTable({
+      responsive: true,
+      language: {
+        processing:     "Pesquisando...",
+        search:         "Pesquisar:",
+        lengthMenu:     "_MENU_ &nbsp;Registros por página.",
+        info:           "Mostrando _START_ a _END_ de um total de  _TOTAL_ registros.",
+        infoEmpty:      "0 registros encontrado.",
+        infoFiltered:   "(_MAX_ registros pesquisados)",
+        infoPostFix:    "",
+        loadingRecords: "Carregando registros...",
+        zeroRecords:    "Nenhum registro encontrado com essa característica.",
+        emptyTable:     "Nenhuma informação nesta tabela de dados.",
+        paginate: {
+            first:      "Primeiro",
+            previous:   "Anterior",
+            next:       "Próximo",
+            last:       "Último"
+        },
+        aria: {
+            sortAscending:  ": Ordem ascendente.",
+            sortDescending: ": Ordem decrescente."
+        }
+    }
+    });
+});
+
+
 (function( $ ) {
 
 	'use strict';

@@ -8,13 +8,18 @@ extract($_POST);
 $_SESSION['auth'] = "false";
 
 if((isset($username) && trim($username) != "") && (isset($password) && trim($password) != "")){
-	$res = pg_prepare($conn_neogrid, "qry1", "SELECT U.id, U.name, U.area, U.job, U.active, U.in_ativaction, U.phone, U.cpf, U.date_of_birth, C.name as company_name, C.acron as company_acron, C.id as id_company FROM sepud.users U JOIN sepud.company C ON C.id = U.id_company WHERE U.email = $1 AND U.password = md5($2)");
+	$res = pg_prepare($conn_neogrid, "qry1", "SELECT U.id, U.name, U.area, U.job, U.active, U.in_ativaction, U.phone, U.cpf, U.date_of_birth, C.name as company_name, C.acron as company_acron, C.id as id_company, P.value as permissoes FROM sepud.users U JOIN sepud.company C ON C.id = U.id_company LEFT JOIN sepud.users_rel_perm_user P ON P.id_user = U.id WHERE U.email = $1 AND U.password = md5($2)");
 	$res = pg_execute($conn_neogrid, "qry1", array($username,$password));
 	if(pg_num_rows($res)==1)
 	{
 		$d = pg_fetch_assoc($res);
 		if($d['active'] == 't' && $d['in_ativaction'] == 'f')
 		{
+			if($d['permissoes']!="")
+			{
+				$d['permissoes'] = (array) json_decode(codificar($d['permissoes'],'d'));
+			}
+
 			$_SESSION 				  = $d;
 			$_SESSION['auth']   = "true";
 			$_SESSION['origem'] = $_POST['modulo'];
@@ -27,8 +32,15 @@ if((isset($username) && trim($username) != "") && (isset($password) && trim($pas
 }else{   $_SESSION['error'] = "Usuário ou senha não podem estar em branco.";}
 
 if($_SESSION['auth']=="true"){
-		if($modulo == "ERG"){
-			header("Location: ../index_erg.php?modulo=".$modulo);
+		if($modulo == "SERP"){
+			if(check_perm("4_9"))
+			{
+					header("Location: ../index_erg.php?modulo=".$modulo);
+			}else
+			{
+					$_SESSION["error"] = "Sem permissão de acesso para módulo de operação do SERP.<br>Em caso de dúvida contate o administrador do sistema.";
+					header("Location: ../index.php");
+			}
 		}else{
 			header("Location: ../index_sistema.php?modulo=".$modulo);
 		}

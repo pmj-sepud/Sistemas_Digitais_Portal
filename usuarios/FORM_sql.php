@@ -5,40 +5,25 @@
 
     extract($_POST);
 
-    //echo "<pre>";
-    //print_r($_POST);
-    //echo  "</pre>";
-    //exit();
 
-/*
-    [name] => Daniel Alberti
-    [nickname] =>
-    [phone] => 47 996972456
-    [registration] =>
-    [id_company] => 3
-    [area] => Seprot
-    [job] => Agente de Transito
-    [observation] =>
-    [workshift_group_time_init] => 06:30
-    [workshift_group_time_finish] => 22:30
-    [workshift_subgroup] => Turno
-    [workshift_subgroup_time_init] => 08:00
-    [workshift_subgroup_time_finish] => 13:00
-    [workshift_group] => Alfa
-    [email] => daniel.alberti@joinville.sc.gov.br
-    [senha] =>
-    [senha_repete] =>
-    [active] => t
-    [acao] => atualizar
-    [id] => 69
-)
-*/
+    if($acao == "permissoes")
+    {
+      unset($_POST['acao'],$_POST['id']);
+      $arr = codificar(json_encode($_POST),'c');
+      $sql = "INSERT INTO sepud.users_rel_perm_user (id_user, value) VALUES ('".$id."', '".$arr."')
+              ON CONFLICT (id_user) DO UPDATE SET value = excluded.value";
+      pg_query($sql)or die("SQL Error ".__LINE__."<br>Query: ".$sql);
+      logger("Permissões","Usuário", "Atualizou as permissões de ID: ".$id);
+      header("Location: FORM.php?nav=permissoes&id=".$id);
+      exit();
+    }
 
     if($acao=="inserir")
     {
       if($registration == ""){ $registration = "Null"; }else{ $registration = "'".$registration."'";}
       if($senha != "nova_senha" && trim($senha) != "" && ($senha == $senha_repete)){ $senhasql1 =   "MD5('".$senha."')"; }else{ $senhasql1 = "Null"; }
       if(trim($email) == ""){ $email = "Null"; }else{ $email = "'".$email."'";}
+      if($initial_workshift_position == ""){ $initial_workshift_position = "Null"; }else{ $initial_workshift_position = "'".$initial_workshift_position."'";}
 
       $sql =  "INSERT INTO sepud.users(
                       name,
@@ -52,7 +37,8 @@
                       phone,
                       in_ativaction,
                       nickname,
-                      registration)
+                      registration,
+                      initial_workshift_position)
               VALUES (
                      '".$name."',
                      ".$email.",
@@ -65,7 +51,8 @@
                     '".$phone."',
                     'f',
                     '".$nickname."',
-                    ".$registration.") RETURNING id";
+                    ".$registration.",
+                    ".$initial_workshift_position.") RETURNING id";
        $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
        $aux = pg_fetch_assoc($res);
 
@@ -81,6 +68,7 @@
         if($senha != "nova_senha" && $senha != "" && ($senha == $senha_repete)){ $senhasql =   "password    = MD5('".$senha."'),"; }
         if($registration == ""){ $registration = "Null"; }else{ $registration = "'".$registration."'";}
         if($email == ""){ $email = "Null"; }else{ $email = "'".$email."'";}
+        if($initial_workshift_position == ""){ $initial_workshift_position = "Null"; }else{ $initial_workshift_position = "'".$initial_workshift_position."'";}
 
         $workshift_group_time_init      = ($workshift_group_time_init      != "" ? "'".$workshift_group_time_init.":00'"     :"Null");
         $workshift_group_time_finish    = ($workshift_group_time_finish    != "" ? "'".$workshift_group_time_finish.":00'"   :"Null");
@@ -107,7 +95,8 @@
                         observation  = '".$observation."',
                         active       = '".$active."',
                         nickname     = '".$nickname."',
-                        registration = ".$registration."
+                        registration = ".$registration.",
+                        initial_workshift_position = ".$initial_workshift_position."
                   WHERE id = '".$id."'";
       pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
       logger("Atualização","Usuário","Atualizou dados do usuário: [".$id."] - ".$name);
