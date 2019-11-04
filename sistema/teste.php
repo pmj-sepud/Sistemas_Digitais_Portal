@@ -3,7 +3,7 @@ session_start();
 require_once("../libs/php/funcoes.php");
 require_once("../libs/php/conn.php");
 
-exit();
+
 ?>
 <style>
 .select2-selection__rendered {
@@ -30,38 +30,8 @@ height: 34px !important;
   <div class="row">
         <div class="col-md-12">
             <?
-                $sql = "SELECT U.id, U.name, P.value as permissoes FROM sepud.users U
-                        LEFT JOIN sepud.users_rel_perm_user P ON P.id_user = U.id
-                        WHERE U.id_company = 3";
-                $res = pg_query($sql)or die("SQL Error: ".__LINE__."<br>"."Query: ".$sql);
-                while($d = pg_fetch_assoc($res))
-                {
-                  echo "<br>".$d['id']." - ".$d['name'];
-                  if($d['permissoes']!="")
-                  {
-                              unset($userperms);
-                              $userperms = (array) json_decode(codificar($d['permissoes'],'d'));
-                              if($userperms['4_9']!="1")
-                              {
-                                  echo " - Incluindo permissão";
-                                  $userperms["4_9"] = 1;
-                              }else{
-                                echo " - Usuário já possui permissão";
-                              }
-                  }else{
-                        echo " - Incluindo NOVA permissão";
-                        $userperms = array("4_9" => 1);
-                      //echo "<h4>Usuário sem permissões, criando nova:</h4>";
-                      //print_r_pre($userperms);
-                  }
-                  print_r_pre($userperms);
-                  $arr = codificar(json_encode($userperms),'c');
-                  echo "<hr>".$arr."<hr>";
-                  $sql = "INSERT INTO sepud.users_rel_perm_user (id_user, value) VALUES ('".$d['id']."', '".$arr."')
-                          ON CONFLICT (id_user) DO UPDATE SET value = excluded.value";
-                  pg_query($sql)or die("SQL Error ".__LINE__."<br>Query: ".$sql);
-                }
-
+                  $agora = now();
+                  print_r_pre($agora);
             ?>
 
         </div>
