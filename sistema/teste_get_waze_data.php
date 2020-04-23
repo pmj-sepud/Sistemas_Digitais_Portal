@@ -35,7 +35,7 @@ height: 34px !important;
 
                 $tipos = "traffic,alerts,irregularities";
                 $tipos = "traffic,alerts,irregularities";
-                $url = "https://world-georss.waze.com/rtserver/web/TGeoRSS?tk=ccp_partner&ccp_partner_name=PREFEITURA%20MUNICIPAL%20DE%20JOINVILLE&format=JSON&types=".$tipos."&polygon=-48.802000,-26.130000;-48.883000,-26.107000;-49.161000,-26.059000;-49.224000,-26.103000;-49.239000,-26.178000;-49.245000,-26.306000;-49.043000,-26.358000;-48.923000,-26.410000;-48.898000,-26.444000;-48.858000,-26.438000;-48.802000,-26.395000;-48.727000,-26.354000;-48.746000,-26.285000;-48.802000,-26.130000;-48.802000,-26.130000;-48.802000,-26.130000;-48.802000,-26.130000;-48.802000,-26.130000;-48.802000,-26.130000;-48.802000,-26.130000;-48.802000,-26.130000;-48.802000,-26.130000;-48.802000,-26.130000;-48.802000,-26.130000";
+                $url; // WAZE URL get from .env vars
                 $json = file_get_contents($url);
                 $obj = json_decode($json);
 

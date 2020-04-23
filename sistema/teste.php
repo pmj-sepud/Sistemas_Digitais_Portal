@@ -45,9 +45,6 @@ height: 34px !important;
             print_r_pre($waze_url);
             //print_r_pre($_SESSION);
 
-
-
-//            $url   = "http://api.openweathermap.org/data/2.5/weather?q=Joinville,sc,br,uk&APPID=f212dca3c6138121d51e6c4d1f6fe89e&mode=json&units=metric&lang=pt_br";
             echo "<br>- Buscando dados: ";
             $json  = file_get_contents($waze_url);
             $d = json_decode(json_encode(json_decode($json)), True); //Conversão Obj to array
