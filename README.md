@@ -7,7 +7,7 @@ Ao final, como resultado, uma série de dados abertos disponíveis a qualquer ci
 
 ### Acesso ao portal
 
-http://jlle30.com.br/opendata
+http://www.jlle30.com.br/opendata
 
 ### Sistemas:
 
