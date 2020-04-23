@@ -2,15 +2,16 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
 
   $agora = now();
 
   if($_GET['id_workshift']=="")
   {
-      $sql   = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
+      $sql   = "SELECT * FROM ".$schema."oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
   }else {
-      $sql   = "SELECT * FROM sepud.oct_workshift WHERE id ='".$_GET['id_workshift']."'";
+      $sql   = "SELECT * FROM ".$schema."oct_workshift WHERE id ='".$_GET['id_workshift']."'";
   }
 
 
@@ -26,8 +27,8 @@
                     U.name as nome, U.id as id_user, U.registration, U.nickname,
                     WP.*
                   FROM
-                          sepud.oct_rel_workshift_persona WP
-                     JOIN sepud.users                      U ON U.id = WP.id_person
+                          ".$schema."oct_rel_workshift_persona WP
+                     JOIN ".$schema."users                      U ON U.id = WP.id_person
                   WHERE
                     WP.id_shift =  '".$turno['id']."'
                   ORDER BY WP.opened ASC";
@@ -57,7 +58,7 @@
         $sqlOc = "SELECT
                   	E.active, count(*) AS qtd
                   FROM
-                  	sepud.oct_events E
+                  	".$schema."oct_events E
                   WHERE
                   	id_workshift = '".$turno['id']."'
                   GROUP BY
@@ -72,13 +73,13 @@
 
 
   //Quantidade de ocorrencias e providencias por guarnição//
-  $sql = "SELECT id_garrison, count(*) as qtd_oc FROM sepud.oct_events E WHERE E.id_workshift = '".$turno['id']."' GROUP BY id_garrison";
+  $sql = "SELECT id_garrison, count(*) as qtd_oc FROM ".$schema."oct_events E WHERE E.id_workshift = '".$turno['id']."' GROUP BY id_garrison";
   $res = pg_query($sql)or die("SQL Error: ".$sql);
   while($aux = pg_fetch_assoc($res)){
       $produtividade_guarnicoes[$aux['id_garrison']]['qtd_oc'] = $aux['qtd_oc'];
       $produtividade_guarnicoes[$aux['id_garrison']]['total']  = $aux['qtd_oc']; }
 
-  $sql = "SELECT id_garrison, count(*) as qtd_prov FROM	sepud.oct_rel_events_providence WHERE id_garrison in (SELECT id FROM sepud.oct_garrison WHERE id_workshift = '".$turno['id']."') GROUP BY id_garrison";
+  $sql = "SELECT id_garrison, count(*) as qtd_prov FROM	".$schema."oct_rel_events_providence WHERE id_garrison in (SELECT id FROM ".$schema."oct_garrison WHERE id_workshift = '".$turno['id']."') GROUP BY id_garrison";
   $res = pg_query($sql)or die("SQL Error: ".__LINE__);
   while($aux = pg_fetch_assoc($res)){ $produtividade_guarnicoes[$aux['id_garrison']]['qtd_prov'] = $aux['qtd_prov'];
                                       $produtividade_guarnicoes[$aux['id_garrison']]['total']   += $aux['qtd_prov']; }
@@ -641,7 +642,7 @@ if($turno_aberto)
     $sql = "SELECT
               G.*
             FROM
-              sepud.oct_garrison G
+              ".$schema."oct_garrison G
             WHERE
               G.id_workshift = '".$turno['id']."' AND G.name is not null ORDER BY G.opened ASC";
     $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);;
@@ -661,8 +662,8 @@ if($turno_aberto)
                             //veiculos da guarnição//
                             $sqlv = "SELECT F.plate, F.type, F.model, F.brand, F.nickname,
                                       			G.*
-                                     FROM sepud.oct_rel_garrison_vehicle G
-                                     JOIN sepud.oct_fleet F ON F.id = G.id_fleet
+                                     FROM ".$schema."oct_rel_garrison_vehicle G
+                                     JOIN ".$schema."oct_fleet F ON F.id = G.id_fleet
                                      WHERE id_garrison = '".$dG['id']."' ORDER BY F.nickname";
                             $resv = pg_query($sqlv) or die("SQL error ".__LINE__."<br>Query: ".$sqlv);
                             unset($aux, $veiculos_da_guarnicao, $pessoas_sem_veiculo);
@@ -675,8 +676,8 @@ if($turno_aberto)
                                         U.nickname, U.name, U.registration,
                                         G.*
                                      FROM
-                                        sepud.oct_rel_garrison_persona G
-                                     JOIN sepud.users U ON U.id = G.id_user
+                                        ".$schema."oct_rel_garrison_persona G
+                                     JOIN ".$schema."users U ON U.id = G.id_user
                                      WHERE
                                       id_garrison = '".$dG['id']."'";
                             $resp = pg_query($sqlp) or die("SQL error ".__LINE__."<br>Query: ".$sqlp);
@@ -756,6 +757,9 @@ if($turno_aberto)
                                 }else{
                                     echo "<tr><td colspan='3' class='text-danger'><small><i><b>Atenção:</b> Veículo sem condutor, favor atualizar.</i></small></td></tr>";
                                 }
+
+echo "<tr><td colspan='6'><hr></td></tr>";
+
                               }
 
                             }
@@ -799,8 +803,8 @@ if($turno_aberto)
                                                               G.*,
                                                               F.plate, F.type, F.model, F.brand, F.nickname
                                                             FROM
-                                                            	sepud.oct_garrison
-                                                            	G JOIN sepud.oct_fleet F ON F.ID = G.id_fleet
+                                                            	".$schema."oct_garrison
+                                                            	G JOIN ".$schema."oct_fleet F ON F.ID = G.id_fleet
                                                             WHERE
                                                             	G.id_workshift = '".$turno['id']."' ORDER BY id DESC";
                                                     $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);;
@@ -853,8 +857,8 @@ if($turno_aberto)
                                                                           GP.type,
                                                                           U.name, U.nickname, U.registration
                                                                         FROM
-                                                                        	sepud.oct_rel_garrison_persona GP
-                                                                        	JOIN sepud.users U ON U.ID = GP.id_user
+                                                                        	".$schema."oct_rel_garrison_persona GP
+                                                                        	JOIN ".$schema."users U ON U.ID = GP.id_user
                                                                         WHERE
                                                                         	GP.id_garrison = '".$d['id']."' ORDER BY GP.type ASC";
 

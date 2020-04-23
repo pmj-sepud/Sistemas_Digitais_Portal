@@ -2,6 +2,7 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
   $agora = now();
 
@@ -145,13 +146,13 @@
                     U.id as id_user, U.name, U.nickname, U.registration,
                     E.date::date
                   FROM
-                    sepud.oct_rel_events_providence P
-                  JOIN sepud.users U ON U.id = P.id_user_resp
-                  JOIN sepud.oct_events E ON E.id = P.id_event AND E.date BETWEEN '".$filtro_data['ano']."-".$filtro_data['mes']."-01 00:00:00' AND '".$filtro_data['ano']."-".$filtro_data['mes']."-".$filtro_data['ultimo_dia']." 23:59:59'
-                  LEFT JOIN sepud.hospital H ON H.id = P.id_hospital
+                    ".$schema."oct_rel_events_providence P
+                  JOIN ".$schema."users U ON U.id = P.id_user_resp
+                  JOIN ".$schema."oct_events E ON E.id = P.id_event AND E.date BETWEEN '".$filtro_data['ano']."-".$filtro_data['mes']."-01 00:00:00' AND '".$filtro_data['ano']."-".$filtro_data['mes']."-".$filtro_data['ultimo_dia']." 23:59:59'
+                  LEFT JOIN ".$schema."hospital H ON H.id = P.id_hospital
                   WHERE
                     P.id_user_resp IS NOT NULL
-                    AND P.id_event IN (SELECT id FROM sepud.oct_events WHERE id_company = '".$_SESSION['id_company']."')
+                    AND P.id_event IN (SELECT id FROM ".$schema."oct_events WHERE id_company = '".$_SESSION['id_company']."')
                   ORDER BY U.name ASC";
 
            $res = pg_query($sql)or die("SQL Error ".__LINE__);

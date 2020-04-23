@@ -13,8 +13,8 @@
 				break;
 			case "rot":
 				$param     = "rot";
-				$titulo    = "ROT";
-				$subtitulo = "Registro de Ocorrências de Trânsitos";
+				$titulo    = "ROTSS";
+				$subtitulo = "Registro de Ocorrências de Trânsitos, Segurança e Saúde";
 				$modulo    = "ROT";
 				break;
 			case "smart":
@@ -34,6 +34,12 @@
 					$titulo    = "Estacionamento";
 					$subtitulo = "Rotativo Público";
 					$modulo    = "SERP";
+					break;
+			case "dev":
+					$param 		 = "developer";
+					$titulo    = "Área de treinamento";
+					$subtitulo = "e testes de sistemas";
+					$modulo    = "devops";
 					break;
 			default:
 				header("Location: index3.php");

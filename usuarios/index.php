@@ -3,6 +3,8 @@
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
   logger("Acesso","Usuários");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
+
 ?>
 
 <section role="main" class="content-body">
@@ -29,8 +31,8 @@
           	C.name as ccompany_name, C.acron as ccompany_acron,
           	U.*
           FROM
-          	   sepud.users   U
-          JOIN sepud.company C ON C.id = U.id_company
+          	   ".$schema."users   U
+          JOIN ".$schema."company C ON C.id = U.id_company
           WHERE  ".implode(" AND ", $filtro)."
           ORDER BY C.acron, U.name ASC";
   $rs  = pg_query($conn_neogrid,$sql);

@@ -2,6 +2,7 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
   $id         = $_GET['id'];
   $victim_sel = $_GET['victim_sel'];
@@ -11,7 +12,7 @@
 
   if($victim_sel)
   {
-    $sql   = "SELECT * FROM sepud.oct_victim WHERE id = '".$victim_sel."'";
+    $sql   = "SELECT * FROM ".$schema."oct_victim WHERE id = '".$victim_sel."'";
     $res   = pg_query($sql)or die("Erro ".__LINE__);
     $dados = pg_fetch_assoc($res);
     $acao  = "atualizar";
@@ -174,7 +175,7 @@
                            <select id="id_vehicle" name="id_vehicle" class="form-control">
                                <option value="">- - -</option>
                              <?
-                               $sql = "SELECT * FROM sepud.oct_vehicles WHERE id_events = '".$id."' ORDER BY description ASC";
+                               $sql = "SELECT * FROM ".$schema."oct_vehicles WHERE id_events = '".$id."' ORDER BY description ASC";
                                $res = pg_query($conn_neogrid,$sql)or die("Error: ".__LINE__);
                                while($d = pg_fetch_assoc($res))
                                {
@@ -264,8 +265,8 @@
                             VE.description as veiculo_desc,
                             *
                           FROM
-                            sepud.oct_victim VI
-                          LEFT JOIN sepud.oct_vehicles VE ON VE.ID = VI.id_vehicle
+                            ".$schema."oct_victim VI
+                          LEFT JOIN ".$schema."oct_vehicles VE ON VE.ID = VI.id_vehicle
                           WHERE
                             VI.id_events = '".$id."'";
                 $resv = pg_query($sqlv)or die("Erro ".__LINE__);

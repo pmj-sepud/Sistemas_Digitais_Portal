@@ -121,11 +121,10 @@ if(isset($_POST['waze_filtro_data']))
 									<header class="panel-heading">
                     Mês de referência: <b><?=$filtro_data['mes_txt']."/".$filtro_data['ano'];?></b>
                     <div class="panel-actions">
-<!--
+
                       <button type="button" class="mb-xs mt-xs mr-xs btn btn-xs btn-primary" data-toggle="modal" data-target="#waze_modal_filtro">
                         Filtros
                       </button>
--->
 									  </div>
                   </header>
 									<div class="panel-body">
@@ -145,7 +144,8 @@ if(isset($_POST['waze_filtro_data']))
                     <? $sql = "SELECT MAX(date_created) as dataupd FROM waze.data_files";
                        $res = pg_query($conn_neogrid,$sql)or die("Erro ".__LINE__);
                        $d   = pg_fetch_assoc($res);
-                       echo formataData($d['dataupd'],1)." <sup><strong>(UTC)</strong></sup>";
+                       echo formataData($d['dataupd'],1)." <sup><strong>(Local time)</strong></sup>";
+
                     ?>
                 </td>
             </tr>

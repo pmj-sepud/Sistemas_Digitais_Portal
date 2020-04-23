@@ -11,8 +11,8 @@
       <i id="menu_bt_top" class="fa fa-bars" aria-label="Toggle sidebar"></i>
     </div>
   </div>
-
   <div class="header-right hidden-print hidden-xs">
+    <? if($_SESSION['origem'] == "devops"){ echo "<span class='text-danger'><b><i>Área de treinamento</i></b></span>"; } ?>
 <!----------------------------------------------------->
 <?
 if($_SESSION['tem_foto'] == "sim")

@@ -2,6 +2,7 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
   $agora = now();
   $sql = "SELECT
@@ -9,9 +10,9 @@
               	F.plate, F.type as fleet_type, F.model, F.brand, F.nickname as fleet_nickname,
               	H.*
               FROM
-              	sepud.oct_workshift_history H
-              LEFT JOIN sepud.users U ON U.id = H.id_user
-              LEFT JOIN sepud.oct_fleet F ON F.id = H.id_vehicle
+              	".$schema."oct_workshift_history H
+              LEFT JOIN ".$schema."users U ON U.id = H.id_user
+              LEFT JOIN ".$schema."oct_fleet F ON F.id = H.id_vehicle
               WHERE H.id_workshift = '".$_GET['id_workshift']."'";
   $res = pg_query($sql)or die("Erro ".__LINE__);
 
@@ -95,8 +96,8 @@
                                                       G.id_garrison,
                                                       U.id, U.name, U.nickname, U.registration
                                                      FROM
-                                                      sepud.oct_rel_garrison_persona G
-                                                     JOIN sepud.users U ON U.id = G.id_user
+                                                      ".$schema."oct_rel_garrison_persona G
+                                                     JOIN ".$schema."users U ON U.id = G.id_user
                                                      WHERE
                                                       id_garrison = '".$d['id_garrison']."'";
                                             $resG = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql."<hr>".print_r($d,true));

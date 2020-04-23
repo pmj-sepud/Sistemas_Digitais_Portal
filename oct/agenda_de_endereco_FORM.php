@@ -2,7 +2,7 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
-
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
   $agora = now();
 
 
@@ -12,8 +12,8 @@
   if($id != "")
   {
       $acao = "Atualizar";
-      $sql = "SELECT S.name as street_name, A.* FROM sepud.oct_addressbook A
-              LEFT JOIN sepud.streets S ON S.id = A.id_street
+      $sql = "SELECT S.name as street_name, A.* FROM ".$schema."oct_addressbook A
+              LEFT JOIN ".$schema."streets S ON S.id = A.id_street
               WHERE A.id = '".$id."'";
       $res = pg_query($sql)or die("SQL error ".__LINE__);
       $d   = pg_fetch_assoc($res);
@@ -85,6 +85,7 @@
                                         <option value="praça"              <?=($d['type']=="praça"?"selected":"");?>>Praça</option>
                                         <option value="pronto atendimento" <?=($d['type']=="pronto atendimento"?"selected":"");?>>Pronto Atendimento</option>
                                         <option value="quartel"            <?=($d['type']=="quartel"?"selected":"");?>>Quartel</option>
+                                        <option value="terminal de ônibus"            <?=($d['type']=="terminal de ônibus"?"selected":"");?>>Terminal de ônibus</option>
                                         <option value="unidade de proteção social básica" <?=($d['type']=="unidade de proteção social básica"?"selected":"");?>>CRAS - Unidade de Proteção Social Básica</option>
                                         <option value="unidade de saúde"   <?=($d['type']=="unidade de saúde"?"selected":"");?>>Unidade de Saúde</option>
                                         <option value="outros"             <?=($d['type']=="outros"?"selected":"");?>>Outros</option>
@@ -98,7 +99,7 @@
                                     <select id="id_street" name="id_street" class="form-control select2" style="width: 100%; height:100%">
                                       <option value="">- - -</option>
                                       <?
-                                        $sql = "SELECT * FROM sepud.streets ORDER BY name ASC";
+                                        $sql = "SELECT * FROM ".$schema."streets ORDER BY name ASC";
                                         $res = pg_query($sql)or die();
                                         while($s = pg_fetch_assoc($res))
                                         {

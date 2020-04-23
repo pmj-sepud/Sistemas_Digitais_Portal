@@ -2,11 +2,12 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
   $agora        = now();
   logger("Acesso","OCT - Minhas Ocorrências");
 
-  $sql   = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
+  $sql   = "SELECT * FROM ".$schema."oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
   $res   = pg_query($sql)or die("Erro ".__LINE__);
 
   if(pg_num_rows($res))
@@ -55,7 +56,7 @@
                   <div class="row">
                     <div class="col-sm-6">
                       <?
-                          $sql = "SELECT count(*) as qtd FROM sepud.oct_events E WHERE id_user = '".$_SESSION['id']."' AND E.active = true";
+                          $sql = "SELECT count(*) as qtd FROM ".$schema."oct_events E WHERE id_user = '".$_SESSION['id']."' AND E.active = true";
                           $res = pg_query($sql)or die("Error ".__LINE__."<br>".$sql);
                           $aux = pg_fetch_assoc($res);
 
@@ -85,8 +86,8 @@
                     <div class="col-sm-6">
                       <?
                           $sql = "SELECT count(*) as qtd
-                                  FROM sepud.oct_events E
-                                  JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = E.id_garrison AND GP.id_user = '".$_SESSION['id']."'
+                                  FROM ".$schema."oct_events E
+                                  JOIN ".$schema."oct_rel_garrison_persona GP ON GP.id_garrison = E.id_garrison AND GP.id_user = '".$_SESSION['id']."'
                                   WHERE E.active = true
                                   AND E.id_garrison is not null
                                   AND E.id_user <> '".$_SESSION['id']."'";
@@ -120,7 +121,7 @@
                   <div class="col-sm-6">
                     <?
                         $sql = "SELECT count(*) as qtd
-                                  FROM sepud.oct_events E
+                                  FROM ".$schema."oct_events E
                                   WHERE E.active = false
                                   AND E.id_user = '".$_SESSION['id']."'
                                   AND E.closure BETWEEN '".$agora['datasrv']." 00:00:00' AND '".$agora['datasrv']." 23:59:59'";

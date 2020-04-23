@@ -2,9 +2,13 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
   $id = $_GET['id'];
   $sistema_nao_config = false;
+
+  if($_SESSION['rotss_nav_retorno_origem']==""){ $retorno_origem = "ocorrencias.php";}else{ $retorno_origem = $_SESSION['rotss_nav_retorno_origem'];}
+
   if($id != "")
   {
       $sql   = "SELECT
@@ -19,14 +23,14 @@
                     EV.*
 
                 FROM
-                          sepud.oct_events    EV
-                     JOIN sepud.users         U  ON U.ID = EV.id_user
-                     JOIN sepud.company       C  ON C.id = U.id_company
-                LEFT JOIN sepud.oct_workshift W  ON W.id = EV.id_workshift
-                LEFT JOIN sepud.oct_garrison  G  ON G.ID = EV.id_garrison
-              	LEFT JOIN sepud.oct_fleet     F  ON F.id = G.id_fleet
-              	LEFT JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = EV.id_garrison AND GP.type = 'Motorista'
-              	LEFT JOIN sepud.users        UG ON UG.id = GP.id_user
+                          ".$schema."oct_events    EV
+                     JOIN ".$schema."users         U  ON U.ID = EV.id_user
+                     JOIN ".$schema."company       C  ON C.id = U.id_company
+                LEFT JOIN ".$schema."oct_workshift W  ON W.id = EV.id_workshift
+                LEFT JOIN ".$schema."oct_garrison  G  ON G.ID = EV.id_garrison
+              	LEFT JOIN ".$schema."oct_fleet     F  ON F.id = G.id_fleet
+              	LEFT JOIN ".$schema."oct_rel_garrison_persona GP ON GP.id_garrison = EV.id_garrison AND GP.type = 'Motorista'
+              	LEFT JOIN ".$schema."users        UG ON UG.id = GP.id_user
                 WHERE EV.ID =  '".$id."'";
 
       $res   = pg_query($conn_neogrid,$sql)or die("Error ".__LINE__);
@@ -41,14 +45,14 @@
         $turno_oc['status'] = $dados['workshift_status'];
       }
 
-      $sql = "SELECT * FROM sepud.oct_rel_events_event_conditions WHERE id_events = '".$id."'";
+      $sql = "SELECT * FROM ".$schema."oct_rel_events_event_conditions WHERE id_events = '".$id."'";
       $res   = pg_query($conn_neogrid,$sql)or die("Error ".__LINE__);
       while($d = pg_fetch_assoc($res))
       {
         $dadosCondicoes[] = $d['id_event_conditions'];
       }
 
-      $sql        = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
+      $sql        = "SELECT * FROM ".$schema."oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
       $resTurno   = pg_query($sql)or die("Erro ".__LINE__);
       if(pg_num_rows($resTurno))
       {
@@ -74,7 +78,7 @@
       $dados['user_name']     = $_SESSION['name'];
       $agora = now();
       $txt_bread = "Nova ocorrência";
-      $sql        = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
+      $sql        = "SELECT * FROM ".$schema."oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
       $resTurno   = pg_query($sql)or die("Erro ".__LINE__);
       if(pg_num_rows($resTurno))
       {
@@ -102,43 +106,62 @@
         <ol class="breadcrumbs">
           <li><a href="index_sistema.php"><i class="fa fa-home"></i></a></li>
           <li><span class='text-muted'>Aplicações</span></li>
-          <li><a href='oct/ocorrencias.php?filtro_data=<?=$_GET['filtro_data'];?>'>Ocorrências de trânsito</a></li>
+          <li><a href='oct/<?=$retorno_origem;?>?filtro_data=<?=$_GET['filtro_data'];?>'>Ocorrências</a></li>
           <li><span class='text-muted'><?=$txt_bread;?></span></li>
         </ol>
       </div>
     </header>
     <section class="panel">
-      <header class="panel-heading">
-        <h4><span class="text-muted">Status: </span><strong><i id='txt_status'><?=$dados['status'];?></i></strong>
-                  <?
-                    if(isset($turno_oc))
-                    {
-                      echo "<br><small class='text-muted'>Turno nº <b>".str_pad($turno_oc['id'],5,"0",STR_PAD_LEFT)."</b> - ".$turno_oc['period']. " - ";
-                      if($turno_oc['status']=="fechado"){ echo " <span class='text-warning'>Turno fechado</span>";}else{ echo " <span class='text-success'>Turno aberto</span>";}
-                      echo "<br>Início: <b>".formataData($turno_oc['opened'],1)."</b>";
-                      if($turno_oc['closed']!=""){echo ", fim: <b>".formataData($turno_oc['closed'],1)."</b>";}
-                      echo "</small>";
-                      echo "<input type='hidden' name='id_workshift' value='".$turno_oc['id']."' />";
-                    }else {
-                      if(isset($turno_aberto))
-                      {
-                        echo "<br><small class='text-muted'>Turno nº <b>".str_pad($turno_aberto['id'],5,"0",STR_PAD_LEFT)."</b> - ".$turno_aberto['period']. " - ";
-                        if($turno_aberto['status']=="fechado"){ echo " <span class='text-warning'>Turno fechado</span>";}else{ echo " <span class='text-success'>Turno aberto</span>";}
-                        echo "<br>Início: <b>".formataData($turno_aberto['opened'],1)."</b>";
-                        if($turno_aberto['closed']!=""){echo ", fim: <b>".formataData($turno_aberto['closed'],1)."</b>";}
-                        echo "</small>";
-                        echo "<input type='hidden' name='id_workshift' value='".$turno_aberto['id']."' />";
-                      }else{
-                        echo "<br><small class='text-danger'>Nenhum turno de trabalho aberto.</small>";
-                      }
-                    }
-                  ?>
-       </h4>
-        <input type="hidden" id="status" name="status" value="<?=$dados['status'];?>" >
-        <div class="panel-actions">
-          <h4 class="text-right"><small class='text-muted'><sup>Responsável:</sup></small><br><strong><i><?=$dados['user_name'];?></i>
-                                 <br><small><?=$dados['company_name'];?></small></strong>
+
+      <div class='row'>
+          <div class='col-sm-6'>
+                        <h4><span class="text-muted">Status: </span><strong><i id='txt_status'><?=$dados['status'];?></i></strong>
+                                  <?
+                                    if(isset($turno_oc))
+                                    {
+                                      echo "<br><small class='text-muted'>Turno nº <b>".str_pad($turno_oc['id'],5,"0",STR_PAD_LEFT)."</b> - ".$turno_oc['period']. " - ";
+                                      if($turno_oc['status']=="fechado"){ echo " <span class='text-warning'>Turno fechado</span>";}else{ echo " <span class='text-success'>Turno aberto</span>";}
+                                      echo "<br>Início: <b>".formataData($turno_oc['opened'],1)."</b>";
+                                      if($turno_oc['closed']!=""){echo ", fim: <b>".formataData($turno_oc['closed'],1)."</b>";}
+                                      echo "</small>";
+                                      echo "<input type='hidden' name='id_workshift' value='".$turno_oc['id']."' />";
+                                    }else {
+                                      if(isset($turno_aberto))
+                                      {
+                                        echo "<br><small class='text-muted'>Turno nº <b>".str_pad($turno_aberto['id'],5,"0",STR_PAD_LEFT)."</b> - ".$turno_aberto['period']. " - ";
+                                        if($turno_aberto['status']=="fechado"){ echo " <span class='text-warning'>Turno fechado</span>";}else{ echo " <span class='text-success'>Turno aberto</span>";}
+                                        echo "<br>Início: <b>".formataData($turno_aberto['opened'],1)."</b>";
+                                        if($turno_aberto['closed']!=""){echo ", fim: <b>".formataData($turno_aberto['closed'],1)."</b>";}
+                                        echo "</small>";
+                                        echo "<input type='hidden' name='id_workshift' value='".$turno_aberto['id']."' />";
+                                      }else{
+                                        echo "<br><small class='text-danger'>Nenhum turno de trabalho aberto.</small>";
+                                      }
+                                    }
+                                  ?>
+                       </h4>
         </div>
+        <div class='col-sm-6'>
+                          <h4 class="text-right">
+                                <small class='text-muted'><sup>Responsável:</sup></small><br>
+                                <strong><i><?=$dados['user_name'];?></i><br>
+                                <small><?=$dados['company_name'];?></small></strong>
+                          </h4>
+                          <input type="hidden" id="status" name="status" value="<?=$dados['status'];?>" />
+        </div>
+      </div>
+
+      <header class="panel-heading" style="height:50px">
+
+          <div class='row' style="margin-top:-8px">
+              <div class='col-sm-12 text-right'>
+                <? if($acao=="atualizar"){ ?>
+                  <a href="#" id="bt_print" ajax="false" class='btn btn-sm btn-default'><i class='fa fa-print'></i> Imprimir</a>
+                <? } ?>
+                  <a href='oct/<?=$retorno_origem;?>' class="btn btn-sm btn-default loading"><i class='fa fa-mail-reply'></i> Voltar</a>
+              </div>
+            </div>
+
       </header>
       <div class="panel-body">
         <div class="row">
@@ -152,8 +175,8 @@
               								<?
                               if(isset($_SESSION["id_company"]))
                               {
-                                  $sql = "SELECT T.* FROM sepud.oct_event_type T
-                                          JOIN sepud.oct_rel_event_type_company R ON R.id_event_type = T.id AND R.id_company = '".$_SESSION["id_company"]."'
+                                  $sql = "SELECT T.* FROM ".$schema."oct_event_type T
+                                          JOIN ".$schema."oct_rel_event_type_company R ON R.id_event_type = T.id AND R.id_company = '".$_SESSION["id_company"]."'
                                           WHERE T.active = true
                                           ORDER BY T.name ASC";
 
@@ -224,17 +247,47 @@
                   </div>
              </div>
 
+             <div class="row">
+               <div class="col-sm-8">
+                 <div class="form-group">
+                 <label class="control-label">Origem da solicitação:</label>
+                     <select name="requester_origin" class="form-control changefield select2">
+                        <option value=''></option>
+                        <option value='Carta' <?=($dados['requester_origin']=="Carta"?"selected":"");?>>Carta</option>
+                        <option value='Central 153' <?=($dados['requester_origin']=="Central 153"?"selected":"");?>>Central 153</option>
+                        <option value='Comunicado' <?=($dados['requester_origin']=="Comunicado"?"selected":"");?>>Comunicado</option>
+                        <option value='E-mail' <?=($dados['requester_origin']=="E-mail"?"selected":"");?>>E-mail</option>
+                        <option value='Indicação' <?=($dados['requester_origin']=="Indicação"?"selected":"");?>>Indicação</option>
+                        <option value='Memorando' <?=($dados['requester_origin']=="Memorando"?"selected":"");?>>Memorando</option>
+                        <option value='Ocorrência' <?=($dados['requester_origin']=="Ocorrência"?"selected":"");?>>Ocorrência</option>
+                        <option value='Ofício' <?=($dados['requester_origin']=="Ofício"?"selected":"");?>>Ofício</option>
+                        <option value='Ouvidoria' <?=($dados['requester_origin']=="Ouvidoria"?"selected":"");?>>Ouvidoria</option>
+                        <option value='Pessoalmente' <?=($dados['requester_origin']=="Pessoalmente"?"selected":"");?>>Pessoalmente</option>
+                        <option value='Protocolo' <?=($dados['requester_origin']=="Protocolo"?"selected":"");?>>Protocolo</option>
+                        <option value='Requerimento' <?=($dados['requester_origin']=="Requerimento"?"selected":"");?>>Requerimento</option>
+                        <option value='SEI' <?=($dados['requester_origin']=="SEI"?"selected":"");?>>SEI</option>
+                        <option value='Telefone' <?=($dados['requester_origin']=="Telefone"?"selected":"");?>>Telefone</option>
+                     </select>
+                </div>
+               </div>
+               <div class="col-sm-4">
+                 <div class="form-group">
+                 <label class="control-label">Protocolo:</label>
+                     <input type="text" name="requester_protocol" class="form-control changefield" value="<?=$dados['requester_protocol'];?>">
+                </div>
+               </div>
+            </div>
+
+
 
             <div class="row">
-
-
               <div class="col-sm-6">
                 <div class="form-group">
                 <label class="control-label">Logradouro:</label>
                     <select id="id_street" name="id_street" class="form-control select2 changefield" style="width: 100%; height:100%">
                       <option value="">- - -</option>
                       <?
-                        $sql = "SELECT * FROM sepud.streets ORDER BY name ASC";
+                        $sql = "SELECT * FROM ".$schema."streets ORDER BY name ASC";
                         $res = pg_query($sql)or die();
                         while($s = pg_fetch_assoc($res))
                         {
@@ -274,13 +327,13 @@
                    <script>
                     var livro_de_endereco = [];
                    <?
-                        //$sql = "SELECT * FROM sepud.oct_addressbook WHERE id_company = '".$_SESSION['id_company']."' ORDER BY name ASC";
+                        //$sql = "SELECT * FROM ".$schema."oct_addressbook WHERE id_company = '".$_SESSION['id_company']."' ORDER BY name ASC";
 
                         $sql = "SELECT
                                 	S.name as street_name, A.*
                                 FROM
-                                	sepud.oct_addressbook A
-                                LEFT JOIN sepud.streets S ON S.id = A.id_street
+                                	".$schema."oct_addressbook A
+                                LEFT JOIN ".$schema."streets S ON S.id = A.id_street
                                 --WHERE A.id_company = '".$_SESSION['id_company']."'
                                 WHERE active = 't'
                                 ORDER BY
@@ -356,8 +409,8 @@
                           	F.nickname, F.plate, F.model, F.brand,
                           	G.*
                           FROM
-                          	sepud.oct_garrison G
-                          LEFT JOIN sepud.oct_fleet F ON F.id = G.id_fleet
+                          	".$schema."oct_garrison G
+                          LEFT JOIN ".$schema."oct_fleet F ON F.id = G.id_fleet
                           WHERE
                           	G.id_workshift = '".$turno_aberto['id']."' AND G.closed is null AND G.name is not null";
                   $res = pg_query($sql)or die("SQL error ".__LINE__);
@@ -374,10 +427,10 @@
                           	F.plate,
                           	V.*
                           FROM
-                          	sepud.oct_rel_garrison_vehicle V
-                          	JOIN sepud.oct_fleet F ON F.ID = V.id_fleet
+                          	".$schema."oct_rel_garrison_vehicle V
+                          	JOIN ".$schema."oct_fleet F ON F.ID = V.id_fleet
                           WHERE
-                          	V.id_garrison IN (SELECT G.ID FROM sepud.oct_garrison G WHERE G.id_workshift = '".$turno_aberto['id']."' AND G.closed is null AND G.name is not null)";
+                          	V.id_garrison IN (SELECT G.ID FROM ".$schema."oct_garrison G WHERE G.id_workshift = '".$turno_aberto['id']."' AND G.closed is null AND G.name is not null)";
 
                   $res = pg_query($sql)or die("SQL error ".__LINE__);
                   while($aux = pg_fetch_assoc($res)){
@@ -390,10 +443,10 @@
                           	U.registration,
                           	P.*
                           FROM
-                          	sepud.oct_rel_garrison_persona
-                          	P JOIN sepud.users U ON U.ID = P.id_user
+                          	".$schema."oct_rel_garrison_persona
+                          	P JOIN ".$schema."users U ON U.ID = P.id_user
                           WHERE
-                          	P.id_garrison IN (SELECT G.ID FROM sepud.oct_garrison G WHERE G.id_workshift = '".$turno_aberto['id']."' AND G.closed is null AND G.name is not null)
+                          	P.id_garrison IN (SELECT G.ID FROM ".$schema."oct_garrison G WHERE G.id_workshift = '".$turno_aberto['id']."' AND G.closed is null AND G.name is not null)
                           ORDER BY U.nickname ASC";
 
                   $res = pg_query($sql)or die("SQL error ".__LINE__);
@@ -419,13 +472,13 @@
                                       </optgroup>";
                               }else{
 
-                                $sql = "SELECT F.nickname as fleet_nickname, G.name, R.* FROM sepud.oct_rel_garrison_vehicle R, sepud.oct_garrison G, sepud.oct_fleet F WHERE R.id_fleet = F.id AND id_garrison = '".$dados['id_garrison']."' AND R.id_garrison = G.id";
+                                $sql = "SELECT F.nickname as fleet_nickname, G.name, R.* FROM ".$schema."oct_rel_garrison_vehicle R, ".$schema."oct_garrison G, ".$schema."oct_fleet F WHERE R.id_fleet = F.id AND id_garrison = '".$dados['id_garrison']."' AND R.id_garrison = G.id";
                                 $res = pg_query($sql)or die("Erro ".__LINE__);
                                 while($auxg = pg_fetch_assoc($res)){
                                     $guarnicao_nova_baixada[$auxg['id_garrison']]['name']=$auxg['name'];
                                     $guarnicao_nova_baixada[$auxg['id_garrison']]['veiculos'][$auxg['id']] = $auxg;
                                 }
-                                $sql = "SELECT G.name, P.*, U.nickname FROM sepud.oct_rel_garrison_persona P, sepud.oct_garrison G, sepud.users U WHERE id_garrison = '".$dados['id_garrison']."' AND P.id_garrison = G.id AND P.id_user = U.id";
+                                $sql = "SELECT G.name, P.*, U.nickname FROM ".$schema."oct_rel_garrison_persona P, ".$schema."oct_garrison G, ".$schema."users U WHERE id_garrison = '".$dados['id_garrison']."' AND P.id_garrison = G.id AND P.id_user = U.id";
                                 $res = pg_query($sql)or die("Erro ".__LINE__);
                                 while($auxg = pg_fetch_assoc($res)){
                                     $guarnicao_nova_baixada[$auxg['id_garrison']]['veiculos'][$auxg['id_rel_garrison_vehicle']]['pessoas'][] = $auxg;
@@ -492,10 +545,10 @@
                                    F.brand,
                                    F.nickname
                                  FROM
-                                   sepud.oct_garrison G
-                                 JOIN sepud.oct_fleet F ON F.id = G.id_fleet
-                                 JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = G.id AND GP.type = 'Motorista'
-                                 JOIN sepud.users U ON U.id = GP.id_user
+                                   ".$schema."oct_garrison G
+                                 JOIN ".$schema."oct_fleet F ON F.id = G.id_fleet
+                                 JOIN ".$schema."oct_rel_garrison_persona GP ON GP.id_garrison = G.id AND GP.type = 'Motorista'
+                                 JOIN ".$schema."users U ON U.id = GP.id_user
                                  WHERE
                                      G.id_workshift = '".$turno_aberto['id']."'
                                  AND G.closed is null";
@@ -568,7 +621,7 @@
 
                          <div class="col-sm-4">
                            <?
-                           $sql = "SELECT * FROM sepud.oct_event_conditions ORDER BY subtype ASC";
+                           $sql = "SELECT * FROM ".$schema."oct_event_conditions ORDER BY subtype ASC";
                            $res = pg_query($conn_neogrid,$sql)or die("Error: ".__LINE__);
                            while($d = pg_fetch_assoc($res)){ $v[$d['type']][] = $d; }
                            unset($d);
@@ -597,8 +650,7 @@
     <div class="col-sm-12" style="margin-top:10px">
 
       <div class="btn-group">
-          <!--<button id="bt_voltar" type="button" class="btn btn-default loading">Voltar</button>-->
-          <a href="oct/ocorrencias.php?filtro_data=<?=$_GET['filtro_data'];?>" class="btn btn-default loading">Voltar</a>
+          <a href='oct/<?=$retorno_origem;?>' class="btn btn-default loading">Voltar</a>
           <div class="btn-group dropup">
             <!--<a class="btn btn-warning dropdown-toggle" data-toggle="dropdown"><?=$dados['status'];?> <span class="caret"></span></a>-->
             <button type="button" id="bt_status" class="btn btn-warning dropdown-toggle disable_button" data-toggle="dropdown" ajax="false">Alterar Status <span class="caret"></span></button>
@@ -634,7 +686,10 @@
 
 
 
-
+<?
+  if($_SESSION["company_configs"]["oct_submodule_envolvidos"]!="false")
+  {
+?>
               <div class="row" style="margin-top:15px">
                     <div class="col-md-12">
             							<section class="panel panel-featured panel-featured-warning">
@@ -650,12 +705,12 @@
             								<div class="panel-body">
 
             								<?
-                                $sqlVei = "SELECT * FROM sepud.oct_vehicles WHERE id_events = '".$id."'";
+                                $sqlVei = "SELECT * FROM ".$schema."oct_vehicles WHERE id_events = '".$id."'";
                                 $resVei = pg_query($conn_neogrid,$sqlVei)or die("Error ".__LINE__);
                                 while($d = pg_fetch_assoc($resVei)){ $veics[$d['id']] = $d; }
 
 
-                                $sqlVit = "SELECT * FROM sepud.oct_victim WHERE id_events = '".$id."'";
+                                $sqlVit = "SELECT * FROM ".$schema."oct_victim WHERE id_events = '".$id."'";
                                 $resVit = pg_query($conn_neogrid,$sqlVit)or die("Error ".__LINE__);
                                 while($d = pg_fetch_assoc($resVit)){
                                   if($d['id_vehicle'] != ""){ $veics[$d['id_vehicle']]['vitimas'][] = $d; }
@@ -750,7 +805,7 @@
             							</section>
     						      </div>
               </div>
-
+<? } ?>
 
 
 
@@ -776,15 +831,17 @@
                                                  H.name as hospital,
                                                  CO.acron as company_acron, CO.name as company_name,
                                                  PR.area, PR.providence,
+                                                 UR.name AS responsavel,
                                                  P.*
-                                          FROM sepud.oct_rel_events_providence P
-                                          JOIN sepud.users U ON U.id = P.id_owner
-                                          JOIN sepud.company C ON C.id = U.id_company
-                                          LEFT JOIN sepud.oct_vehicles VE ON VE.id = P.id_vehicle
-                                          LEFT JOIN sepud.oct_victim   VI ON VI.id = P.id_victim
-                                          LEFT JOIN sepud.hospital      H ON  H.id = P.id_hospital
-                                          LEFT JOIN sepud.company      CO ON CO.id = P.id_company_requested
-                                          JOIN sepud.oct_providence    PR ON PR.id = P.id_providence
+                                          FROM ".$schema."oct_rel_events_providence P
+                                          JOIN ".$schema."users U ON U.id = P.id_owner
+                                          JOIN ".$schema."company C ON C.id = U.id_company
+                                          LEFT JOIN ".$schema."oct_vehicles VE ON VE.id = P.id_vehicle
+                                          LEFT JOIN ".$schema."oct_victim   VI ON VI.id = P.id_victim
+                                          LEFT JOIN ".$schema."hospital      H ON  H.id = P.id_hospital
+                                          LEFT JOIN ".$schema."company      CO ON CO.id = P.id_company_requested
+                                          LEFT JOIN ".$schema."users        UR ON UR.id = P.id_user_resp
+                                          JOIN ".$schema."oct_providence    PR ON PR.id = P.id_providence
                                           WHERE P.id_event = '".$id."'
                                           ORDER BY P.opened_date DESC";
                                     $res = pg_query($sql)or die("Erro ".__LINE__."<hr><pre>".$sql."</pre>");
@@ -806,6 +863,7 @@
 
 
                                             echo "<table class='table'>";
+                                            if(isset($p['responsavel'])!=""){     echo "<td width='50'><span style='color:#CCCCCC'>Responsável:</span></td><td>".$p['responsavel']."</td>"; }
                                             echo "<tr><td width='50'><span style='color:#CCCCCC'>Observações:</span></td><td>";
                                             if($p['observation'] != ""){ echo $p['observation']; }else{ echo "<span style='color:#CCCCCC'>Nenhuma anotação de observação para essa providência.</span>";}
                                             echo "</td></tr>";
@@ -915,7 +973,7 @@
 
 <? if($acao == "atualizar"){
 
-  $sql = "SELECT * FROM sepud.oct_rel_events_images WHERE id_events = '".$id."' ORDER BY id DESC";
+  $sql = "SELECT * FROM ".$schema."oct_rel_events_images WHERE id_events = '".$id."' ORDER BY id DESC";
   $res = pg_query($sql)or die("Erro ".__LINE__."SQL: ".$sql);
 ?>
 
@@ -940,8 +998,10 @@
                     {
                       while($f = pg_fetch_assoc($res))
                       {
-                        echo  "<img src='oct/uploads/".$id."/".$f['image']."' style='padding:2px; width:100px' data-toggle='modal' data-target='#modalFotos' />";
-                        $arqs_imgs[] = "oct/uploads/".$id."/".$f['image'];
+                        if($_SESSION['origem'] == "devops"){ $dirdev   = "dev/"; }
+
+                        echo  "<img src='oct/uploads/".$dirdev.$id."/".$f['image']."' style='padding:2px; width:100px' data-toggle='modal' data-target='#modalFotos' />";
+                        $arqs_imgs[] = "oct/uploads/".$dirdev.$id."/".$f['image'];
                       }
                       unset($aux,$id_img);
 
@@ -980,7 +1040,7 @@
       <?
           if($acao == "inserir")
           {
-            echo "<a href='oct/ocorrencias.php?filtro_data=".$_GET['filtro_data']."' class='btn btn-default loading'>Voltar</a> ";
+            echo "<a href='oct/".$retorno_origem."' class='btn btn-default loading'>Voltar</a> ";
             if(!$sistema_nao_config)
             {
               echo "<button id='bt_inserir_oc' type='submit' class='btn btn-primary'>Inserir ocorrência</button>";
@@ -991,8 +1051,7 @@
 
       ?>
           <div class="btn-group">
-              <!--<button id="bt_voltar" type="button" class="btn btn-default loading">Voltar</button>-->
-              <a href="oct/ocorrencias.php?filtro_data=<?=$_GET['filtro_data'];?>" class="btn btn-default loading">Voltar</a>
+              <a href='oct/<?=$retorno_origem;?>' class="btn btn-default loading">Voltar</a>
               <div class="btn-group dropup">
     						<!--<a class="btn btn-warning dropdown-toggle" data-toggle="dropdown"><?=$dados['status'];?> <span class="caret"></span></a>-->
                 <button type="button" id="bt_status" class="btn btn-warning dropdown-toggle disable_button" data-toggle="dropdown" ajax="false">Alterar Status <span class="caret"></span></button>
@@ -1074,6 +1133,12 @@
 </div>
 
 <script>
+
+$("#bt_print").click(function(){
+	var vw = window.open('oct/oc_print.php?id_oc=<?=$id;?>&id_workshift=<?=$turno_oc['id'];?>',
+									     'popup',
+								 	     'width=800, height=600, top=10, left=10, scrollbars=no,location=no,status=no');
+});
 
 $("#id_addressbook").change(function(){
   $("#street_number").val('');
@@ -1261,11 +1326,11 @@ var latlon  = new L.latLng(<?=$posicao;?>);
 var map 		= new L.map('map', {attributionControl: false, zoomControl: true}).setView(latlon, zoommap);
 
 
-L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoiam9uc25pZSIsImEiOiJjanBsMnpzbzgwOXVkNDhxbG4xemF0N3gwIn0.Tbsjfe9j7zZsf3HIHI3QGQ', {
+L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoiam9uc25pZSIsImEiOiJjazdvdHg2cmQwY3NoM2VwOXg1YWdzNWN0In0.teqXLAHyVSJwut8hqAMONw', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     maxZoom: 18,
     id: 'mapbox.streets',
-    accessToken: 'pk.eyJ1Ijoiam9uc25pZSIsImEiOiJjanBsMnpzbzgwOXVkNDhxbG4xemF0N3gwIn0.Tbsjfe9j7zZsf3HIHI3QGQ'
+    accessToken: 'pk.eyJ1Ijoiam9uc25pZSIsImEiOiJjazdvdHg2cmQwY3NoM2VwOXg1YWdzNWN0In0.teqXLAHyVSJwut8hqAMONw'
 }).addTo(map);
 
 map.on("dragend",   function (e) {$("#mapinfo").html("MAPA: dragend");	count=0;	});

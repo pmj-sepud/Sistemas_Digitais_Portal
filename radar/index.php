@@ -10,37 +10,33 @@
 
   if($_GET['filtro']=="dia"){
     $ontem = date('Y-m-d',strtotime("-1 days"));
-    $filtro_sql = " EF.pubdate = '".$ontem."'";
+    $filtro_sql = " F.date = '".$ontem."' ";
     $txt_filtro = "Referência: ".formataData($ontem,1);
     logger("Acesso","Radares","Filtro: último dia");
   }else{
-    $filtro_sql = " EF.pubdate >= '".$agora['ano']."-".$agora['mes']."-01'";
+    $filtro_sql = " F.date >= '".$agora['ano']."-".$agora['mes']."-01' ";
     $txt_filtro = "Referência: ".$agora['mes_txt_c']."/".$agora['ano'];
     logger("Acesso","Radares");
   }
 
- $sql  = "SELECT  EF.equipment,  EQ.address, EQ.id,
-                (SUM(F.speed_00_10) + 	SUM(F.speed_11_20) + 	SUM(F.speed_21_30) + 	SUM(F.speed_31_40) +
-                SUM(F.speed_41_50) +	SUM(F.speed_51_60) +	SUM(F.speed_61_70) +	SUM(F.speed_71_80) +
-                SUM(F.speed_81_90) +	SUM(F.speed_91_100)+	SUM(F.speed_100_up))
-                AS contador_veiculos FROM radars.equipment_files as EF
-        LEFT JOIN radars.flows as F       ON F.equipment_files_id = EF.id
-        JOIN      radars.equipments as EQ ON EQ.equipment = EF.equipment
-        WHERE  $filtro_sql
-        GROUP BY EF.equipment, EQ.address, EQ.id
-        ORDER BY 	(SUM(F.speed_00_10) + SUM(F.speed_11_20) + 	SUM(F.speed_21_30) + 	SUM(F.speed_31_40) +
-                   SUM(F.speed_41_50) +	SUM(F.speed_51_60) +	SUM(F.speed_61_70) +	SUM(F.speed_71_80) +
-                   SUM(F.speed_81_90) +	SUM(F.speed_91_100)+	SUM(F.speed_100_up)) DESC";
+      $sql  = "SELECT E.id, E.equipment, E.address,
+              			 max(F.date) as last_file_imported, sum(total) as contador_veiculos
+              FROM radars.radars_flows F, radars.radars_equipments E
+              WHERE $filtro_sql
+              AND F.equipament_id = E.id
+              GROUP BY E.id, E.equipment, E.address
+              ORDER BY E.id ASC";
 
   $res  = pg_query($conn_neogrid,$sql);
   while($d = pg_fetch_assoc($res)){
 
       $eqps[$d['equipment']] = $d;
 
-      $sqlImport  = "SELECT max(pubdate) as data_import FROM radars.equipment_files WHERE equipment = '".$d['equipment']."'";
+    /*  $sqlImport  = "SELECT max(pubdate) as data_import FROM radars.equipment_files WHERE equipment = '".$d['equipment']."'";
       $resImport  = pg_query($conn_neogrid,$sqlImport);
       $infoImport = pg_fetch_assoc($resImport);
       $eqps[$d['equipment']]['last_file_imported'] = $infoImport['data_import'];
+    */
   }
 
 ?>

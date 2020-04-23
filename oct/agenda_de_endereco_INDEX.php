@@ -2,7 +2,7 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
-
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
   $agora = now();
 
 /*
@@ -94,8 +94,8 @@
                     </header>
   									<div class="panel-body">
                     <?
-                        $sql = "SELECT S.name as street_name, A.* FROM sepud.oct_addressbook A
-                                LEFT JOIN sepud.streets S ON S.id = A.id_street
+                        $sql = "SELECT S.name as street_name, A.* FROM ".$schema."oct_addressbook A
+                                LEFT JOIN ".$schema."streets S ON S.id = A.id_street
                                 ".$filtro_sql."
                                 ORDER BY A.name ASC";
                         $res = pg_query($sql)or die("SQL error ".__LINE__);

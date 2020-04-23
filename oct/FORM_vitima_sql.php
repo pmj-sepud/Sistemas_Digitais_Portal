@@ -2,6 +2,7 @@
     session_start();
     require_once("../libs/php/funcoes.php");
     require_once("../libs/php/conn.php");
+    $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
     extract($_POST);
 
@@ -15,7 +16,7 @@
       if($refuse_redir!= ""){ $refuse_redir= "'".$refuse_redir."'";}else{ $refuse_redir= "Null"; }
       if($death       != ""){ $death       = "'".$death."'";       }else{ $death       = "Null"; }
 
-      $sql = "INSERT INTO sepud.oct_victim
+      $sql = "INSERT INTO ".$schema."oct_victim
                           (name,
                            id_events,
                            age,
@@ -50,7 +51,7 @@
 
       /*
 
-      SQL: INSERT INTO sepud.oct_victim (name, id_events, age, description, genre, state, id_vehicle, position_in_vehicle, refuse_help, rg, cpf, mother_name, conducted) VALUES ('Jonathan', '13139', Null, Null, 'Masc', 'Nada', Null, '', 't', '', '', 'Sniecikoski', '')
+      SQL: INSERT INTO ".$schema."oct_victim (name, id_events, age, description, genre, state, id_vehicle, position_in_vehicle, refuse_help, rg, cpf, mother_name, conducted) VALUES ('Jonathan', '13139', Null, Null, 'Masc', 'Nada', Null, '', 't', '', '', 'Sniecikoski', '')
       */
 
       logger("Inserção","OCT - Vítima", "Ocorrência n.".$id);
@@ -72,7 +73,7 @@
       if($refuse_redir!= ""){ $refuse_redir= "'".$refuse_redir."'";}else{ $refuse_redir= "Null"; }
       if($death       != ""){ $death       = "'".$death."'";       }else{ $death       = "Null"; }
 
-      $sql = "UPDATE sepud.oct_victim SET
+      $sql = "UPDATE ".$schema."oct_victim SET
                      name                = '".$name."',
                      age                 = ".$age.",
                      description         = ".$description.",
@@ -101,12 +102,12 @@
     if($acao == "remover")
     {
 
-      $sql  = "SELECT * FROM sepud.oct_victim WHERE id = '".$victim_sel."'";
+      $sql  = "SELECT * FROM ".$schema."oct_victim WHERE id = '".$victim_sel."'";
       $res  = pg_query($sql)or die("Erro ".__LINE__);
       $d    = pg_fetch_assoc($res);
       $vit  = print_r($d,true);
 
-      $sql  = "DELETE FROM sepud.oct_victim WHERE id = '".$victim_sel."'";
+      $sql  = "DELETE FROM ".$schema."oct_victim WHERE id = '".$victim_sel."'";
 
       logger("Remoção","OCT - Vítima", "Ocorrência n.".$id.", Dados: ".$vit);
 

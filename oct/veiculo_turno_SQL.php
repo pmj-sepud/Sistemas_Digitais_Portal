@@ -2,6 +2,7 @@
 session_start();
 require_once("../libs/php/funcoes.php");
 require_once("../libs/php/conn.php");
+$schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
 
 $agora = now();
@@ -22,14 +23,14 @@ extract($_GET);
 if($acao=="associar_passageiro" && $turno != "" && $id_garrison != "" && $id_user_pass != "")
 {
 
-  $sql = "INSERT INTO sepud.oct_rel_garrison_persona (id_garrison, id_user, type) VALUES ('".$id_garrison."', $id_user_pass, 'Passageiro')";
+  $sql = "INSERT INTO ".$schema."oct_rel_garrison_persona (id_garrison, id_user, type) VALUES ('".$id_garrison."', $id_user_pass, 'Passageiro')";
   pg_query($sql)or die("Error ".__LINE__."<br>".$sql);
   header("Location: veiculo_turno_FORM.php?turno=".$turno."&id_garrison=".$id_garrison);
   exit();
 }
 if($acao=="remover_passageiro" && $turno != "" && $id_garrison != "" && $id_user_pass != "")
 {
-  $sql = "DELETE FROM sepud.oct_rel_garrison_persona WHERE id_garrison = '".$id_garrison."' AND id_user = '".$id_user_pass."' AND type = 'Passageiro'";
+  $sql = "DELETE FROM ".$schema."oct_rel_garrison_persona WHERE id_garrison = '".$id_garrison."' AND id_user = '".$id_user_pass."' AND type = 'Passageiro'";
   pg_query($sql)or die("Error ".__LINE__."<br>".$sql);
   header("Location: veiculo_turno_FORM.php?turno=".$turno."&id_garrison=".$id_garrison);
   exit();
@@ -38,9 +39,9 @@ if($acao=="remover_passageiro" && $turno != "" && $id_garrison != "" && $id_user
 
 if($acao=="remover" && $id!="")
 {
-  $sql = "DELETE FROM sepud.oct_rel_garrison_persona          WHERE id_garrison = '".$id."';
-          DELETE FROM sepud.oct_garrison                      WHERE id          = '".$id."';
-          UPDATE      sepud.oct_events SET id_garrison = null WHERE id_garrison = '".$id."';";
+  $sql = "DELETE FROM ".$schema."oct_rel_garrison_persona          WHERE id_garrison = '".$id."';
+          DELETE FROM ".$schema."oct_garrison                      WHERE id          = '".$id."';
+          UPDATE      ".$schema."oct_events SET id_garrison = null WHERE id_garrison = '".$id."';";
   pg_query($sql)or die("Error ".__LINE__."<br>".$sql);
   header("Location: index.php?id_workshift=".$id_workshift);
   exit();
@@ -48,7 +49,7 @@ if($acao=="remover" && $id!="")
 
 if($acao=="Atualizar" && $id != "")
 {
-  $sql = "UPDATE sepud.oct_garrison
+  $sql = "UPDATE ".$schema."oct_garrison
           SET
             opened       = ".$opened.",
             closed       = ".$closed.",
@@ -64,7 +65,7 @@ if($acao=="Atualizar" && $id != "")
 
 if($acao == "Inserir" && $id_user != "" && $id_fleet != "")
 {
-  $sql = "INSERT INTO sepud.oct_garrison(
+  $sql = "INSERT INTO ".$schema."oct_garrison(
                                         id_fleet,
                                         id_workshift,
                                         opened,
@@ -82,7 +83,7 @@ if($acao == "Inserir" && $id_user != "" && $id_fleet != "")
   $res = pg_query($sql)or die("Error ".__LINE__."<br>".$sql);
   $aux = pg_fetch_assoc($res);
   $id  = $aux['id'];
-  $sql = "INSERT INTO sepud.oct_rel_garrison_persona (id_garrison, id_user, type) VALUES ('".$id."', $id_user, 'Motorista')";
+  $sql = "INSERT INTO ".$schema."oct_rel_garrison_persona (id_garrison, id_user, type) VALUES ('".$id."', $id_user, 'Motorista')";
   pg_query($sql)or die("Error ".__LINE__."<br>".$sql);
   header("Location: veiculo_turno_FORM.php?id_garrison=".$id."&turno=".$id_workshift);
   exit();

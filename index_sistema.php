@@ -19,7 +19,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
 		<!-- Web Fonts  -->
-		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800|Shadows+Into+Light" rel="stylesheet" type="text/css">
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800|Shadows+Into+Light" rel="stylesheet" type="text/css">
 
 		<!-- Vendor CSS -->
 		<link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.css" />
@@ -67,6 +67,9 @@
 
 		<link rel='stylesheet' type='text/css' href='https://api.tomtom.com/maps-sdk-for-web/cdn/5.x/5.36.1/maps/maps.css'>
 
+
+
+
 		<style>
 			.select2-container { width: 100% !important;}
 			.select2-selection__rendered {line-height: 32px !important;	}
@@ -84,17 +87,17 @@
 					<? require_once("sistema/menu_top.php"); ?>
 					<div class="inner-wrapper">
 								  <?
-										//if($_GET['modulo'] != "eri"){
-											require_once("sistema/menu_esq.php");
-										//}
+										 if($_SESSION['origem'] != "devops"){ require_once("sistema/menu_esq.php");}
+										 														    else{ require_once("sistema/menu_esq_dev.php");}
 									?>
 								<div id="wrap">
 									<?
-									 	//if($_GET['modulo'] != "eri"){
-											require_once("sistema/conteudo.php");
-									//	}else {
-										//	require_once("eri/index.php");
-									//	}
+									 if($_SESSION['origem'] != "devops")
+									 {
+												require_once("sistema/conteudo.php");
+									 }else{
+												require_once("sistema/conteudo_dev.php");
+										}
 									?>
 								</div>
 					</div>
@@ -137,9 +140,9 @@
 		<script src="assets/vendor/pnotify/pnotify.custom.js"></script>
 		<script src="assets/vendor/intercooler/intercooler-0.4.8.js"></script>
 		<script src="assets/vendor/jquery-mockjax/jquery.mockjax.js"></script>
-		<script src="assets/vendor/gauge/gauge.js"></script>
 
-		<script src="http://oss.maxcdn.com/jquery.form/3.50/jquery.form.min.js"></script>
+
+		<script src="https://oss.maxcdn.com/jquery.form/3.50/jquery.form.min.js"></script>
 
 
 
@@ -171,6 +174,10 @@
 		<!-- Examples -->
 		<!--<script src="assets/javascripts/dashboard/examples.dashboard.js"></script>-->
 		<script src="assets/javascripts/jquery.mask.min.js"></script>
+
+		<script src="https://code.highcharts.com/highcharts.js"></script>
+
+
 
 
 <script>

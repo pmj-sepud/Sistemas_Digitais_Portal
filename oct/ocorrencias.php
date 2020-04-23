@@ -2,6 +2,8 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema   = ($_SESSION['schema']?$_SESSION['schema'].".":"");
+  $oct_form = ($_SESSION['company_configs']['oct_form']!=""?$_SESSION['company_configs']['oct_form']:"FORM.php");
 
   $agora        = now();
   $data_atual   = $agora['data'];
@@ -9,16 +11,45 @@
   //$filtro_ativo = " OR  EV.active = 't'";
   $hoje         = time();
 
+  if($_GET['rotss_nav_filtro_data_reset']=="true"){ unset($_SESSION['rotss_nav_filtro_data']);}
+  $_SESSION['rotss_nav_retorno_origem'] = "ocorrencias.php";
+  //unset($_SESSION['rotss_nav_filtro_data']);
+  //if(isset($_SESSION['rotss_nav_filtro_data']) && $_SESSION['rotss_nav_filtro_data']!=""){ $_GET['filtro_data'] = $_SESSION['rotss_nav_filtro_data']; }
 
   if(isset($_POST['filtro_data']) && $_POST['filtro_data'] != "")
   {
-    $_GET['filtro_data'] = date2mkt($_POST['filtro_data']);
+    $_GET['filtro_data']               = date2mkt($_POST['filtro_data']);
+    $_SESSION['rotss_nav_filtro_data'] = date2mkt($_POST['filtro_data']);
   }
+
+  if(isset($_GET['filtro_data']) && $_GET['filtro_data'] != "")
+  {
+    $anterior                          = $_GET['filtro_data'] - (24*3600);
+    $proximo                           = $_GET['filtro_data'] + (24*3600);
+    $data_atual                        = date("d/m/Y", $_GET['filtro_data']);
+    $data_db                           = date("Y-m-d", $_GET['filtro_data']);
+    $_SESSION['rotss_nav_filtro_data'] = $_GET['filtro_data'];
+    //$filtro_ativo = " OR (EV.id_company = '".$_SESSION['id_company']."' AND EV.active = 't')";
+  }else {
+        if(isset($_SESSION['rotss_nav_filtro_data']) && $_SESSION['rotss_nav_filtro_data']!="")
+        {
+            $anterior                          = $_SESSION['rotss_nav_filtro_data'] - (24*3600);
+            $proximo                           = $_SESSION['rotss_nav_filtro_data'] + (24*3600);
+            $data_atual                        = date("d/m/Y", $_SESSION['rotss_nav_filtro_data']);
+            $data_db                           = date("Y-m-d", $_SESSION['rotss_nav_filtro_data']);
+        }else{
+            $anterior = $hoje - (24*3600);
+            $proximo  = $hoje + (24*3600);
+            //$filtro_ativo = " OR (EV.id_company = '".$_SESSION['id_company']."' AND EV.active = 't')";
+        }
+  }
+
+  if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " OR  EV.active = 't'";*/ }else{ $bt_prox = true; }
 
   if(isset($_POST['filtro_placaveiculo']) && $_POST['filtro_placaveiculo'] != "")
   {
       $sqlPa="SELECT distinct(id_events)
-              FROM sepud.oct_vehicles
+              FROM ".$schema."oct_vehicles
               WHERE
                   id_events is not null
               AND licence_plate = '".$_POST['filtro_placaveiculo']."'";
@@ -28,23 +59,12 @@
       $bt_filtro_placa = true;
   }
 
-  if(isset($_GET['filtro_data']) && $_GET['filtro_data'] != "")
+  if(isset($_POST['filtro_num_oc']) && $_POST['filtro_num_oc'] != "")
   {
-    $anterior   = $_GET['filtro_data'] - (24*3600);
-    $proximo    = $_GET['filtro_data'] + (24*3600);
-    $data_atual = date("d/m/Y", $_GET['filtro_data']);
-    $data_db    = date("Y-m-d", $_GET['filtro_data']);
-    //$filtro_ativo = " OR (EV.id_company = '".$_SESSION['id_company']."' AND EV.active = 't')";
-  }else {
-    $anterior = $hoje - (24*3600);
-    $proximo  = $hoje + (24*3600);
-    //$filtro_ativo = " OR (EV.id_company = '".$_SESSION['id_company']."' AND EV.active = 't')";
+        $filtro_num_oc = $_POST['filtro_num_oc'];
   }
 
-if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " OR  EV.active = 't'";*/ }else{ $bt_prox = true; }
-
-
-
+/*
   $sql = "SELECT
                EVT.name as event_type,
                EV.id,
@@ -62,36 +82,73 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
                C.name  as company,
                C.acron as company_acron,
                S.name  as street_name,
-               (SELECT COUNT(*) FROM sepud.oct_victim                WHERE id_events = EV.ID) as vitimas_encontradas,
-               (SELECT COUNT(*) FROM sepud.oct_rel_events_providence WHERE id_event  = EV.id) as qtd_providencias,
-               (SELECT COUNT(*) FROM sepud.oct_rel_events_images     WHERE id_events = EV.id) as qtd_fotos,
+               (SELECT COUNT(*) FROM ".$schema."oct_victim                WHERE id_events = EV.ID) as vitimas_encontradas,
+               (SELECT COUNT(*) FROM ".$schema."oct_rel_events_providence WHERE id_event  = EV.id) as qtd_providencias,
+               (SELECT COUNT(*) FROM ".$schema."oct_rel_events_images     WHERE id_events = EV.id) as qtd_fotos,
                U.NAME  as user_name,
                --UG.name as user_name_garrison, UG.nickname as nickname_garrison,
 	             --F.plate, F.brand, F.model,
                AB.name  as addressbook_name
          FROM
-               sepud.oct_events     AS  EV
-        --LEFT JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = EV.id_garrison AND GP.type = 'Motorista'
-       	--LEFT JOIN sepud.users 									 UG ON UG.id = GP.id_user
+               ".$schema."oct_events     AS  EV
+        --LEFT JOIN ".$schema."oct_rel_garrison_persona GP ON GP.id_garrison = EV.id_garrison AND GP.type = 'Motorista'
+       	--LEFT JOIN ".$schema."users 									 UG ON UG.id = GP.id_user
 
-       	--LEFT JOIN sepud.oct_garrison 							G ON G.id  = EV.id_garrison
-       	--LEFT JOIN sepud.oct_fleet                 F ON F.id  = G.id_fleet
-             JOIN  sepud.oct_event_type  as EVT ON EV.id_event_type = EVT.id
-             JOIN  sepud.users           as   U ON U.id             = EV.id_user
-         JOIN  sepud.company             as   C ON C.id             = EV.id_company
-         LEFT JOIN sepud.streets         as   S ON S.id             = EV.id_street
-         LEFT JOIN sepud.oct_addressbook as  AB ON AB.id            = EV.id_addressbook
+       	--LEFT JOIN ".$schema."oct_garrison 							G ON G.id  = EV.id_garrison
+       	--LEFT JOIN ".$schema."oct_fleet                 F ON F.id  = G.id_fleet
+             JOIN  ".$schema."oct_event_type  as EVT ON EV.id_event_type = EVT.id
+             JOIN  ".$schema."users           as   U ON U.id             = EV.id_user
+         JOIN  ".$schema."company             as   C ON C.id             = EV.id_company
+         LEFT JOIN ".$schema."streets         as   S ON S.id             = EV.id_street
+         LEFT JOIN ".$schema."oct_addressbook as  AB ON AB.id            = EV.id_addressbook
          WHERE ";
-
+*/
+$sql = "SELECT
+             EVT.name as event_type,
+             EV.id,
+             EV.date,
+             EV.arrival,
+             EV.status,
+             EV.victim_inform,
+             EV.victim_found,
+             EV.active,
+             EV.address_reference,
+             EV.id_street,
+             EV.id_workshift,
+             EV.id_garrison,
+             C.id    as id_company,
+             C.name  as company,
+             C.acron as company_acron,
+             S.name  as street_name,
+             (SELECT COUNT(*) FROM ".$schema."oct_victim                WHERE id_events = EV.ID) as vitimas_encontradas,
+             (SELECT COUNT(*) FROM ".$schema."oct_rel_events_providence WHERE id_event  = EV.id) as qtd_providencias,
+             (SELECT COUNT(*) FROM ".$schema."oct_rel_events_images     WHERE id_events = EV.id) as qtd_fotos,
+             U.NAME  as user_name,
+             AB.name  as addressbook_name
+       FROM
+                 ".$schema."oct_events     as EV
+            JOIN ".$schema."oct_event_type as EVT ON EV.id_event_type = EVT.id
+            JOIN ".$schema."users          as U   ON U.id             = EV.id_user
+            JOIN ".$schema."company        as C   ON C.id             = EV.id_company
+       LEFT JOIN ".$schema."streets         as S   ON S.id             = EV.id_street
+       LEFT JOIN ".$schema."oct_addressbook as AB  ON AB.id            = EV.id_addressbook
+       WHERE ";
          if($filtro_placa != "")
          {
-           $sql .= " EV.id in (".$filtro_placa.")";
-         }else {
-           $sql .= " (EV.id_company = '".$_SESSION['id_company']."' AND EV.date BETWEEN '".$data_db." 00:00:00' AND '".$data_db." 23:59:59')".$filtro_ativo;
+              $sql .= " EV.id in (".$filtro_placa.")";
+         }elseif($filtro_num_oc != ""){
+              $sql .= " EV.id = '".$filtro_num_oc."'";
+         }else{
+
+           $sql .= " (EV.id_company = '".$_SESSION['id_company']."' or EV.id in (SELECT id_event FROM ".$schema."oct_rel_events_providence WHERE id_company_requested = '".$_SESSION['id_company']."' AND id_providence = 53))
+                      AND EV.date BETWEEN '".$data_db." 00:00:00' AND '".$data_db." 23:59:59'".$filtro_ativo;
          }
          $sql .= " ORDER BY EV.id DESC";
 
+
+
  $rs  = pg_query($sql);
+
  $total_oc = 0;
  while($d = pg_fetch_assoc($rs))
  {
@@ -109,7 +166,7 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
  {
    $aux  = implode(",", $eventos_com_providencia);
    $sqlP = "SELECT   P.id_event, P.id_vehicle, T.id, T.area, T.providence
-            FROM     sepud.oct_rel_events_providence P, sepud.oct_providence T
+            FROM     ".$schema."oct_rel_events_providence P, ".$schema."oct_providence T
             WHERE
                      P.id_event in (".$aux.")
                  AND P.id_providence = T.id
@@ -149,6 +206,7 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
 
  function guarnicoes($id_garrison, $id_workshift, $modelo)
  {
+        $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
         if($id_garrison != "")//Buscando uma guarnição especifica
         {
@@ -156,11 +214,11 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
                          F.nickname, F.plate, F.model, F.brand,
                          G.*
                        FROM
-                         sepud.oct_garrison G
-                       LEFT JOIN sepud.oct_fleet F ON F.id = G.id_fleet
+                                 ".$schema."oct_garrison G
+                       LEFT JOIN ".$schema."oct_fleet F ON F.id = G.id_fleet
                        WHERE
                          G.id = '".$id_garrison."'";
-               $res = pg_query($sql)or die("SQL error ".__LINE__);
+               $res = pg_query($sql)or die("SQL error: ".__LINE__."<h4>".$sql."</h4>");
                while($aux = pg_fetch_assoc($res))
                {
                    $guarnicao_empenhada = $aux;
@@ -177,8 +235,8 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
                                  F.plate,
                                  V.*
                                FROM
-                                 sepud.oct_rel_garrison_vehicle V
-                                 JOIN sepud.oct_fleet F ON F.ID = V.id_fleet
+                                      ".$schema."oct_rel_garrison_vehicle V
+                                 JOIN ".$schema."oct_fleet F ON F.ID = V.id_fleet
                                WHERE
                                  V.id_garrison = '".$id_garrison."'";
 
@@ -192,8 +250,8 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
                                 U.registration,
                                 P.*
                               FROM
-                                sepud.oct_rel_garrison_persona P
-                                JOIN sepud.users U ON U.ID = P.id_user
+                                ".$schema."oct_rel_garrison_persona P
+                                JOIN ".$schema."users U ON U.ID = P.id_user
                               WHERE
                                 P.id_garrison = '".$id_garrison."'
                               ORDER BY U.nickname ASC";
@@ -269,7 +327,7 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
       <ol class="breadcrumbs">
         <li><a href="index_sistema.php"><i class="fa fa-home"></i></a></li>
         <li><span class='text-muted'>Aplicações</span></li>
-        <li><span class='text-muted'>Ocorrências</span></li>
+        <li><span class='text-muted'>Ocorrências do dia</span></li>
       </ol>
       <!--<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>-->
     </div>
@@ -284,7 +342,7 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
 
   <header class="panel-heading visible-xs" style="height:120px">
     <div class="text-center">
-        <a href="oct/FORM.php">
+        <a href="oct/<?=$oct_form;?>?filtro_data=<?=$_GET['filtro_data'];?>">
           <button type="button" class="mb-xs mt-xs mr-xs btn  btn-danger"><i class="fa fa-exclamation-triangle"></i> Nova ocorrência</button>
         </a>
 
@@ -324,7 +382,7 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
                         </small>
                     <div class="panel-actions" style='margin-top:0px;'>
 
-                      <a href="oct/FORM.php">
+                      <a href="oct/<?=$oct_form;?>">
                         <button type="button" class="mb-xs mt-xs mr-xs btn  btn-danger"><i class="fa fa-exclamation-triangle"></i> Nova ocorrência</button>
                       </a>
 
@@ -345,7 +403,7 @@ if(!$bt_filtro_placa){ ?>
 
 ?>
   <? if($bt_prox || $bt_filtro_placa){ ?>
-  <a href="oct/ocorrencias.php?filtro_data=">
+  <a href="oct/ocorrencias.php?rotss_nav_filtro_data_reset=true">
     <button type="button" class="mb-xs mt-xs mr-xs btn btn-success">Ir para hoje</button>
   </a>
 <? if(!$bt_filtro_placa){ ?>
@@ -369,6 +427,17 @@ if(!$bt_filtro_placa){ ?>
 									  </div>
                   </header>
 									<div class="panel-body">
+
+<?/*
+    if($_SESSION['id']==1)
+    {
+      print_r_pre($_POST);
+      print_r_pre($sql);
+    }
+  */
+?>
+
+
 
                     <div class="table-responsive">
 
@@ -415,33 +484,49 @@ if(isset($dados) && count($dados))
 
                               <td><small><i class="text-muted">Logradouro:</i></small><br><?=$local;?></td>
                               <td><small><i class="text-muted">Data de abertura:</i></small><br><?=$dt_abertura;?></td>
-                              <td><small><i class="text-muted">Origem:</i></small><br><?=$dados[$i]['company_acron'];?></td>
+                              <td><small><i class="text-muted">Origem:</i></small><br><?=($dados[$i]['company_acron']==$_SESSION['company_acron']?$dados[$i]['company_acron']:"<b class='text-success'>".$dados[$i]['company_acron']."</b>");?></td>
                               <td><small><i class="text-muted">Status:</i></small><br><?=($dados[$i]['status']=="Inativa"?"<b class='text-info'>Inativa</b>":$dados[$i]['status']);?></td>
 
                               <td style="vertical-align: middle;" class="text-center"><?=$prov_adm;?></td>
                               <td style="vertical-align: middle;" class="text-center"><?=$prov_gui;?></td>
                               <td style="vertical-align: middle;" class="text-center"><?=$prov_mat;?></td>
                               <td style="vertical-align: middle;" class="text-center"><?=$qtd_fotos;?></td>
-                              <td style="vertical-align: middle;" class="text-center"><a href='oct/FORM.php?id=<?=$dados[$i]['id'];?>' class='mb-xs mt-xs mr-xs btn btn-default loading2'><i class='fa fa-pencil'></i></a></td>
+                              <td style="vertical-align: middle;" class="text-center"><a href='oct/<?=$oct_form;?>?id=<?=$dados[$i]['id'];?>' class='mb-xs mt-xs mr-xs btn btn-default loading2'><i class='fa fa-pencil'></i></a></td>
                             </tr>
                             <tr>
                               <td colspan='2'><small><i class="text-muted">Responsável:</i></small><br><?=$dados[$i]['user_name'];?></td>
                               <td colspan='7'>
                                 <?
-                                  unset($passenger, $garrison_txt, $guarnicao_empenhada, $str, $info);
-                                  if($dados[$i]['id_garrison']!="")
-                                  {
+                                        unset($passenger, $garrison_txt, $guarnicao_empenhada, $str, $info);
+                                        $sql = "SELECT
+                                                	U.name, U.nickname
+                                                FROM
+                                                	".$schema."oct_rel_events_providence P
+                                                JOIN ".$schema."users U ON U.id = P.id_user_resp
+                                                WHERE
+                                                	P.id_providence IN (52)
+                                                	AND P.id_event = '".$dados[$i]['id']."'
+                                                ORDER BY
+                                                	P.opened_date DESC
+                                                	LIMIT 1";
 
-                                        unset($guarnicao_empenhada);
-                                        $guarnicao_empenhada = guarnicoes($dados[$i]['id_garrison'],"","resumido");
-                                        echo "<small><i class='text-muted'>Guarnição empenhada:</i></small> ";
-                                        echo "<small><b>Grupamento ".strtoupper($guarnicao_empenhada['name'])."</b></small><br>";
-                                        echo $guarnicao_empenhada['info'];
-
-                                 }else{
-                                   echo  "<small><i class='text-danger'>Nenhuma guarnição empenhada.</i></small>";
-                                 }
-
+                                        $resResp = pg_query($sql)or die("SQl Error ".$sql);
+                                        if(pg_num_rows($resResp))
+                                        {
+                                            $nomeResponsavel = pg_fetch_assoc($resResp);
+                                            echo "<small><i class='text-muted'>Responsável atual:</i></small><br>";
+                                            echo "<small><b>".strtoupper($nomeResponsavel['name'])."</b></small><br>";
+                                        }elseif($dados[$i]['id_garrison']!="")
+                                        {
+                                          unset($guarnicao_empenhada);
+                                          $guarnicao_empenhada = guarnicoes($dados[$i]['id_garrison'],"","resumido");
+                                          echo "<small><i class='text-muted'>Guarnição empenhada:</i></small> ";
+                                          echo "<small><b>Grupamento ".strtoupper($guarnicao_empenhada['name'])."</b></small><br>";
+                                          echo $guarnicao_empenhada['info'];
+                                        }else
+                                        {
+                                            echo  "<small><i class='text-danger'>Nenhuma guarnição designada ou responsável empenhado.</i></small>";
+                                        }
                                 ?>
                               </td>
                             </tr>
@@ -477,7 +562,7 @@ if(isset($dados_baixados) && count($dados_baixados))
 
       ?>
       <tr>
-          <td rowspan="3" style="vertical-align: middle;" class="text-center warning"><?=$dados[$i]['id']; if($dados[$i]['id_workshift']!=""){ echo ".".$dados[$i]['id_workshift'];}?></td>
+          <td rowspan="3" style="vertical-align: middle;" class="text-center warning"><a id='<?=$dados[$i]['id'];?>'></a><?=$dados[$i]['id']; if($dados[$i]['id_workshift']!=""){ echo ".".$dados[$i]['id_workshift'];}?></td>
           <td colspan="8"><b><?=$dados[$i]['event_type'];?></b></td>
         </tr>
         <tr>
@@ -493,30 +578,47 @@ if(isset($dados_baixados) && count($dados_baixados))
           ?>
           <td><small><i class="text-muted">Logradouro:</i></small><br><?=$local;?></td>
           <td><small><i class="text-muted">Data de abertura:</i></small><br><?=$dt_abertura;?></td>
-          <td><small><i class="text-muted">Origem:</i></small><br><?=$dados[$i]['company_acron'];?></td>
+          <td><small><i class="text-muted">Origem:</i></small><br><?=($dados[$i]['company_acron']==$_SESSION['company_acron']?$dados[$i]['company_acron']:"<b class='text-warning'>".$dados[$i]['company_acron']."</b>");?></td>
           <td><small><i class="text-muted">Status:</i></small><br><?=$dados[$i]['status'];?></td>
 
           <td style="vertical-align: middle;" class="text-center"><?=$prov_adm;?></td>
           <td style="vertical-align: middle;" class="text-center"><?=$prov_gui;?></td>
           <td style="vertical-align: middle;" class="text-center"><?=$prov_mat;?></td>
           <td style="vertical-align: middle;" class="text-center"><?=$qtd_fotos;?></td>
-          <td style="vertical-align: middle;" class="text-center"><a href='oct/FORM.php?id=<?=$dados[$i]['id'];?>' class='mb-xs mt-xs mr-xs btn btn-default loading2'><i class='fa fa-pencil'></i></a></td>
+          <td style="vertical-align: middle;" class="text-center"><a href='oct/<?=$oct_form;?>?id=<?=$dados[$i]['id'];?>' class='mb-xs mt-xs mr-xs btn btn-default loading2'><i class='fa fa-pencil'></i></a></td>
         </tr>
         <tr>
           <td colspan='2'><small><i class="text-muted">Responsável:</i></small><br><?=$dados[$i]['user_name'];?></td>
           <td colspan='7'>
             <?
-                    if($dados[$i]['id_garrison']!="")
-                    {
+                      $sql = "SELECT
+                                U.name, U.nickname
+                              FROM
+                                ".$schema."oct_rel_events_providence P
+                              JOIN ".$schema."users U ON U.id = P.id_user_resp
+                              WHERE
+                                P.id_providence IN (52)
+                                AND P.id_event = '".$dados[$i]['id']."'
+                              ORDER BY
+                                P.opened_date DESC
+                                LIMIT 1";
+
+                      $resResp = pg_query($sql)or die("SQl Error ".$sql);
+                      if(pg_num_rows($resResp))
+                      {
+                          $nomeResponsavel = pg_fetch_assoc($resResp);
+                          echo "<small><i class='text-muted'>Responsável atual:</i></small><br>";
+                          echo "<small><b>".strtoupper($nomeResponsavel['name'])."</b></small><br>";
+                      }elseif($dados[$i]['id_garrison']!="")
+                      {
                           unset($guarnicao_empenhada);
                           $guarnicao_empenhada = guarnicoes($dados[$i]['id_garrison'],"","resumido");
                           echo "<small><i class='text-muted'>Guarnição empenhada:</i></small> ";
                           echo "<small><b>Grupamento ".strtoupper($guarnicao_empenhada['name'])."</b></small><br>";
                           echo $guarnicao_empenhada['info'];
-
-                    }else{
-                          echo  "<small><i class='text-danger'>Nenhuma guarnição empenhada.</i></small>";
-                    }
+                      }else{
+                          echo  "<small><i class='text-danger'>Nenhuma guarnição designada ou responsável empenhado.</i></small>";
+                      }
             ?>
           </td>
         </tr>
@@ -573,7 +675,6 @@ if(isset($dados_baixados) && count($dados_baixados))
 </section>
 
 <script>
-
 $("#bt_submit").click(function(){
     $('#modalFiltro').modal('hide');
     $('body').removeClass('modal-open');

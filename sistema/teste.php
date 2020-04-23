@@ -30,9 +30,32 @@ height: 34px !important;
   <div class="row">
         <div class="col-md-12">
             <?
-                  $agora = now();
-                  print_r_pre($agora);
+            $agora = now();
+
+
+
+            $schema     = getenv('SCHEMA');
+            $schema_dev = getenv('SCHEMA_DEV');
+            $waze_url   = getenv('WAZE_URL');
+
+            //print_r_pre($schema);
+            //print_r_pre($schema_dev);
+            print_r_pre($waze_url);
+            $waze_url = base64_decode($waze_url);
+            print_r_pre($waze_url);
+            //print_r_pre($_SESSION);
+
+
+
+//            $url   = "http://api.openweathermap.org/data/2.5/weather?q=Joinville,sc,br,uk&APPID=f212dca3c6138121d51e6c4d1f6fe89e&mode=json&units=metric&lang=pt_br";
+            echo "<br>- Buscando dados: ";
+            $json  = file_get_contents($waze_url);
+            $d = json_decode(json_encode(json_decode($json)), True); //Conversão Obj to array
+            echo  "ok.<br>";
+            print_r_pre($d);
+
             ?>
+
 
         </div>
   </div>
@@ -40,3 +63,40 @@ height: 34px !important;
 </section>
 <script>
 </script>
+<?
+
+function makeSql($table, $fieldvals, $type, $returning="")
+{
+    switch ($type) {
+      case 'ins':
+              foreach ($fieldvals as $key => $val)
+              {
+                $keys[] = $key;
+                $vals[] = ($val!=""?"'".$val."'":"Null");
+              }
+
+              $sql = "INSERT INTO ".$table." (".implode(", ", $keys).") VALUES (".implode(", ",$vals).") ".($returning!=""?"RETURNING ".$returning:"");
+      break;
+      case 'upd':
+              foreach ($fieldvals as $key => $val)
+              {
+                if($val!="")
+                {
+                  $upds[] = $key."='".$val."'";
+                }else {
+                  $upds[] = $key."=Null";
+                }
+              }
+              if($returning != "")
+              {
+                $sql = "UPDATE ".$table." SET ".implode(", ",$upds)." WHERE ".$returning;
+              }
+      break;
+
+      default:
+        break;
+    }
+  return $sql;
+}
+
+?>

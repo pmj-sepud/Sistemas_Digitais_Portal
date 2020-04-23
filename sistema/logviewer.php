@@ -3,6 +3,7 @@ session_start();
 session_start();
 require_once("../libs/php/funcoes.php");
 require_once("../libs/php/conn.php");
+$schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
 $filtro = ($_GET['filtro']!=""?$_GET['filtro']:"todos");
 $class_filtro[$filtro] = "active";
@@ -25,18 +26,20 @@ logger("Acesso","Logs");
 <?
 	$agora = now();
 		$sql = "SELECT U.name, L.id_user, L.timestamp, L.ip, L.module, L.action, L.obs
-						FROM sepud.logs L
-						LEFT JOIN sepud.users U ON U.id = L.id_user
+						FROM ".$schema."logs L
+						LEFT JOIN ".$schema."users U ON U.id = L.id_user
 						--WHERE id_user = 110
 						--WHERE L.obs like '%Baixou o%'
-						WHERE L.module <> 'Logs'
-						AND L.timestamp >= '".$agora['datasrv']." 00:00:00'
+						WHERE
+						--L.module <> 'Logs' AND
+						L.timestamp >= '".$agora['datasrv']." 00:00:00'
+						--L.timestamp >= '2019-11-06 00:00:00'
 						ORDER BY L.timestamp DESC
 						--LIMIT 2500";
 	$rs  = pg_query($sql)or die("Erro ".__LINE__);
 	while($aux = pg_fetch_assoc($rs)){ $d[] = $aux; }
 	unset($sql,$rs);
-	if(count($d)){
+	if(isset($d) && count($d)){
 ?>
 
 <table class="table table-striped" id="tabela_dinamica">

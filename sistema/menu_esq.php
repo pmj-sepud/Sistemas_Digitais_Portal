@@ -46,7 +46,8 @@ require_once("libs/php/conn.php");
                               <li class="nav-parent">
                   						    <a>WAZE</a>
                   							  <ul class="nav nav-children">
-                                        <li><a href="waze/index.php" menuautoclose="true">Dashboard</a></li>
+                                        <li><a href="waze/index.php"           menuautoclose="true">Dashboard</a></li>
+                                        <li><a href="waze/evolucao_diaria.php" menuautoclose="true">Evolução Diária</a></li>
                                         <li><a href="waze/mapa.php" menuautoclose="true">Mapa</a></li>
                   				        </ul>
                   						</li>
@@ -58,7 +59,8 @@ require_once("libs/php/conn.php");
                       <li class="nav-parent">
           						    <a>TOMTOM</a>
           							  <ul class="nav nav-children">
-                                <li><a href="tomtom/index.php" menuautoclose="true">Dashboard</a></li>
+                                <li><a href="tomtom/trafficflow.php" menuautoclose="true">Fluxo de tráfego</a></li>
+                                <li><a href="tomtom/jams.php" menuautoclose="true">Congestionamento</a></li>
           				        </ul>
           						</li>
                     <? }else{ ?>
@@ -103,11 +105,13 @@ require_once("libs/php/conn.php");
                       <li class="nav-parent">
                           <a><span>Operação</span></a>
                           <ul class="nav nav-children">
-                              <li><a href="oct/ocorrencias.php" menuautoclose="true">Ocorrências</a></li>
+                              <li><a href="oct/ocorrencias.php?rotss_nav_filtro_data_reset=true" menuautoclose="true">Ocorrências do dia</a></li>
+                              <li><a href="oct/ocorrencias_todas.php" menuautoclose="true">Ocorrências Abertas</a></li>
                               <li><a href="oct/eventos_administrativos_INDEX.php" menuautoclose="true">Diário administrativo</a></li>
 
-                              <? if($_SESSION['id']==1){ ?>
-                                  <li><a href="oct/guarnicao_USERFORM.php" menuautoclose="true">Guarnição</a></li>
+                              <? if($_SESSION['id']==1|| $_SESSION['id']==10){ ?>
+                                  <li><a href="oct/dashboard_oc.php" menuautoclose="true">Dashboard - Ocorrências <sup><small>(DEV)</small></sup></a></li>
+                                  <li><a href="oct/guarnicao_USERFORM.php" menuautoclose="true">Guarnição <sup><small>(DEV)</small></sup></a></li>
                               <? } ?>
                           </ul>
                       </li>
@@ -126,8 +130,10 @@ require_once("libs/php/conn.php");
                               if(check_perm("3_15"))//ROTSS - Relatórios
                               {
                                   echo "<li><a href='oct/dashboard.php' menuautoclose='true'>Evolução mensal</a></li>";
+                                  echo "<li><a href='oct/rel_export_rotss_csv.php' menuautoclose='true'>Exportação CSV</a></li>";
                               }else{
                                 echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Evolução mensal</a></li>";
+                                echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Exportação CSV</a></li>";
                               }
                               if($_SESSION['id_company']==8)
                               {
@@ -167,9 +173,60 @@ require_once("libs/php/conn.php");
             </ul>
           </li>
 
+          <li class="nav-parent">
+            <a><span>Monitoramento</span></a>
+            <ul class="nav nav-children">
+                <?
+                    if(check_perm("6_17"))    { echo "<li><a href='monitoramento/index.php' menuautoclose='true'>Configurações</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Configurações</a></li>"; }
+                    if(check_perm("6_18"))    { echo "<li><a href='#' menuautoclose='true' onClick='abre_monitoramento();'>Executar</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Executar</a></li>"; }
+                ?>
             </ul>
           </li>
 
+            </ul>
+          </li>
+<script>
+function abre_monitoramento()
+{
+    	var params = ['height='+screen.height,'width='+(screen.width-10), 'fullscreen=yes'].join(',');
+	    var newTab =window.open('','_blank',params);
+      newTab.location = "../monitoramento/exec.php";
+      newTab.focus();
+}
+function fullscreen() {
+var isInFullScreen = (document.fullscreenElement && document.fullscreenElement !== null) ||
+(document.webkitFullscreenElement && document.webkitFullscreenElement !== null) ||
+(document.mozFullScreenElement && document.mozFullScreenElement !== null) ||
+(document.msFullscreenElement && document.msFullscreenElement !== null);
+
+var docElm = document.documentElement;
+if (!isInFullScreen) {
+if (docElm.requestFullscreen) {
+    docElm.requestFullscreen();
+} else if (docElm.mozRequestFullScreen) {
+    docElm.mozRequestFullScreen();
+} else if (docElm.webkitRequestFullScreen) {
+    docElm.webkitRequestFullScreen();
+} else if (docElm.msRequestFullscreen) {
+    docElm.msRequestFullscreen();
+}
+$("#icofulls").removeClass('fa-expand').addClass('fa-compress');
+$("#linkfulls").attr('title','Tela normal');
+} else {
+if (document.exitFullscreen) {
+    document.exitFullscreen();
+} else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+} else if (document.mozCancelFullScreen) {
+    document.mozCancelFullScreen();
+} else if (document.msExitFullscreen) {
+    document.msExitFullscreen();
+}
+$("#icofulls").removeClass('fa-compress').addClass('fa-expand');
+$("#linkfulls").attr('title','Tela cheia');
+}
+}
+</script>
 
 <!--
 

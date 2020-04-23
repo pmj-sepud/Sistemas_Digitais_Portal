@@ -2,6 +2,7 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
   $acao = "inserir";
   logger("Acesso","Novo usuário");
 
@@ -76,7 +77,7 @@
                           <div class="col-md-10">
                             <select class="form-control" id="id_company" name="id_company">
                                 <?
-                                    $sql = "SELECT * FROM sepud.company ORDER BY name ASC";
+                                    $sql = "SELECT * FROM ".$schema."company ORDER BY name ASC";
                                     $res = pg_query($sql)or die();
                                     while($d = pg_fetch_assoc($res))
                                     {

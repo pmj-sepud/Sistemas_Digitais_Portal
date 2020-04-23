@@ -2,6 +2,7 @@
     session_start();
     require_once("../libs/php/funcoes.php");
     require_once("../libs/php/conn.php");
+    $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
     extract($_POST);
 
@@ -10,7 +11,7 @@
     {
       unset($_POST['acao'],$_POST['id']);
       $arr = codificar(json_encode($_POST),'c');
-      $sql = "INSERT INTO sepud.users_rel_perm_user (id_user, value) VALUES ('".$id."', '".$arr."')
+      $sql = "INSERT INTO ".$schema."users_rel_perm_user (id_user, value) VALUES ('".$id."', '".$arr."')
               ON CONFLICT (id_user) DO UPDATE SET value = excluded.value";
       pg_query($sql)or die("SQL Error ".__LINE__."<br>Query: ".$sql);
       logger("Permissões","Usuário", "Atualizou as permissões de ID: ".$id);
@@ -25,7 +26,7 @@
       if(trim($email) == ""){ $email = "Null"; }else{ $email = "'".$email."'";}
       if($initial_workshift_position == ""){ $initial_workshift_position = "Null"; }else{ $initial_workshift_position = "'".$initial_workshift_position."'";}
 
-      $sql =  "INSERT INTO sepud.users(
+      $sql =  "INSERT INTO ".$schema."users(
                       name,
                       email,
                       password,
@@ -38,7 +39,8 @@
                       in_ativaction,
                       nickname,
                       registration,
-                      initial_workshift_position)
+                      initial_workshift_position,
+                      work_status)
               VALUES (
                      '".$name."',
                      ".$email.",
@@ -52,7 +54,8 @@
                     'f',
                     '".$nickname."',
                     ".$registration.",
-                    ".$initial_workshift_position.") RETURNING id";
+                    ".$initial_workshift_position.",
+                    '".$work_status."') RETURNING id";
        $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
        $aux = pg_fetch_assoc($res);
 
@@ -78,7 +81,7 @@
         $workshift_subgroup             = ($workshift_subgroup             != "" ? "'".$workshift_subgroup."'"               :"Null");
 
 
-        $sql =  "UPDATE sepud.users SET
+        $sql =  "UPDATE ".$schema."users SET
                         workshift_group_time_init      = ".$workshift_group_time_init.",
                         workshift_group_time_finish    =  ".$workshift_group_time_finish.",
                         workshift_group                = ".$workshift_group.",
@@ -96,7 +99,8 @@
                         active       = '".$active."',
                         nickname     = '".$nickname."',
                         registration = ".$registration.",
-                        initial_workshift_position = ".$initial_workshift_position."
+                        initial_workshift_position = ".$initial_workshift_position.",
+                        work_status  = '".$work_status."'
                   WHERE id = '".$id."'";
       pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
       logger("Atualização","Usuário","Atualizou dados do usuário: [".$id."] - ".$name);
@@ -108,7 +112,7 @@
 
     if($acao == "remover" && $id != "")
     {
-      $sql = "UPDATE sepud.users SET active = false WHERE id = '".$id."'";
+      $sql = "UPDATE ".$schema."users SET active = false WHERE id = '".$id."'";
       pg_query($sql)or die("Erro ".__LINE__);
       logger("Baixa","Usuário","Baixou o usuário: [".$id."]");
       header("Location: index.php");

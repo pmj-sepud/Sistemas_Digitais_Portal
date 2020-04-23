@@ -2,8 +2,9 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
-  $sql = "SELECT * FROM sepud.oct_workshift WHERE id_company = '".$_SESSION['id_company']."' ORDER BY opened DESC";
+  $sql = "SELECT * FROM ".$schema."oct_workshift WHERE id_company = '".$_SESSION['id_company']."' ORDER BY opened DESC";
   $rs  = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
 
   $turno_aberto = false;

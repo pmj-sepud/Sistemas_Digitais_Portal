@@ -1,4 +1,5 @@
 <?php
+session_start();
 //////////////////////////////////////////////////////////////////////////////
 if(getenv("DB_HOST")==""){ setenvs(); }
 function setenvs()
@@ -77,12 +78,13 @@ function codificar($dados,$funcao,$debug=0)
 
 function logger($action, $module = "Null", $obs = "Null")
 {
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"sepud.");
   if($module != "Null"){ $module = "'".$module."'"; }
 
   $id_user = ($_SESSION['id']!=""?$_SESSION['id']:"Null");
 
   $agora = now();
-	$sql = "INSERT INTO sepud.logs(ip, id_user, module, action, timestamp, obs)
+	$sql = "INSERT INTO ".$schema."logs(ip, id_user, module, action, timestamp, obs)
 					VALUES ('".$_SERVER['REMOTE_ADDR']."', $id_user, ".$module.",'".$action."','".$agora['datatimesrv']."', '".$obs."')";
 	pg_query($sql)or die("Erro ".__LINE__."<hr>".pg_last_error()."<hr>".$sql);
 }
@@ -113,11 +115,14 @@ function now($ret = "todos"){
 	$data['data']       = $data['dia'].'/'.$data['mes'].'/'.$data['ano'];
 	$data['datasrv']    = $data['ano'].'-'.$data['mes'].'-'.$data['dia'];
   $data['datatimesrv']= $data['ano'].'-'.$data['mes'].'-'.$data['dia']." ".$data['hora'].':'.$data['min'].':'.$data['seg'];
-	$data['hm']         = $data['hora'].':'.$data['min'];
+  $data['datatimesrv_utc']   = gmdate("Y-m-d H:i:s", $mkt);
+  $data['hm']         = $data['hora'].':'.$data['min'];
 	$data['hms']        = $data['hora'].':'.$data['min'].':'.$data['seg'];
 	$data['dthm']       = $data['data']." ".$data['hm'];
 	$data['dthms']      = $data['data']." ".$data['hm'].":".$data['seg'];
 	$data['mkt']        = $mkt;
+
+  $data['millis']     = $mkt*1000;
 	$data['ultimo_dia'] = date('t',$mkt);
   $data['dia_semana'] = date('N',$mkt);
 
@@ -175,6 +180,7 @@ function mkt2date($mkt){
       $data['data']       = $data['dia'].'/'.$data['mes'].'/'.$data['ano'];
       $data['datasrv']    = $data['ano'].'-'.$data['mes'].'-'.$data['dia'];
       $data['datatimesrv']= $data['ano'].'-'.$data['mes'].'-'.$data['dia']." ".$data['hora'].':'.$data['min'].':'.$data['seg'];
+      $data['datatimesrv_utc']   = gmdate("Y-m-d H:i:s", $mkt);
       $data['hm']         = $data['hora'].':'.$data['min'];
       $data['hms']        = $data['hora'].':'.$data['min'].':'.$data['seg'];
       $data['dthm']       = $data['data']." ".$data['hm'];

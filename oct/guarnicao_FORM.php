@@ -2,7 +2,7 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
-
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
   $agora = now();
 
   $id_workshift = $_GET['id_workshift'];
@@ -13,14 +13,14 @@
       logger("Acesso - Inserção","OCT - Guarnição");
   }else{
     $acao  = "Atualizar";
-    $sql   = "SELECT * FROM sepud.oct_garrison G WHERE id = '".$id_garrison."'";
+    $sql   = "SELECT * FROM ".$schema."oct_garrison G WHERE id = '".$id_garrison."'";
     $res   = pg_query($sql)or die("SQL Error ".__LINE__);
     $dados = pg_fetch_assoc($res);
 
     //Listando todos os colaboradores do turno atual//
     $sql = "SELECT DISTINCT U.id, U.name, U.nickname, U.registration
-            FROM sepud.oct_rel_workshift_persona W
-            JOIN sepud.users U ON U.id = W.id_person
+            FROM ".$schema."oct_rel_workshift_persona W
+            JOIN ".$schema."users U ON U.id = W.id_person
             WHERE W.id_shift = '".$id_workshift."' AND W.status in ('ativo', 'HE-Compensação', 'Serviços') ORDER BY U.nickname ASC";
     $res = pg_query($sql)or die("<option>SQL ERROR ".__LINE__."</option>");
 
@@ -34,8 +34,8 @@
                  F.plate, F.type, F.model, F.brand, F.nickname,
                  G.*
                FROM
-                sepud.oct_rel_garrison_vehicle G
-               JOIN sepud.oct_fleet F ON F.id = G.id_fleet
+                ".$schema."oct_rel_garrison_vehicle G
+               JOIN ".$schema."oct_fleet F ON F.id = G.id_fleet
                WHERE
                 id_garrison = '".$id_garrison."'
                ORDER BY F.brand DESC, F.model ASC, F.nickname ASC";
@@ -57,8 +57,8 @@
                 	G.*,
                 	U.name, U.nickname, U.registration
                 FROM
-                	sepud.oct_rel_garrison_persona G
-                JOIN sepud.users U ON U.id = G.id_user
+                	".$schema."oct_rel_garrison_persona G
+                JOIN ".$schema."users U ON U.id = G.id_user
                 WHERE
                 	id_garrison = '".$id_garrison."'";
     $resPer   = pg_query($sqlPer)or die("SQL error ".__LINE__."<br>Query: ".$sqlPer);
@@ -210,7 +210,7 @@
                                             echo "</select></div>";
 
                                         }else{
-                                            $sql = "SELECT * FROM sepud.oct_fleet WHERE id_company = '".$_SESSION['id_company']."' ORDER BY brand DESC, model ASC, nickname ASC";
+                                            $sql = "SELECT * FROM ".$schema."oct_fleet WHERE id_company = '".$_SESSION['id_company']."' ORDER BY brand DESC, model ASC, nickname ASC";
                                             $res = pg_query($sql)or die("Erro ".__LINE__);
                                             while($d = pg_fetch_assoc($res)){ $autos[$d['type']][] = $d;}
 

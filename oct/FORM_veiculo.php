@@ -2,6 +2,7 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
   $id       = $_GET['id'];
   $veic_sel = $_GET['veic_sel'];
@@ -10,7 +11,7 @@
 
   if($veic_sel)
   {
-    $sql   = "SELECT * FROM sepud.oct_vehicles WHERE id = '".$veic_sel."'";
+    $sql   = "SELECT * FROM ".$schema."oct_vehicles WHERE id = '".$veic_sel."'";
     $resV  = pg_query($sql)or die("Erro ".__LINE__);
     $dados = pg_fetch_assoc($resV);
     $acao  = "atualizar";
@@ -76,7 +77,7 @@
         <select id="tipo_veiculo" name="tipo_veiculo" class="form-control">
           <option value="">- - -</option>
           <?
-              $sql = "SELECT * FROM sepud.oct_vehicle_type ORDER BY name ASC";
+              $sql = "SELECT * FROM ".$schema."oct_vehicle_type ORDER BY name ASC";
               $res = pg_query($sql) or die();
               while($t = pg_fetch_assoc($res))
               {
@@ -147,8 +148,8 @@
                                 	DISTINCT WP.id_shift AS id_workshift,
                                 	U.name, U.nickname, U.registration, U.id as id_user
                                 FROM
-                                	sepud.oct_rel_workshift_persona WP
-                                JOIN sepud.users U ON U.id = WP.id_person
+                                	".$schema."oct_rel_workshift_persona WP
+                                JOIN ".$schema."users U ON U.id = WP.id_person
                                 WHERE
                                 	id_shift = '".$_GET['id_workshift']."'
                                 ORDER BY U.nickname ASC";
@@ -228,10 +229,10 @@
                   $sqlv = "SELECT
                             	VE.*,
                               T.name as vehicle_type,
-                            	(SELECT COUNT ( * ) FROM sepud.oct_victim WHERE id_vehicle = VE.ID) AS qtd_vitimas
+                            	(SELECT COUNT ( * ) FROM ".$schema."oct_victim WHERE id_vehicle = VE.ID) AS qtd_vitimas
                             FROM
-                            	sepud.oct_vehicles VE
-                              LEFT JOIN sepud.oct_vehicle_type T ON T.id = VE.id_vehicle_type
+                            	".$schema."oct_vehicles VE
+                              LEFT JOIN ".$schema."oct_vehicle_type T ON T.id = VE.id_vehicle_type
                             WHERE
                             	id_events = '".$id."'
                             ORDER BY id ASC";

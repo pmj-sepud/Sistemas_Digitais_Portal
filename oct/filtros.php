@@ -8,6 +8,16 @@
 
             <div class="row" style="margin-bottom:10px">
                 <div class="form-group">
+                    <label class="col-md-3 control-label" for="filtro_num_oc">Nº da ocorrência:</label>
+                    <div class="col-md-8">
+                        <input type="number" name="filtro_num_oc" id="filtro_num_oc" class="form-control">
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row" style="margin-bottom:10px">
+                <div class="form-group">
                     <label class="col-md-3 control-label" for="filtro_data">Data:</label>
                     <div class="col-md-8">
                         <input type="text" name="filtro_data" id="filtro_data" class="form-control">

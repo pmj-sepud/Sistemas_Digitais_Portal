@@ -2,6 +2,7 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
   $id         = $_GET['id'];
   $agora      = now();
@@ -11,11 +12,10 @@
   if($_GET['id_providence'])
   {
     $acao  = "atualizar";
-    $sql   = "SELECT * FROM sepud.oct_rel_events_providence WHERE id = '".$_GET['id_providence']."'";
+    $sql   = "SELECT * FROM ".$schema."oct_rel_events_providence WHERE id = '".$_GET['id_providence']."'";
     $res   = pg_query($sql)or die("SQL Error ".__LINE__);
     $dados = pg_fetch_assoc($res);
   }else{
-
     $acao       = "inserir";
   }
 
@@ -53,25 +53,25 @@
                  <label class="control-label">Providência:</label>
                  <select id="id_providence_type" name="id_providence_type" class="form-control">
                     <?
-                          $sql = "SELECT * FROM sepud.oct_providence ORDER BY area, providence ASC";
+                          $sql = "SELECT * FROM ".$schema."oct_providence ORDER BY area, providence ASC";
                           $res = pg_query($sql)or die("Erro ".__LINE__);
                           while($p = pg_fetch_assoc($res))
                           {
                             $provs[$p['area']][] = $p;
                           }
-
                           foreach ($provs as $area => $prov)
                           {
-                            echo "<optgroup label='$area'>";
+                            echo "<optgroup label='".$area."'>";
                               for($i=0;$i<count($prov);$i++)
                               {
-
-                                if(isset($dados['id_providence']) && $dados['id_providence']==$prov[$i]["id"]){ $sel = "selected"; }
-                                else {
-                                  if($prov[$i]["id"] == 26){ $sel = "selected"; }else{ $sel = ""; }
-                                }
-
-                                echo "<option value='".$prov[$i]["id"]."' $sel>".$prov[$i]["providence"]."</option>";
+                                  $sel = "";
+                                  if(isset($dados['id_providence']))
+                                  {
+                                      if($dados['id_providence']==$prov[$i]["id"]){$sel="selected";}else{$sel="";}
+                                  }else{
+                                      if($prov[$i]["id"]==26){$sel="selected";}else{$sel="";}
+                                  }
+                                  echo "<option value='".$prov[$i]["id"]."' $sel>".$prov[$i]["providence"]."</option>";
                               }
                             echo "</optgroup>";
                           }
@@ -92,7 +92,7 @@
                  <select class="form-control select2" name="id_user_resp">
                     <option value="">- - -</option>
                     <?
-                        $sql = "SELECT id, nickname, name, registration FROM sepud.users U WHERE id_company = '".$_SESSION['id_company']."' AND active = 't' ORDER BY name ASC";
+                        $sql = "SELECT id, nickname, name, registration FROM ".$schema."users U WHERE id_company = '".$_SESSION['id_company']."' AND active = 't' ORDER BY name ASC";
                         $res = pg_query($sql)or die("<option value=''>Erro: ".$sql."</option>");
                         while($u = pg_fetch_assoc($res))
                         {
@@ -116,8 +116,8 @@
                  F.nickname, F.plate, F.model, F.brand,
                  G.*
                FROM
-                 sepud.oct_garrison G
-               LEFT JOIN sepud.oct_fleet F ON F.id = G.id_fleet
+                 ".$schema."oct_garrison G
+               LEFT JOIN ".$schema."oct_fleet F ON F.id = G.id_fleet
                WHERE
                  G.id_workshift = '".$turno_aberto['id']."' AND G.closed is null AND G.name is not null";
        $res = pg_query($sql)or die("SQL error ".__LINE__);
@@ -133,10 +133,10 @@
                  F.plate,
                  V.*
                FROM
-                 sepud.oct_rel_garrison_vehicle V
-                 JOIN sepud.oct_fleet F ON F.ID = V.id_fleet
+                 ".$schema."oct_rel_garrison_vehicle V
+                 JOIN ".$schema."oct_fleet F ON F.ID = V.id_fleet
                WHERE
-                 V.id_garrison IN (SELECT G.ID FROM sepud.oct_garrison G WHERE G.id_workshift = '".$turno_aberto['id']."' AND G.closed is null AND G.name is not null)";
+                 V.id_garrison IN (SELECT G.ID FROM ".$schema."oct_garrison G WHERE G.id_workshift = '".$turno_aberto['id']."' AND G.closed is null AND G.name is not null)";
 
        $res = pg_query($sql)or die("SQL error ".__LINE__);
        while($aux = pg_fetch_assoc($res)){
@@ -149,10 +149,10 @@
                  U.registration,
                  P.*
                FROM
-                 sepud.oct_rel_garrison_persona
-                 P JOIN sepud.users U ON U.ID = P.id_user
+                 ".$schema."oct_rel_garrison_persona
+                 P JOIN ".$schema."users U ON U.ID = P.id_user
                WHERE
-                 P.id_garrison IN (SELECT G.ID FROM sepud.oct_garrison G WHERE G.id_workshift = '".$turno_aberto['id']."' AND G.closed is null AND G.name is not null)
+                 P.id_garrison IN (SELECT G.ID FROM ".$schema."oct_garrison G WHERE G.id_workshift = '".$turno_aberto['id']."' AND G.closed is null AND G.name is not null)
                ORDER BY U.nickname ASC";
 
        $res = pg_query($sql)or die("SQL error ".__LINE__);
@@ -179,15 +179,15 @@
                    }else{
                      /*
 
-                     SELECT G.name, P.* FROM sepud.oct_rel_garrison_persona P, sepud.oct_garrison G WHERE id_garrison = '1974' AND P.id_garrison = G.id;
+                     SELECT G.name, P.* FROM ".$schema."oct_rel_garrison_persona P, ".$schema."oct_garrison G WHERE id_garrison = '1974' AND P.id_garrison = G.id;
                      */
-                     $sql = "SELECT F.nickname as fleet_nickname, G.name, R.* FROM sepud.oct_rel_garrison_vehicle R, sepud.oct_garrison G, sepud.oct_fleet F WHERE R.id_fleet = F.id AND id_garrison = '".$dados['id_garrison']."' AND R.id_garrison = G.id";
+                     $sql = "SELECT F.nickname as fleet_nickname, G.name, R.* FROM ".$schema."oct_rel_garrison_vehicle R, ".$schema."oct_garrison G, ".$schema."oct_fleet F WHERE R.id_fleet = F.id AND id_garrison = '".$dados['id_garrison']."' AND R.id_garrison = G.id";
                      $res = pg_query($sql)or die("Erro ".__LINE__);
                      while($auxg = pg_fetch_assoc($res)){
                          $guarnicao_nova_baixada[$auxg['id_garrison']]['name']=$auxg['name'];
                          $guarnicao_nova_baixada[$auxg['id_garrison']]['veiculos'][$auxg['id']] = $auxg;
                      }
-                     $sql = "SELECT G.name, P.*, U.nickname FROM sepud.oct_rel_garrison_persona P, sepud.oct_garrison G, sepud.users U WHERE id_garrison = '".$dados['id_garrison']."' AND P.id_garrison = G.id AND P.id_user = U.id";
+                     $sql = "SELECT G.name, P.*, U.nickname FROM ".$schema."oct_rel_garrison_persona P, ".$schema."oct_garrison G, ".$schema."users U WHERE id_garrison = '".$dados['id_garrison']."' AND P.id_garrison = G.id AND P.id_user = U.id";
                      $res = pg_query($sql)or die("Erro ".__LINE__);
                      while($auxg = pg_fetch_assoc($res)){
                          $guarnicao_nova_baixada[$auxg['id_garrison']]['veiculos'][$auxg['id_rel_garrison_vehicle']]['pessoas'][] = $auxg;
@@ -249,10 +249,10 @@
                         F.brand,
                         F.nickname
                       FROM
-                        sepud.oct_garrison G
-                      JOIN sepud.oct_fleet F ON F.id = G.id_fleet
-                      JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = G.id AND GP.type = 'Motorista'
-                      JOIN sepud.users U ON U.id = GP.id_user
+                        ".$schema."oct_garrison G
+                      JOIN ".$schema."oct_fleet F ON F.id = G.id_fleet
+                      JOIN ".$schema."oct_rel_garrison_persona GP ON GP.id_garrison = G.id AND GP.type = 'Motorista'
+                      JOIN ".$schema."users U ON U.id = GP.id_user
                       WHERE
                           G.id_workshift = '".$turno_aberto['id']."'
                       AND G.closed is null";
@@ -277,7 +277,10 @@
   </div>
 </div>
 
-
+<?
+if($_SESSION["company_configs"]["oct_submodule_envolvidos"]!="false")
+{
+?>
            <div class="row">
              <div class="col-sm-6">
 
@@ -288,9 +291,9 @@
                           <?
                               $sql = "SELECT
                                         	VE.*,
-                                        	(SELECT COUNT ( * ) FROM sepud.oct_victim WHERE id_vehicle = VE.ID) AS qtd_vitimas
+                                        	(SELECT COUNT ( * ) FROM ".$schema."oct_victim WHERE id_vehicle = VE.ID) AS qtd_vitimas
                                         FROM
-                                        	sepud.oct_vehicles VE
+                                        	".$schema."oct_vehicles VE
                                         WHERE
                                         	VE.id_events = '".$id."'
                                         ORDER BY VE.id ASC";
@@ -309,10 +312,6 @@
 
 
              <div class="col-sm-6">
-               <?
-
-
-               ?>
                <div class="form-group">
                    <label class="control-label">Envolvido:</label>
                     <select id="id_victim" name="id_victim" class="form-control">
@@ -325,8 +324,8 @@
                                        VE.description as veiculo_desc,
                                        *
                                      FROM
-                                       sepud.oct_victim VI
-                                     LEFT JOIN sepud.oct_vehicles VE ON VE.ID = VI.id_vehicle
+                                       ".$schema."oct_victim VI
+                                     LEFT JOIN ".$schema."oct_vehicles VE ON VE.ID = VI.id_vehicle
                                      WHERE
                                        VI.id_events = '".$id."'";
                             $res = pg_query($sql) or die("Erro ".__LINE__);
@@ -342,7 +341,7 @@
              </div>
 
            </div>
-
+<? } ?>
 
 
            <div class="row">
@@ -356,7 +355,7 @@
                               $sql = "SELECT
                                           H.*
                                         FROM
-                                          sepud.hospital H
+                                          ".$schema."hospital H
                                         ORDER BY H.name ASC";
                               $res = pg_query($sql) or die("Erro ".__LINE__);
                               while($d = pg_fetch_assoc($res))
@@ -380,7 +379,7 @@
                           $sql = "SELECT
                                   	*
                                   FROM
-                                  	sepud.company
+                                  	".$schema."company
                                   ORDER BY
                                   	name ASC";
 
@@ -476,15 +475,17 @@
                                                              H.name as hospital,
                                                              CO.acron as company_acron, CO.name as company_name,
                                                              PR.area, PR.providence,
+                                                             UR.name AS responsavel,
                                                              P.*
-                                                      FROM sepud.oct_rel_events_providence P
-                                                      JOIN sepud.users U ON U.id = P.id_owner
-                                                      JOIN sepud.company C ON C.id = U.id_company
-                                                      LEFT JOIN sepud.oct_vehicles VE ON VE.id = P.id_vehicle
-                                                      LEFT JOIN sepud.oct_victim   VI ON VI.id = P.id_victim
-                                                      LEFT JOIN sepud.hospital      H ON  H.id = P.id_hospital
-                                                      LEFT JOIN sepud.company      CO ON CO.id = P.id_company_requested
-                                                      JOIN sepud.oct_providence    PR ON PR.id = P.id_providence
+                                                      FROM ".$schema."oct_rel_events_providence P
+                                                      JOIN ".$schema."users U ON U.id = P.id_owner
+                                                      JOIN ".$schema."company C ON C.id = U.id_company
+                                                      LEFT JOIN ".$schema."oct_vehicles VE ON VE.id = P.id_vehicle
+                                                      LEFT JOIN ".$schema."oct_victim   VI ON VI.id = P.id_victim
+                                                      LEFT JOIN ".$schema."hospital      H ON  H.id = P.id_hospital
+                                                      LEFT JOIN ".$schema."company      CO ON CO.id = P.id_company_requested
+                                                      LEFT JOIN ".$schema."users        UR ON UR.id = P.id_user_resp
+                                                      JOIN ".$schema."oct_providence    PR ON PR.id = P.id_providence
                                                       WHERE P.id_event = '".$id."'
                                                       ORDER BY P.opened_date DESC";
                                                 $res = pg_query($sql)or die("Erro ".__LINE__."<hr><pre>".$sql."</pre>");
@@ -507,6 +508,7 @@
 
 
                                                                   echo "<table class='table'>";
+                                                                  if(isset($p['responsavel'])!=""){     echo "<td width='50'><span style='color:#CCCCCC'>Responsável:</span></td><td>".$p['responsavel']."</td>"; }
                                                                   echo "<tr><td width='50'><span style='color:#CCCCCC'>Observações:</span></td><td colspan='3'>";
                                                                   if($p['observation'] != ""){ echo $p['observation']; }else{ echo "<span style='color:#CCCCCC'>Nenhuma anotação de observação para essa providência.</span>";}
                                                                   echo "</td></tr>";
@@ -534,7 +536,7 @@
 
                                                             echo "<td class='text-center' width='50px'><a href='oct/FORM_providencias_sql.php?id_workshift=".$_GET['id_workshift']."&id=".$id."&id_providence=".$p['id']."&acao=remover'><button type='button' class='mb-xs mt-xs mr-xs btn btn-xs btn-danger'><i class='fa fa-trash'></i></button></a></td>";
                                                             echo "<td class='text-center' width='50px'><a href='oct/FORM_providencias.php?id_workshift=".$_GET['id_workshift']."&id=".$id."&id_providence=".$p['id']."'><button type='button' class='mb-xs mt-xs mr-xs btn btn-xs btn-primary'><i class='fa fa-cogs'></i></button></a></td>";
-                                                            
+
                                                         echo "</td>";
                                                       echo "</tr>";
 

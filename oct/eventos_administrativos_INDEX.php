@@ -2,9 +2,10 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
   $agora = now();
-  $sql   = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
+  $sql   = "SELECT * FROM ".$schema."oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
   $res   = pg_query($sql)or die("Erro ".__LINE__);
 
   if(pg_num_rows($res))
@@ -17,11 +18,11 @@
           			 SAE.name as logradouroRegistro,
           			 U.name as nome_usuario,
           			 AE.*
-            FROM      sepud.oct_administrative_events AE
-            LEFT JOIN sepud.oct_addressbook   A ON A.id   = AE.id_addressbook
-            LEFT JOIN sepud.streets 				SAB ON SAB.id = A.id_street
-            LEFT JOIN sepud.streets 				SAE ON SAE.id = AE.id_street
-            LEFT JOIN sepud.users             U ON U.id   = AE.id_user
+            FROM      ".$schema."oct_administrative_events AE
+            LEFT JOIN ".$schema."oct_addressbook   A ON A.id   = AE.id_addressbook
+            LEFT JOIN ".$schema."streets 				SAB ON SAB.id = A.id_street
+            LEFT JOIN ".$schema."streets 				SAE ON SAE.id = AE.id_street
+            LEFT JOIN ".$schema."users             U ON U.id   = AE.id_user
             WHERE AE.id_workshift = '".$turno['id']."'
             ORDER BY AE.id DESC";
     $res = pg_query($sql)or die("Erro ".__LINE__);

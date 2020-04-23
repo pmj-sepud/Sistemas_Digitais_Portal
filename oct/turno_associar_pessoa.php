@@ -2,13 +2,14 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
   logger("Acesso","OCT", "Turno");
   $agora = now();
 
   if($_GET['id_workshift']!=""){
     $id_workshift    = $_GET['id_workshift'];
-    $sql             = "SELECT * FROM sepud.oct_workshift WHERE id = ".$id_workshift;
+    $sql             = "SELECT * FROM ".$schema."oct_workshift WHERE id = ".$id_workshift;
     $res             = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
     $dados_workshift = pg_fetch_assoc($res)or die("SQL Error ".__LINE__);
 
@@ -19,8 +20,8 @@
               	U.name, U.nickname, U.registration,
               	R.*
               FROM
-              	sepud.oct_rel_workshift_persona R,
-              	sepud.users U
+              	".$schema."oct_rel_workshift_persona R,
+              	".$schema."users U
               WHERE
               	R.id_person = U.id AND
               	R.id  = '".$id_rel_workshit."'";
@@ -93,7 +94,7 @@
 
                                                               if($_GET['id_rel_workshift']=="")
                                                               {
-                                                                    $sql = "SELECT * FROM sepud.users WHERE id_company = '".$_SESSION['id_company']."' AND active = true ORDER BY name ASC";
+                                                                    $sql = "SELECT * FROM ".$schema."users WHERE id_company = '".$_SESSION['id_company']."' AND active = true ORDER BY name ASC";
                                                                     $res = pg_query($sql)or die("<option>Erro ".__LINE__." - SQL: ".$sql."</option>");
                                                                     if(pg_num_rows($res))
                                                                     {
@@ -193,21 +194,16 @@
                                                       <div class="form-group">
                                                       <label class="control-label">Status:</label>
                                                           <select name="status" class="form-control">
-                                                              <option value="ativo"    <?=($dados_user['status']=="baixado"?"selected":"");?>>Ativo</option>
-
+                                                              <option value="ativo"             <?=($dados_user['status']=="ativo"?"selected":"");?>>Ativo</option>
                                                               <option value="HE-Compensação"    <?=($dados_user['status']=="HE-Compensação"?"selected":"");?>>Hora extra - Compensação</option>
                                                               <option value="HF-Compensação"    <?=($dados_user['status']=="HF-Compensação"?"selected":"");?>>Hora falta - Compensação</option>
                                                               <option value="Serviços"          <?=($dados_user['status']=="Serviços"?"selected":"");?>>Serviços extraordinários</option>
-<!--
-                                                              <option value="baixado"  <?=($dados_user['status']=="baixado"?"selected":"");?>>Baixado</option>
--->
-                                                              <option value="folga"    <?=($dados_user['status']=="folga"?"selected":"");?>>Folga</option>
-                                                              <option value="troca"    <?=($dados_user['status']=="troca"?"selected":"");?>>Troca</option>
-
-                                                              <option value="ferias"   <?=($dados_user['status']=="ferias"?"selected":"");?>>Férias</option>
-                                                              <option value="falta"    <?=($dados_user['status']=="falta"?"selected":"");?>>Faltou</option>
-                                                              <option value="atestado" <?=($dados_user['status']=="atestado"?"selected":"");?>>Atestado</option>
-                                                              <option value="licença"  <?=($dados_user['status']=="licença"?"selected":"");?>>Licença</option>
+                                                              <option value="folga"             <?=($dados_user['status']=="folga"?"selected":"");?>>Folga</option>
+                                                              <option value="troca"             <?=($dados_user['status']=="troca"?"selected":"");?>>Troca</option>
+                                                              <option value="ferias"            <?=($dados_user['status']=="ferias"?"selected":"");?>>Férias</option>
+                                                              <option value="falta"             <?=($dados_user['status']=="falta"?"selected":"");?>>Faltou</option>
+                                                              <option value="atestado"          <?=($dados_user['status']=="atestado"?"selected":"");?>>Atestado</option>
+                                                              <option value="licença"           <?=($dados_user['status']=="licença"?"selected":"");?>>Licença</option>
                                                           </select>
                                                      </div>
                                                    </div>
@@ -265,8 +261,8 @@
                                       	U.name as nome, U.nickname, U.registration,
                                       	WP.*
                                       FROM
-                                      	        sepud.oct_rel_workshift_persona WP
-                                           JOIN sepud.users                      U ON U.id = WP.id_person
+                                      	        ".$schema."oct_rel_workshift_persona WP
+                                           JOIN ".$schema."users                      U ON U.id = WP.id_person
                                       WHERE
                                       	WP.id_shift =  '".$id_workshift."'
                                       ORDER BY WP.opened ASC, U.name ASC";

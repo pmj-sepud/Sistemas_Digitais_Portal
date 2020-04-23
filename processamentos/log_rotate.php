@@ -1,4 +1,5 @@
 <?
+error_reporting(0);
 $basedir = "/var/www/html";
 $envfile = ".env";
 if(file_exists($basedir."/".$envfile))
@@ -30,9 +31,9 @@ while($c++ <= 100)
         $res  = pg_query($sql)or die("SQL Error");
         $info = pg_fetch_assoc($res);
 
-        echo "\n > Quantidades de dias armazenados: ".$info['qtd'];
-        echo "\n > Dia mais antigo armazenado: ".$info['data']."\n------------------------\n";
-
+        $txt  =  "\n > Quantidades de dias armazenados: ".$info['qtd'];
+        $txt .= "\n > Dia mais antigo armazenado: ".$info['data']."\n------------------------\n";
+        echo $txt;
         if($info['qtd'] > 3)
         {
 
@@ -62,9 +63,12 @@ while($c++ <= 100)
                     $sqlD = "DELETE FROM sepud.logs WHERE timestamp BETWEEN '".$info['data']." 00:00:00' AND '".$info['data']." 23:59:59'";
                     pg_query($sqlD)or die("SQL Error");
 
+                    logger("Processo automatizado","Logs", "Reclicagem:<br>".nl2br($txt)."<br>".nl2br($meta));
+
   }else{
     $c = 101;
     echo "\nNao ha logs para ser reciclado";
+    logger("Processo automatizado","Logs", "Reclicagem:<br>".nl2br($txt)."<br>Não há logs para ser reciclado");
   }
 echo "\n------------------------";
 }

@@ -2,6 +2,7 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
 
   logger("Acesso","ROTSS - Acompanhamento mensal - SAMU");
@@ -124,10 +125,10 @@
             $sql = "SELECT C.acron as company_acron,
                     			 T.name event_name, T.type as event_type,
                            date_part('day',E.date) as dia
-                    FROM sepud.oct_events E
-                    JOIN sepud.oct_event_type T ON T.id = E.id_event_type
-                    JOIN sepud.users          U ON U.id = E.id_user
-                    JOIN sepud.company        C ON C.id = E.id_company AND C.id = 8
+                    FROM ".$schema."oct_events E
+                    JOIN ".$schema."oct_event_type T ON T.id = E.id_event_type
+                    JOIN ".$schema."users          U ON U.id = E.id_user
+                    JOIN ".$schema."company        C ON C.id = E.id_company AND C.id = 8
                     WHERE
                             E.date BETWEEN '".$filtro_data["ano"]."-".$filtro_data["mes"]."-01 00:00:00'
                                      AND '".$filtro_data["ano"]."-".$filtro_data["mes"]."-".$filtro_data["ultimo_dia"]." 23:59:59'

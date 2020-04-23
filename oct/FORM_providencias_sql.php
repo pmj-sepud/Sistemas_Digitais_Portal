@@ -2,17 +2,10 @@
     session_start();
     require_once("../libs/php/funcoes.php");
     require_once("../libs/php/conn.php");
+    $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
     extract($_POST);
     $agora = now();
-
-    if($_SESSION['id']==1)
-    {
-      echo "<div align='center'>";
-        print_r_pre($_POST);
-      echo "<br></br><a href='oct/FORM_providencias.php?id_workshift=".$id_workshift."&id=".$id."'>Voltar</a>";
-      echo "</div>";
-    }
 
 
     if($acao == "inserir" && isset($_SESSION['id']))
@@ -37,7 +30,7 @@
       }
 
 
-        $sql = "INSERT INTO sepud.oct_rel_events_providence
+        $sql = "INSERT INTO ".$schema."oct_rel_events_providence
                           (id_owner,
                            id_vehicle,
                            id_victim,
@@ -81,7 +74,7 @@
           $id_garrison   = ($id_garrison   != "" ? $id_garrison             :"Null");
           $id_user_resp  = ($id_user_resp  != "" ? $id_user_resp            :"Null");
 
-          $sql = "UPDATE sepud.oct_rel_events_providence SET
+          $sql = "UPDATE ".$schema."oct_rel_events_providence SET
                id_vehicle           = $id_vehicle,
                id_victim            = $id_victim,
                id_hospital          = $id_hospital,
@@ -104,11 +97,11 @@
     extract($_GET);
     if($acao == "remover")
     {
-      $sql  = "SELECT * FROM sepud.oct_rel_events_providence WHERE id = '".$id_providence."'";
+      $sql  = "SELECT * FROM ".$schema."oct_rel_events_providence WHERE id = '".$id_providence."'";
       $res  = pg_query($sql)or die("Erro ".__LINE__);
       $d    = pg_fetch_assoc($res);
       $prov = print_r($d,true);
-      $sql = "DELETE FROM sepud.oct_rel_events_providence WHERE id = '".$id_providence."'";
+      $sql = "DELETE FROM ".$schema."oct_rel_events_providence WHERE id = '".$id_providence."'";
       pg_query($sql)or die("Erro ".__LINE__);
       logger("Remoção","OCT - Providências", "Ocorrência n.".$id.", Dados: ".$prov);
       header("Location: FORM_providencias.php?turno=".$id_workshift."&id=".$id);

@@ -3,6 +3,7 @@
     session_start();
     require_once("../libs/php/funcoes.php");
     require_once("../libs/php/conn.php");
+    $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
     extract($_POST);
 
@@ -12,16 +13,18 @@
     if($acao == "inserir" && $userid != "" && $_SESSION['id_company'])
     {
 
-      if($id_street       == ""){ $id_street      ="Null"; }else{ $id_street       = "'".$id_street."'";     }
-      if($street_number   == ""){ $street_number  ="Null"; }else{ $street_number   = "'".$street_number."'"; }
-      if($id_workshift    == ""){ $id_workshift   ="Null"; }else{ $id_workshift    = "'".$id_workshift."'";  }
-      if($id_addressbook  == ""){ $id_addressbook ="Null"; }else{ $id_addressbook  = "'".$id_addressbook."'";}
-      if($id_garrison     == ""){ $id_garrison    ="Null"; }else{ $id_garrison     = "'".$id_garrison."'";   }
-      if($victim_inform   == ""){ $victim_inform  ="0";    }else{ $victim_inform   =     $victim_inform;     }
-      if($region          == ""){ $region         ="Null"; }else{ $region          = "'".$region."'";        }
+      if($id_street          == ""){ $id_street           ="Null"; }else{ $id_street         = "'".$id_street."'";     }
+      if($street_number      == ""){ $street_number      ="Null"; }else{ $street_number      = "'".$street_number."'"; }
+      if($id_workshift       == ""){ $id_workshift       ="Null"; }else{ $id_workshift       = "'".$id_workshift."'";  }
+      if($id_addressbook     == ""){ $id_addressbook     ="Null"; }else{ $id_addressbook     = "'".$id_addressbook."'";}
+      if($id_garrison        == ""){ $id_garrison        ="Null"; }else{ $id_garrison        = "'".$id_garrison."'";   }
+      if($victim_inform      == ""){ $victim_inform      ="0";    }else{ $victim_inform      =     $victim_inform;     }
+      if($region             == ""){ $region             ="Null"; }else{ $region             = "'".$region."'";        }
+      if($requester_origin   == ""){ $requester_origin   ="Null"; }else{ $requester_origin   = "'".$requester_origin."'";   }
+      if($requester_protocol == ""){ $requester_protocol ="Null"; }else{ $requester_protocol = "'".$requester_protocol."'"; }
 
 
-        $sql = "INSERT INTO sepud.oct_events
+        $sql = "INSERT INTO ".$schema."oct_events
                     (date,
                      description,
                      address_reference,
@@ -39,7 +42,9 @@
                      requester_phone,
                      id_addressbook,
                      id_garrison,
-                     region)
+                     region,
+                     requester_origin,
+                     requester_protocol)
               VALUES ('".$datafinal."',
                       '".$description."',
                       '".$endereco."',
@@ -57,7 +62,9 @@
                       '".$requester_phone."',
                       ".$id_addressbook.",
                       ".$id_garrison.",
-                      ".$region.") returning id";
+                      ".$region.",
+                      ".$requester_origin.",
+                      ".$requester_protocol.") returning id";
 
         $res = pg_query($sql) or die("Erro ".__LINE__."SQL: ".$sql);
         $aux = pg_fetch_assoc($res);
@@ -73,10 +80,10 @@
     {
         if(isset($_POST['condicoes']))
         {
-          $sqlCond = "DELETE FROM sepud.oct_rel_events_event_conditions WHERE id_events = '".$id."';";
+          $sqlCond = "DELETE FROM ".$schema."oct_rel_events_event_conditions WHERE id_events = '".$id."';";
           for($i = 0;$i < count($_POST['condicoes']); $i++)
           {
-              $sqlCond .= " INSERT INTO sepud.oct_rel_events_event_conditions (id_events, id_event_conditions) VALUES ('".$id."', '".$_POST['condicoes'][$i]."');";
+              $sqlCond .= " INSERT INTO ".$schema."oct_rel_events_event_conditions (id_events, id_event_conditions) VALUES ('".$id."', '".$_POST['condicoes'][$i]."');";
           }
         }
 
@@ -90,8 +97,12 @@
         if($on_way          != ""){ $sql_on_way     = ",on_way = '".$on_way."'";    }else{ $sql_on_way     = ",on_way = Null";}
         if($victim_inform   == ""){ $victim_inform  ="Null"; }else{ $victim_inform = "'".$victim_inform."'";  }
         if($region          == ""){ $region         ="Null"; }else{ $region        = "'".$region."'";         }
+        if($requester_origin   == ""){ $requester_origin   ="Null"; }else{ $requester_origin   = "'".$requester_origin."'";   }
+        if($requester_protocol == ""){ $requester_protocol ="Null"; }else{ $requester_protocol = "'".$requester_protocol."'"; }
 
-        $sql = "UPDATE sepud.oct_events SET
+
+
+        $sql = "UPDATE ".$schema."oct_events SET
                      date               = '".$datafinal."',
                      description        = '".$description."',
                      address_reference  = '".$endereco."',
@@ -107,7 +118,9 @@
                      id_addressbook     = ".$id_addressbook.",
                      id_garrison        = ".$id_garrison.",
                      id_workshift       = ".$id_workshift.",
-                     region             = ".$region."
+                     region             = ".$region.",
+                     requester_origin   = ".$requester_origin.",
+                     requester_protocol = ".$requester_protocol."
                      ".$sql_closure."
                      ".$sql_arrival."
                      ".$sql_on_way."
@@ -128,52 +141,52 @@ if($_GET['status_acao'] == "atualizar" && $_GET['id'] != "")
     switch ($_GET['status_alterar']) {
       case 'ab':
         $var_status = "Aberta";
-        $sqlU = "UPDATE sepud.oct_events SET active = true, closure = null, arrival = null,  status = '".$var_status."', on_way = null, date = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
+        $sqlU = "UPDATE ".$schema."oct_events SET active = true, closure = null, arrival = null,  status = '".$var_status."', on_way = null, date = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
         break;
       case 'in':
         $var_status = "Inativa";
-        $sqlU = "UPDATE sepud.oct_events SET active = true, closure = null, arrival = null,  status = '".$var_status."', on_way = null WHERE id = '".$_GET['id']."'";
+        $sqlU = "UPDATE ".$schema."oct_events SET active = true, closure = null, arrival = null,  status = '".$var_status."', on_way = null WHERE id = '".$_GET['id']."'";
         break;
       case 'd':
         $var_status = "Em deslocamento";
-        $sqlU = "UPDATE sepud.oct_events SET active = true, closure = null, arrival = null,  status = '".$var_status."', on_way = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
+        $sqlU = "UPDATE ".$schema."oct_events SET active = true, closure = null, arrival = null,  status = '".$var_status."', on_way = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
         break;
       case 'a':
         $var_status = "Em atendimento";
-        $sqlU = "UPDATE sepud.oct_events SET active = true, closure = null, status = '".$var_status."', arrival = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
+        $sqlU = "UPDATE ".$schema."oct_events SET active = true, closure = null, status = '".$var_status."', arrival = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
         break;
       case 'e':
         $var_status = "Encaminhamento";
-        $sqlU = "UPDATE sepud.oct_events SET active = true, closure = null,  status = '".$var_status."' WHERE id = '".$_GET['id']."'";
+        $sqlU = "UPDATE ".$schema."oct_events SET active = true, closure = null,  status = '".$var_status."' WHERE id = '".$_GET['id']."'";
         break;
       case 'f':
         $var_status = "Ocorrência terminada";
-        $sqlU = "UPDATE sepud.oct_events SET status = '".$var_status."', active = false, closure = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
+        $sqlU = "UPDATE ".$schema."oct_events SET status = '".$var_status."', active = false, closure = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
         break;
 
       case 'ce':
         $var_status = "Ocorrência cancelada - Evadido/Não localizado";
-        $sqlU = "UPDATE sepud.oct_events SET status = '".$var_status."', active = false, closure = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
+        $sqlU = "UPDATE ".$schema."oct_events SET status = '".$var_status."', active = false, closure = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
         break;
 
       case 'ct':
         $var_status = "Ocorrência cancelada - trote";
-        $sqlU = "UPDATE sepud.oct_events SET status = '".$var_status."', active = false, closure = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
+        $sqlU = "UPDATE ".$schema."oct_events SET status = '".$var_status."', active = false, closure = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
         break;
 
       case 'cc':
         $var_status = "Ocorrência cancelada - Central de atendimento";
-        $sqlU = "UPDATE sepud.oct_events SET status = '".$var_status."', active = false, closure = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
+        $sqlU = "UPDATE ".$schema."oct_events SET status = '".$var_status."', active = false, closure = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
         break;
 
       case 'cs':
         $var_status = "Ocorrência cancelada - Sem recurso";
-        $sqlU = "UPDATE sepud.oct_events SET status = '".$var_status."', active = false, closure = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
+        $sqlU = "UPDATE ".$schema."oct_events SET status = '".$var_status."', active = false, closure = '".$agora['datasrv']." ".$agora['hms']."' WHERE id = '".$_GET['id']."'";
         break;
 
       default:
         $var_status = "Em atendimento";
-        $sqlU = "UPDATE sepud.oct_events SET active = true, closure = null, status = '".$var_status."' WHERE id = '".$_GET['id']."'";
+        $sqlU = "UPDATE ".$schema."oct_events SET active = true, closure = null, status = '".$var_status."' WHERE id = '".$_GET['id']."'";
         break;
     }
 

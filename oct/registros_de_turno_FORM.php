@@ -2,6 +2,7 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
   $agora = now();
 
@@ -18,7 +19,7 @@
 
   if($_GET['id']==""){ $acao = "Inserir";  }
   else {               $acao = "Atualizar";
-    $sqlU  = "SELECT * FROM sepud.oct_workshift_history WHERE id = '".$_GET['id']."'";
+    $sqlU  = "SELECT * FROM ".$schema."oct_workshift_history WHERE id = '".$_GET['id']."'";
     $res   = pg_query($sqlU)or die("SQL Error ".__LINE__."<br>Query: ".$sqlU);
     $dados = pg_fetch_assoc($res);
 
@@ -97,7 +98,7 @@
                                     <div class="row">
                                         <div class="col-md-12">
                                           <?
-                                          $sql = "SELECT * FROM sepud.oct_fleet WHERE id_company = '".$_SESSION['id_company']."' ORDER BY brand DESC, model ASC";
+                                          $sql = "SELECT * FROM ".$schema."oct_fleet WHERE id_company = '".$_SESSION['id_company']."' ORDER BY brand DESC, model ASC";
                                           $res = pg_query($sql)or die("Erro ".__LINE__);
                                           while($d = pg_fetch_assoc($res)){ $autos[$d['type']][] = $d;}
                                           ?>
@@ -175,8 +176,8 @@ if($show_pessoa){
       $sql = "SELECT
               	DISTINCT U.id, U.name, U.nickname, U.registration
               FROM
-              	sepud.oct_rel_workshift_persona  R
-              JOIN sepud.users U ON U.id = R.id_person
+              	".$schema."oct_rel_workshift_persona  R
+              JOIN ".$schema."users U ON U.id = R.id_person
               WHERE
               	id_shift = '".$id_workshift."'
               ORDER BY U.nickname ASC";
@@ -234,8 +235,8 @@ if($show_guarnicao){
                    F.nickname, F.plate, F.model, F.brand,
                    G.*
                  FROM
-                   sepud.oct_garrison G
-                 LEFT JOIN sepud.oct_fleet F ON F.id = G.id_fleet
+                   ".$schema."oct_garrison G
+                 LEFT JOIN ".$schema."oct_fleet F ON F.id = G.id_fleet
                  WHERE
                    G.id_workshift = '".$id_workshift."' AND G.closed is null AND G.name is not null";
          $res = pg_query($sql)or die("SQL error ".__LINE__);
@@ -252,10 +253,10 @@ if($show_guarnicao){
                    F.plate,
                    V.*
                  FROM
-                   sepud.oct_rel_garrison_vehicle V
-                   JOIN sepud.oct_fleet F ON F.ID = V.id_fleet
+                   ".$schema."oct_rel_garrison_vehicle V
+                   JOIN ".$schema."oct_fleet F ON F.ID = V.id_fleet
                  WHERE
-                   V.id_garrison IN (SELECT G.ID FROM sepud.oct_garrison G WHERE G.id_workshift = '".$id_workshift."' AND G.closed is null AND G.name is not null)";
+                   V.id_garrison IN (SELECT G.ID FROM ".$schema."oct_garrison G WHERE G.id_workshift = '".$id_workshift."' AND G.closed is null AND G.name is not null)";
 
          $res = pg_query($sql)or die("SQL error ".__LINE__);
          while($aux = pg_fetch_assoc($res)){
@@ -268,10 +269,10 @@ if($show_guarnicao){
                    U.registration,
                    P.*
                  FROM
-                   sepud.oct_rel_garrison_persona
-                   P JOIN sepud.users U ON U.ID = P.id_user
+                   ".$schema."oct_rel_garrison_persona
+                   P JOIN ".$schema."users U ON U.ID = P.id_user
                  WHERE
-                   P.id_garrison IN (SELECT G.ID FROM sepud.oct_garrison G WHERE G.id_workshift = '".$id_workshift."' AND G.closed is null AND G.name is not null)
+                   P.id_garrison IN (SELECT G.ID FROM ".$schema."oct_garrison G WHERE G.id_workshift = '".$id_workshift."' AND G.closed is null AND G.name is not null)
                  ORDER BY U.nickname ASC";
 
          $res = pg_query($sql)or die("SQL error ".__LINE__);
@@ -297,13 +298,13 @@ if($show_guarnicao){
                              </optgroup>";
                      }else{
 
-                       $sql = "SELECT F.nickname as fleet_nickname, G.name, R.* FROM sepud.oct_rel_garrison_vehicle R, sepud.oct_garrison G, sepud.oct_fleet F WHERE R.id_fleet = F.id AND id_garrison = '".$dados['id_garrison']."' AND R.id_garrison = G.id";
+                       $sql = "SELECT F.nickname as fleet_nickname, G.name, R.* FROM ".$schema."oct_rel_garrison_vehicle R, ".$schema."oct_garrison G, ".$schema."oct_fleet F WHERE R.id_fleet = F.id AND id_garrison = '".$dados['id_garrison']."' AND R.id_garrison = G.id";
                        $res = pg_query($sql)or die("Erro ".__LINE__);
                        while($auxg = pg_fetch_assoc($res)){
                            $guarnicao_nova_baixada[$auxg['id_garrison']]['name']=$auxg['name'];
                            $guarnicao_nova_baixada[$auxg['id_garrison']]['veiculos'][$auxg['id']] = $auxg;
                        }
-                       $sql = "SELECT G.name, P.*, U.nickname FROM sepud.oct_rel_garrison_persona P, sepud.oct_garrison G, sepud.users U WHERE id_garrison = '".$dados['id_garrison']."' AND P.id_garrison = G.id AND P.id_user = U.id";
+                       $sql = "SELECT G.name, P.*, U.nickname FROM ".$schema."oct_rel_garrison_persona P, ".$schema."oct_garrison G, ".$schema."users U WHERE id_garrison = '".$dados['id_garrison']."' AND P.id_garrison = G.id AND P.id_user = U.id";
                        $res = pg_query($sql)or die("Erro ".__LINE__);
                        while($auxg = pg_fetch_assoc($res)){
                            $guarnicao_nova_baixada[$auxg['id_garrison']]['veiculos'][$auxg['id_rel_garrison_vehicle']]['pessoas'][] = $auxg;
@@ -365,10 +366,10 @@ if($show_guarnicao){
                           F.brand,
                           F.nickname
                         FROM
-                          sepud.oct_garrison G
-                        JOIN sepud.oct_fleet F ON F.id = G.id_fleet
-                        JOIN sepud.oct_rel_garrison_persona GP ON GP.id_garrison = G.id AND GP.type = 'Motorista'
-                        JOIN sepud.users U ON U.id = GP.id_user
+                          ".$schema."oct_garrison G
+                        JOIN ".$schema."oct_fleet F ON F.id = G.id_fleet
+                        JOIN ".$schema."oct_rel_garrison_persona GP ON GP.id_garrison = G.id AND GP.type = 'Motorista'
+                        JOIN ".$schema."users U ON U.id = GP.id_user
                         WHERE
                             G.id_workshift = '".$id_workshift."'
                         AND G.closed is null";

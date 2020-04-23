@@ -2,13 +2,14 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
   logger("Acesso","OCT", "Turno - Gerar associação automática");
   $agora = now();
 
   if($_GET['id_workshift']!=""){
     $id_workshift    = $_GET['id_workshift'];
-    $sql             = "SELECT * FROM sepud.oct_workshift WHERE id = ".$id_workshift;
+    $sql             = "SELECT * FROM ".$schema."oct_workshift WHERE id = ".$id_workshift;
     $res             = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
     $dados_workshift = pg_fetch_assoc($res)or die("SQL Error ".__LINE__);
   }else {
@@ -94,9 +95,9 @@
                   echo "<br>06. Preparando  colaboradores para inserção neste turno de trabalho: ";
 
                   $sql = "SELECT
-                          		id, name, nickname, workshift_group_time_init, workshift_group_time_finish, initial_workshift_position
+                          		id, name, nickname, workshift_group_time_init, workshift_group_time_finish, initial_workshift_position, work_status
                           FROM
-                          	sepud.users
+                          	".$schema."users
                           WHERE
                           	id_company = '".$_SESSION['id_company']."'
                           	AND active = TRUE
@@ -115,10 +116,11 @@
                     echo "<small class='text-muted'>";
                     while($us = pg_fetch_assoc($res))
                     {
-                        $usuarios_a_incluir[$us['id']]['ini']  = substr($dados_workshift['opened'],0,10)." ".$us['workshift_group_time_init'];
-                        $usuarios_a_incluir[$us['id']]['fim']  = substr($dados_workshift['opened'],0,10)." ".$us['workshift_group_time_finish'];
-                        $usuarios_a_incluir[$us['id']]['type'] = ($us['initial_workshift_position']!=""?$us['initial_workshift_position']:"agente");
-                        echo "<br>&nbsp;&nbsp;06.".$c++.". ".$us['workshift_group_time_init']." a ".$us['workshift_group_time_finish']." - [UID: ".$us['id']."] ".$us['name']." - Inicia como <b>".$usuarios_a_incluir[$us['id']]['type']."</b>";
+                        $usuarios_a_incluir[$us['id']]['ini']    = substr($dados_workshift['opened'],0,10)." ".$us['workshift_group_time_init'];
+                        $usuarios_a_incluir[$us['id']]['fim']    = substr($dados_workshift['opened'],0,10)." ".$us['workshift_group_time_finish'];
+                        $usuarios_a_incluir[$us['id']]['type']   = ($us['initial_workshift_position']!=""?$us['initial_workshift_position']:"agente");
+                        $usuarios_a_incluir[$us['id']]['work_status'] = ($us['work_status']!=""?$us['work_status']:"ativo");
+                        echo "<br>&nbsp;&nbsp;06.".$c++.". ".$us['workshift_group_time_init']." a ".$us['workshift_group_time_finish']." - [UID: ".$us['id']."] ".$us['name']." - Inicia como <b>".$usuarios_a_incluir[$us['id']]['type']."</b>, Situação de trabalho: <b>".$usuarios_a_incluir[$us['id']]['work_status']."</b>";
                     }
                     echo "</small>";
 
@@ -126,7 +128,7 @@
                     $c=1;$total=pg_num_rows($res);
                     foreach($usuarios_a_incluir as $uid => $info)
                     {
-                      $sql = "INSERT INTO sepud.oct_rel_workshift_persona(
+                      $sql = "INSERT INTO ".$schema."oct_rel_workshift_persona(
                                           id_shift,
                                           id_person,
                                           opened,
@@ -138,7 +140,7 @@
                                       '".$info['ini']."',
                                       '".$info['fim']."',
                                       '".$info['type']."',
-                                      'ativo')";
+                                      '".$info['work_status']."')";
                       echo $c++."/".$total;
                       $res = pg_query($sql);
                       if($res){ echo ", ok ";}else{ echo ", <span class='text-danger'><b>, error</b></span>";}
@@ -146,7 +148,7 @@
                     }
                     echo "</small>";
                     echo "<br>08. Bloqueando inserções automáticas futuras para este turno: ";
-                    $sql = "UPDATE sepud.oct_workshift SET is_populate = true WHERE id = '".$id_workshift."'";
+                    $sql = "UPDATE ".$schema."oct_workshift SET is_populate = true WHERE id = '".$id_workshift."'";
                     $res = pg_query($sql);
                     if($res){ echo ", <b>atualizado !</b>"; }else{ echo "<span class='text-danger'><b>, erro !</b></span>";}
                   }else {

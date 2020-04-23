@@ -2,18 +2,19 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
   logger("Acesso","OCT", "Turno");
   $agora = now();
 
   if($_GET['id']!=""){
     $id    = $_GET['id'];
-    $sql   = "SELECT * FROM sepud.oct_workshift WHERE id = ".$id;
+    $sql   = "SELECT * FROM ".$schema."oct_workshift WHERE id = ".$id;
     $res   = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
     $dados = pg_fetch_assoc($res);
 
     unset($sql,$res);
-    $sql   = "SELECT id FROM sepud.oct_workshift WHERE id_company = '".$_SESSION['id_company']."' AND status = 'aberto'";
+    $sql   = "SELECT id FROM ".$schema."oct_workshift WHERE id_company = '".$_SESSION['id_company']."' AND status = 'aberto'";
     $res   = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
     $aux   = pg_fetch_assoc($res);
     if($aux['id']>0){ $ha_turno_aberto = $aux['id']; }else{ $ha_turno_aberto = false;}
@@ -22,7 +23,7 @@
     $bt_enviar_txt = "Atualizar";
 
   }else{
-    $sql   = "SELECT id FROM sepud.oct_workshift WHERE id_company = '".$_SESSION['id_company']."' AND status = 'aberto'";
+    $sql   = "SELECT id FROM ".$schema."oct_workshift WHERE id_company = '".$_SESSION['id_company']."' AND status = 'aberto'";
     $res   = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
     $aux   = pg_fetch_assoc($res);
     if($aux['id']>0){ $ha_turno_aberto = $aux['id']; }else{ $ha_turno_aberto = false;}
@@ -137,7 +138,7 @@
                             <label class="control-label">Livro diário:</label>
                                 <select name="workshift_group" class="form-control">
                                   <?
-                                        $sql = "SELECT workshift_groups, workshift_subgroups FROM sepud.company WHERE id = '".$_SESSION['id_company']."'";
+                                        $sql = "SELECT workshift_groups, workshift_subgroups FROM ".$schema."company WHERE id = '".$_SESSION['id_company']."'";
                                         $res = pg_query($sql)or die("<option>SQL Error: ".__LINE__."</option>");
                                         if(pg_num_rows($res))
                                         {
@@ -171,7 +172,7 @@
 
                       <div class="row">
                             <div class="col-sm-12">
-                              <i class='text-muted'>* Se já houver um turno aberto, primeiro deve-se fechá-lo para o status deste turno possa ser alterado para "Aberto".</i>
+                              <i class='text-muted'>* Se já houver um turno aberto, primeiro deve-se fechá-lo para que o status deste turno possa ser alterado para "Aberto".</i>
                             </div>
                       </div>
 

@@ -3,7 +3,7 @@
   //Realiza a checagem se existe o turno do proximo dia com status INATIVO e altera para ATIVO.
   //O turno anterior é colocado como fechado. Se houver mais de um turno pra mesma data com
   //o status de inativo o sistema não realiza a troca de turno.
-
+  error_reporting(0);
 
   $basedir = "/var/www/html";
   $envfile = ".env";
@@ -26,7 +26,6 @@
 
   $agora = now();
 
-
   $sql = "SELECT
           	C.name as company_name,
           	W.id, W.opened, W.id_company, W.status
@@ -44,8 +43,11 @@
     $company[$d['id_company']] = $d['company_name'];
   }
 
+
+
   if(isset($turnos))
   {
+        logger("Processo automatizado","Turno", "Turnos inativos: ".print_r($turnos,true));
         foreach ($turnos as $id_company => $turno){
           echo "\n > ".$company[$id_company].", ".count($turno)." turno encontrado.";
           if(count($turno)==1)
@@ -58,18 +60,22 @@
                       	id_company = '".$id_company."'
                       	AND status = 'aberto'
                       	AND opened NOT BETWEEN '".$agora['datasrv']." 00:00:00' AND '".$agora['datasrv']." 23:59:59'";
-              pg_query($sql)or die("SQL error ".__LINE__);
+              $res = pg_query($sql)or die("SQL error ".__LINE__);
               echo ", feito.";
+              logger("Processo automatizado","Turno", "Fechando turno anterior: ".pg_affected_rows($res));
 
               echo "\n   Atualizando status do novo turno para aberto";
               $sql = "UPDATE sepud.oct_workshift SET status = 'aberto' WHERE id = '".$turno[0]['id']."'";
-              pg_query($sql)or die("SQL error ".__LINE__);
+              $res = pg_query($sql)or die("SQL error ".__LINE__);
               echo ", feito.";
+              logger("Processo automatizado","Turno", "Abrindo turno ID: ".$turno[0]['id']);
           }else{
             echo " (Nada a fazer, mais de um turno configurado para esta data)";
+            logger("Processo automatizado","Turno", "Não atualizado, mais de um turno pré-configurado para essa data");
           }
         }
   }else {
+    logger("Processo automatizado","Turno", "Nenhum turnos inativo");
     echo "\nNenhum turno INATIVO encontrado.";
   }
 
@@ -77,6 +83,6 @@
   $sql = "UPDATE sepud.oct_workshift SET status = 'fechado' WHERE status = 'aberto' AND closed < '".$agora['datasrv']." 00:00:00'";
   $res = pg_query($sql) or die("\nError ".__LINE__);
   echo "\n".pg_affected_rows($res)." turnos baixados";
-
+  logger("Processo automatizado","Turno", "Baixando turnos anteriores: ".pg_affected_rows($res)." turnos baixados");
   echo "\n\n\n\n-------------------------------------------";
   echo "\nFim do processamento.\n\n";

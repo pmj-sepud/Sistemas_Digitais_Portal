@@ -42,40 +42,42 @@
 
 
 
-    $filtro_sql = " EF.pubdate BETWEEN '".$filtro_data['ano']."-".$filtro_data['mes']."-01' AND '".$filtro_data['ano']."-".$filtro_data['mes']."-".$filtro_data['ultimo_dia']."'";
-
-
+    $filtro_sql = " F.date BETWEEN '".$filtro_data['ano']."-".$filtro_data['mes']."-01' AND '".$filtro_data['ano']."-".$filtro_data['mes']."-".$filtro_data['ultimo_dia']."' AND ";
     $txt_filtro = "Referência: ".$filtro_data['mes_txt_c']."/".$filtro_data['ano'];
-
-    $sql  = "SELECT  EF.equipment,  EQ.address, EQ.id, EF.pubdate,
-               (SUM(F.speed_00_10) + 	SUM(F.speed_11_20) + 	SUM(F.speed_21_30) + 	SUM(F.speed_31_40) +
-                SUM(F.speed_41_50) +	SUM(F.speed_51_60) +	SUM(F.speed_61_70) +	SUM(F.speed_71_80) +
-                SUM(F.speed_81_90) +	SUM(F.speed_91_100)+	SUM(F.speed_100_up)) AS contador_veiculos
-          FROM radars.equipment_files as EF
-          LEFT JOIN radars.flows as F       ON F.equipment_files_id = EF.id
-          JOIN      radars.equipments as EQ ON EQ.equipment = EF.equipment
-          WHERE  $filtro_sql AND EQ.id = '".$id."'
-          GROUP BY EF.equipment, EQ.address, EQ.id, EF.pubdate
-          ORDER BY 	(SUM(F.speed_00_10) + SUM(F.speed_11_20) + 	SUM(F.speed_21_30) + 	SUM(F.speed_31_40) +
-                     SUM(F.speed_41_50) +	SUM(F.speed_51_60) +	SUM(F.speed_61_70) +	SUM(F.speed_71_80) +
-                     SUM(F.speed_81_90) +	SUM(F.speed_91_100)+	SUM(F.speed_100_up)) DESC";
+    $sql  = "SELECT E.id, E.equipment, E.address,
+          				 F.date, sum(F.total) as contador_veiculo
+          	FROM radars.radars_flows F, radars.radars_equipments E
+          	WHERE
+                  $filtro_sql
+                  F.equipament_id = '".$id."'  AND
+          				F.equipament_id = E.id
+          	GROUP BY F.date, E.id, E.equipment, E.address
+          	ORDER BY date ASC";
 
   $res  = pg_query($conn_neogrid,$sql);
   while($d = pg_fetch_assoc($res)){
 
-      $eqps[$d['equipment']]['contador_veiculos']      += $d['contador_veiculos'];
+      $eqps[$d['equipment']]['contador_veiculos']      += $d['contador_veiculo'];
       $eqps[$d['equipment']]['id']                      = $d['id'];
       $eqps[$d['equipment']]['address']                 = $d['address'];
-      $eqps[$d['equipment']]['contagem'][$d['pubdate']] = $d['contador_veiculos'];
+      $eqps[$d['equipment']]['contagem'][$d['date']] = $d['contador_veiculo'];
 
       $nome_eqp = $d['equipment'];
   }
 
-
-  $sqlImport  = "SELECT max(pubdate) as data_import FROM radars.equipment_files WHERE equipment = '".$nome_eqp."'";
+  $sqlImport  = "SELECT max(date) as data_import,
+                			 E.equipment, E.id, E.address
+                FROM radars.radars_flows F, radars.radars_equipments E
+                WHERE F.equipament_id = '".$id."'
+                AND F.equipament_id = E.id
+                GROUP BY E.equipment, E.id, E.address";
   $resImport  = pg_query($conn_neogrid,$sqlImport);
   $infoImport = pg_fetch_assoc($resImport);
-  $eqps[$nome_eqp]['last_file_imported'] = $infoImport['data_import'];
+  $eqps[$infoImport['equipment']]['last_file_imported'] = $infoImport['data_import'];
+  $eqps[$infoImport['equipment']]['id']                 = $infoImport['id'];
+  $eqps[$infoImport['equipment']]['address']            = $infoImport['address'];
+  $nome_eqp = $infoImport['equipment'];
+
 
   logger("Acesso","Radares - Detalhado","ID: ".$id);
 
@@ -108,6 +110,11 @@
 									<header class="panel-heading">
                     Mês de referência: <b><?=$filtro_data['mes_txt']."/".$filtro_data['ano'];?></b>
                     <div class="panel-actions">
+                      <a href="radar/index.php">
+                          <button type="button" class="mb-xs mt-xs mr-xs btn btn-xs btn-default">
+                            Voltar
+                          </button>
+                      </a>
                       <button type="button" class="mb-xs mt-xs mr-xs btn btn-xs btn-primary" data-toggle="modal" data-target="#modal_filtro">
                         Filtros
                       </button>
@@ -115,10 +122,6 @@
                   </header>
 									<div class="panel-body">
 
-                    <?
-                      //print_r_pre($_POST);
-                      //print_r_pre($filtro_data);
-                    ?>
 										<div class="table-responsive">
                       <table class="table table-hover mb-none">
 												<thead>

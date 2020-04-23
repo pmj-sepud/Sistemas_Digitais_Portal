@@ -2,6 +2,7 @@
 session_start();
 require_once("../libs/php/funcoes.php");
 require_once("../libs/php/conn.php");
+$schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
 
 $agora = now();
@@ -14,7 +15,7 @@ if($_POST['acao']=="atualizar_associado" && $_POST['id_user']!="" && $_POST['id_
   $dt_fechamento = ($closed != ""?"'".$closed." ".$closed_hour."'" : "Null");
 
 
-  echo $sql = "UPDATE sepud.oct_rel_workshift_persona SET
+  echo $sql = "UPDATE ".$schema."oct_rel_workshift_persona SET
                       opened      = '".$dt_abertura."',
                       closed      = ".$dt_fechamento.",
                       type        = '".$type."',
@@ -29,8 +30,8 @@ if($_POST['acao']=="atualizar_associado" && $_POST['id_user']!="" && $_POST['id_
 
 if($_GET['acao'] == "fechar" && $_GET['id'] != "")
 {
-  $sqlU  = "UPDATE sepud.oct_workshift             SET status = 'fechado' WHERE       id = '".$_GET['id']."';";
-  //$sqlU2 = "UPDATE sepud.oct_rel_workshift_persona SET status = '".$agora['datatimesrv']."' WHERE id_shift = '".$_GET['id']."';";
+  $sqlU  = "UPDATE ".$schema."oct_workshift             SET status = 'fechado' WHERE       id = '".$_GET['id']."';";
+  //$sqlU2 = "UPDATE ".$schema."oct_rel_workshift_persona SET status = '".$agora['datatimesrv']."' WHERE id_shift = '".$_GET['id']."';";
   pg_query($sqlU)or die("Erro ".__LINE__."<br>SQL: ".$sqlU);
   header("location: index.php");
   exit();
@@ -51,7 +52,7 @@ if($_POST['acao'] == "inserir")
 
   $obs = pg_escape_string($observation);
 
-  $sql = "INSERT INTO sepud.oct_workshift(
+  $sql = "INSERT INTO ".$schema."oct_workshift(
                       opened,
                       closed,
                       id_company,
@@ -86,9 +87,9 @@ if($_POST['acao'] == "novo_associado")
   $dt_abertura   = $opened." ".$opened_hour;
   $dt_fechamento = ($closed    != ""                        ? "'".$closed." ".$closed_hour."'" : "Null");
 
-  $sqlupdshift = "UPDATE sepud.oct_workshift SET is_populate = 't' WHERE id = '".$id_workshift."';";
+  $sqlupdshift = "UPDATE ".$schema."oct_workshift SET is_populate = 't' WHERE id = '".$id_workshift."';";
 
-  $sql = "INSERT INTO sepud.oct_rel_workshift_persona(
+  $sql = "INSERT INTO ".$schema."oct_rel_workshift_persona(
                       id_shift,
                       id_person,
                       opened,
@@ -124,7 +125,7 @@ if($_POST['acao'] == "atualizar" && $_POST['id_workshift'] != "")
 
   $obs = pg_escape_string($observation);
 
-  $sql = "UPDATE sepud.oct_workshift SET
+  $sql = "UPDATE ".$schema."oct_workshift SET
                       opened          = '".$dt_abertura."',
                       closed          = '".$dt_fechamento."',
                       observation     = '".$obs."',
@@ -140,11 +141,11 @@ if($_POST['acao'] == "atualizar" && $_POST['id_workshift'] != "")
 
 if($_GET['acao']=="remover_associado" && $_GET['id']!="" && $_GET["id_workshift"]!="")
 {
-  $sql = "DELETE FROM sepud.oct_rel_workshift_persona WHERE id = '".$_GET['id']."' RETURNING (SELECT count(*) as registros FROM sepud.oct_rel_workshift_persona WHERE id_shift = '".$_GET["id_workshift"]."');";
+  $sql = "DELETE FROM ".$schema."oct_rel_workshift_persona WHERE id = '".$_GET['id']."' RETURNING (SELECT count(*) as registros FROM ".$schema."oct_rel_workshift_persona WHERE id_shift = '".$_GET["id_workshift"]."');";
   $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
   $aux = pg_fetch_assoc($res);
   if(($aux['registros']-1) <= 0){ //Não possui mais funcionarios associados ao turno, libera botão para população automatica do turno//
-    $sqlu = "UPDATE sepud.oct_workshift SET is_populate = 'f' WHERE id = '".$_GET["id_workshift"]."'";
+    $sqlu = "UPDATE ".$schema."oct_workshift SET is_populate = 'f' WHERE id = '".$_GET["id_workshift"]."'";
     pg_query($sqlu)or die("SQL Error ".__LINE__."<br>Query: ".$sqlu);
   }
   header("location: turno_associar_pessoa.php?id_workshift=".$_GET['id_workshift']);

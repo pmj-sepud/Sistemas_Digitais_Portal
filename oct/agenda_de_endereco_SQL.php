@@ -2,7 +2,7 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
-
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
   $agora = now();
 
   foreach ($_POST as $var => $val)
@@ -18,17 +18,17 @@
 
   if($_GET['acao'] == "Remover" && $_GET['id'] != "")
   {
-    $sql = "SELECT count(*) as qtd FROM sepud.oct_events WHERE id_addressbook = '".$_GET['id']."'";
+    $sql = "SELECT count(*) as qtd FROM ".$schema."oct_events WHERE id_addressbook = '".$_GET['id']."'";
     $res = pg_query($sql)or die("SQL Error ".__LINE__);
     $aux = pg_fetch_assoc($res);
 
     if($aux['qtd']==0)
     {
-      $sql = "DELETE FROM sepud.oct_addressbook WHERE id = '".$_GET['id']."'";
+      $sql = "DELETE FROM ".$schema."oct_addressbook WHERE id = '".$_GET['id']."'";
       pg_query($sql)or die("SQL Error ".__LINE__);
       header("Location: agenda_de_endereco_INDEX.php");
     }else{
-      $sql = "UPDATE sepud.oct_addressbook SET active = 'f' WHERE id = '".$_GET['id']."'";
+      $sql = "UPDATE ".$schema."oct_addressbook SET active = 'f' WHERE id = '".$_GET['id']."'";
       pg_query($sql)or die("SQL Error ".__LINE__);
       header("Location: agenda_de_endereco_FORM.php?id=".$_GET['id']);
     }
@@ -38,7 +38,7 @@
 
   if($acao == "Atualizar")
   {
-    $sql = "UPDATE sepud.oct_addressbook
+    $sql = "UPDATE ".$schema."oct_addressbook
             SET
                 name         = $name,
                 num_ref      = $num_ref,
@@ -59,7 +59,7 @@
 
   if($acao == "Inserir" && $name != "")
   {
-    $sql = "INSERT INTO sepud.oct_addressbook(name,  num_ref,  id_street,  geoposition,  obs,  zipcode,  neighborhood,  zone,  type)
+    $sql = "INSERT INTO ".$schema."oct_addressbook(name,  num_ref,  id_street,  geoposition,  obs,  zipcode,  neighborhood,  zone,  type)
             VALUES                           ($name, $num_ref, $id_street, $geoposition, $obs, $zipcode, $neighborhood, $zone, $type)RETURNING  id ";
     $res = pg_query($sql)or die("SQL Error ".__LINE__);
     $aux = pg_fetch_assoc($res);

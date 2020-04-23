@@ -2,6 +2,7 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
   $agora = now();
 
@@ -11,11 +12,11 @@
       $acao = "Inserir";
   }else {
     $acao  = "Atualizar";
-    $sql   = "SELECT * FROM sepud.oct_garrison G WHERE id = '".$_GET['id_garrison']."'";
+    $sql   = "SELECT * FROM ".$schema."oct_garrison G WHERE id = '".$_GET['id_garrison']."'";
     $res   = pg_query($sql)or die("SQL Error ".__LINE__);
     $dados = pg_fetch_assoc($res);
 
-    $sql = "SELECT * FROM sepud.oct_rel_garrison_persona WHERE id_garrison = '".$_GET['id_garrison']."'";
+    $sql = "SELECT * FROM ".$schema."oct_rel_garrison_persona WHERE id_garrison = '".$_GET['id_garrison']."'";
     $res   = pg_query($sql)or die("SQL Error ".__LINE__);
     while($ret = pg_fetch_assoc($res))
     {
@@ -55,7 +56,7 @@
                                     <div class="row">
                                         <div class="col-md-12">
                                           <?
-                                            $sql = "SELECT * FROM sepud.oct_fleet WHERE id_company = '".$_SESSION['id_company']."' ORDER BY brand DESC, model ASC";
+                                            $sql = "SELECT * FROM ".$schema."oct_fleet WHERE id_company = '".$_SESSION['id_company']."' ORDER BY brand DESC, model ASC";
                                             $res = pg_query($sql)or die("Erro ".__LINE__);
                                             while($d = pg_fetch_assoc($res)){ $autos[$d['type']][] = $d;}
                                           ?>
@@ -87,8 +88,8 @@
                                        <select id="id_user" name="id_user" class="form-control select2">
                                           <?
                                               $sql = "SELECT DISTINCT U.id, U.name, U.nickname, U.registration
-                                                      FROM sepud.oct_rel_workshift_persona W
-                                                      JOIN sepud.users U ON U.id = W.id_person
+                                                      FROM ".$schema."oct_rel_workshift_persona W
+                                                      JOIN ".$schema."users U ON U.id = W.id_person
                                                       WHERE W.id_shift = '".$turno."' AND W.status in ('ativo', 'HE-Compensação', 'Serviços') ORDER BY U.nickname ASC";
                                               $res = pg_query($sql)or die("<option>SQL ERROR ".__LINE__."</option>");
                                               echo "<option value=''></option>";
@@ -196,8 +197,8 @@
                                                     	R.id_garrison,
                                                     	U.id, U.name, U.nickname, U.registration
                                                     FROM
-                                                    	sepud.oct_rel_garrison_persona R
-                                                    JOIN sepud.users U ON U.id = R.id_user
+                                                    	".$schema."oct_rel_garrison_persona R
+                                                    JOIN ".$schema."users U ON U.id = R.id_user
                                                     WHERE
                                                     	R.id_garrison = '".$dados['id']."'
                                                     	AND R.TYPE = 'Passageiro'";

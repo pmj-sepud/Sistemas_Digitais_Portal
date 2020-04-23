@@ -2,6 +2,7 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
   if($_GET['id'] != "")
   {
@@ -13,8 +14,8 @@
                     C.workshift_subgroups_repetition,
             			  C.workshift_subgroups,
 			              U.*
-             FROM sepud.users U
-	           JOIN sepud.company C ON C.id = U.id_company
+             FROM ".$schema."users U
+	           JOIN ".$schema."company C ON C.id = U.id_company
              WHERE
               	U.id = '".$_GET['id']."'";
     $res  = pg_query($sql)or die("Erro ".__LINE__);
@@ -23,7 +24,7 @@
     $sql = "SELECT
                 R.value
               FROM
-                sepud.users_rel_perm_user R
+                ".$schema."users_rel_perm_user R
               WHERE
                 R.id_user = '".$_GET['id']."'";
      $res = pg_query($sql)or die("SQL Error ".__LINE__);
@@ -82,8 +83,8 @@
                                 $sql = "SELECT M.id as id_module, M.descrition as module_description, M.module as module_name, M.show_order,
                                         			 S.id as id_perm, S.permission, S.description as perm_description, S.type
                                         FROM
-                                        sepud.users_perm_modules M
-                                        LEFT JOIN sepud.users_perm_modules_subgroup S ON S.id_module = M.id
+                                        ".$schema."users_perm_modules M
+                                        LEFT JOIN ".$schema."users_perm_modules_subgroup S ON S.id_module = M.id
                                         ORDER BY M.show_order ASC, S.id ASC";
                                 $res = pg_query($sql)or die("SQL Error ".__LINE__);
                                 while ($p = pg_fetch_assoc($res)) {
@@ -251,7 +252,7 @@
                           <div class="col-md-10">
                             <select class="form-control" id="id_company" name="id_company">
                                 <?
-                                    $sql = "SELECT * FROM sepud.company ORDER BY name ASC";
+                                    $sql = "SELECT * FROM ".$schema."company ORDER BY name ASC";
                                     $res = pg_query($sql)or die();
                                     while($comp = pg_fetch_assoc($res))
                                     {
@@ -285,6 +286,33 @@
 												  </div>
 												</div>
 											</fieldset>
+
+
+
+      <hr class="dotted">
+      <h4 class="mb-xlg">Situação de trabalho:</h4>
+      <fieldset class="mb-xl">
+
+                        <div class="form-group">
+                          <label class="col-md-2 control-label" for="work_status">Situação</label>
+                          <div class="col-md-10">
+                            <select name="work_status" class="form-control">
+                                <option value="ativo"             <?=($d['work_status']=="ativo"?"selected":"");?>>Ativo</option>
+                                <option value="HE-Compensação"    <?=($d['work_status']=="HE-Compensação"?"selected":"");?>>Hora extra - Compensação</option>
+                                <option value="HF-Compensação"    <?=($d['work_status']=="HF-Compensação"?"selected":"");?>>Hora falta - Compensação</option>
+                                <option value="Serviços"          <?=($d['work_status']=="Serviços"?"selected":"");?>>Serviços extraordinários</option>
+                                <option value="folga"             <?=($d['work_status']=="folga"?"selected":"");?>>Folga</option>
+                                <option value="troca"             <?=($d['work_status']=="troca"?"selected":"");?>>Troca</option>
+                                <option value="ferias"            <?=($d['work_status']=="ferias"?"selected":"");?>>Férias</option>
+                                <option value="falta"             <?=($d['work_status']=="falta"?"selected":"");?>>Faltou</option>
+                                <option value="atestado"          <?=($d['work_status']=="atestado"?"selected":"");?>>Atestado</option>
+                                <option value="licença"           <?=($d['work_status']=="licença"?"selected":"");?>>Licença</option>
+                            </select>
+                       </div>
+                     </div>
+
+      </fieldset>
+
 
                       <hr class="dotted">
                       <h4 class="mb-xlg">Turno de trabalho</h4>
@@ -409,7 +437,7 @@
 												</div>
 
                         <div class="form-group">
-                          <label class="col-md-2 control-label" for="active">Status</label>
+                          <label class="col-md-2 control-label" for="active">Status da conta</label>
                           <div class="col-md-10">
                             <select class="form-control" id="active" name="active">
 

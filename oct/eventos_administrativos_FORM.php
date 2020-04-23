@@ -2,12 +2,13 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
   $agora = now();
 
   if($_GET['id']!="")
   {
-    $sql   = "SELECT * FROM sepud.oct_administrative_events WHERE id = '".$_GET['id']."'";
+    $sql   = "SELECT * FROM ".$schema."oct_administrative_events WHERE id = '".$_GET['id']."'";
     $res   = pg_query($sql)or die("SQL Error ".__LINE__);
     $dados = pg_fetch_assoc($res);
     $acao  = "Atualizar";
@@ -17,7 +18,7 @@
   }else{
     $acao            = "Inserir";
     $dados['status'] = "Nova ocorrência administrativa";
-    $sql        = "SELECT * FROM sepud.oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
+    $sql        = "SELECT * FROM ".$schema."oct_workshift WHERE id_company = ".$_SESSION['id_company']." AND status = 'aberto'";
     $resTurno   = pg_query($sql)or die("Erro ".__LINE__);
     if(pg_num_rows($resTurno))
     {
@@ -74,7 +75,7 @@
                                                         <label class="control-label">Agenda de Endereço:</label>
                                                         <select id="id_addressbook" name="id_addressbook" class="form-control select2">
                                                            <?
-                                                                 $sql = "SELECT * FROM sepud.oct_addressbook WHERE id_company = '".$_SESSION['id_company']."' ORDER BY name ASC";
+                                                                 $sql = "SELECT * FROM ".$schema."oct_addressbook WHERE id_company = '".$_SESSION['id_company']."' ORDER BY name ASC";
                                                                  $res = pg_query($sql)or die("Erro ".__LINE__);
                                                                  while($d = pg_fetch_assoc($res))
                                                                  {
@@ -103,7 +104,7 @@
                                       <label class="control-label">Logradouro:</label>
                                       <select id="id_street" name="id_street" class="form-control select2">
                                          <?
-                                               $sql = "SELECT * FROM sepud.streets ORDER BY name ASC";
+                                               $sql = "SELECT * FROM ".$schema."streets ORDER BY name ASC";
                                                $res = pg_query($sql)or die("Erro ".__LINE__);
                                                echo "<option value=''></option>";
                                                while($d = pg_fetch_assoc($res))
@@ -147,7 +148,7 @@
                          <label class="control-label">Agente:</label>
                          <select id="id_user" name="id_user" class="form-control select2">
                             <?
-                                $sql = "SELECT * FROM sepud.users WHERE id_company = '".$_SESSION['id_company']."' ORDER BY name ASC";
+                                $sql = "SELECT * FROM ".$schema."users WHERE id_company = '".$_SESSION['id_company']."' ORDER BY name ASC";
                                 $res = pg_query($sql)or die("<option>SQL ERROR ".__LINE__."</option>");
                                 echo "<option value=''></option>";
                                 while($d = pg_fetch_assoc($res))

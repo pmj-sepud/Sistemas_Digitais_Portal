@@ -2,11 +2,10 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
-
-
-
-$id_oc = $_GET["id_oc"];
-$dir   = "uploads/".$id_oc;
+  $schema = ($_SESSION['schema']!=""      ?$_SESSION['schema'].".":"");
+  $dirdev = ($_SESSION['origem']=="devops"?"dev/"                 :"");
+  $id_oc  = $_GET["id_oc"];
+  $dir    = "uploads/".$dirdev.$id_oc;
 
 logger("Inserção","OCT - imagens", "Ocorrência n.".$id_oc);
 
@@ -33,17 +32,17 @@ if (isset($_FILES['files']) && !empty($_FILES['files'])) {
           $aux      = explode(".",$_FILES["files"]["name"][$i]);
           $extensao = ".".end($aux);
 /*
-          $sqlS     = "SELECT currval('sepud.oct_rel_events_images_id_seq') AS seq";
+          $sqlS     = "SELECT currval('".$schema."oct_rel_events_images_id_seq') AS seq";
           $res      = pg_query($sqlS)or die("Erro ".__LINE__);
           $seq      = pg_fetch_assoc($res);
 */
   //        $nome_arq = "oc_".str_pad($_GET['id_oc'],8,"0",STR_PAD_LEFT)."_".str_pad($seq['seq'],8,"0",STR_PAD_LEFT).$extensao;
 
-          $sql = "INSERT INTO sepud.oct_rel_events_images(
+          $sql = "INSERT INTO ".$schema."oct_rel_events_images(
 						              id_events, image, path, timestamp)
                   VALUES (
                           ".$id_oc.",
-	                       ('OC_' || lpad('".$id_oc."'::text, 8,'0') || '_' || lpad(currval('sepud.oct_rel_events_images_id_seq')::text,8,'0')  || '".$extensao."'),
+	                       ('OC_' || lpad('".$id_oc."'::text, 8,'0') || '_' || lpad(currval('".$schema."oct_rel_events_images_id_seq')::text,8,'0')  || '".$extensao."'),
 	                        '".$dir."',
 	                '".$agora['datatimesrv']."')RETURNING image";
 

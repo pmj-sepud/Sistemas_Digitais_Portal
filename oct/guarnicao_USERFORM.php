@@ -2,10 +2,11 @@
   session_start();
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
   $agora = now();
 //logger("Acesso - Atualização","OCT - Guarnição", "Guarnição ID:".$_GET['id_garrison']);
-  $sql = "SELECT id FROM sepud.oct_workshift WHERE status = 'aberto' AND id_company = '".$_SESSION['id_company']."'";
+  $sql = "SELECT id FROM ".$schema."oct_workshift WHERE status = 'aberto' AND id_company = '".$_SESSION['id_company']."'";
   $res = pg_query($sql)or die("SQL error ".__LINE__);
   if(pg_num_rows($res))
   {
@@ -56,35 +57,47 @@
                                               		W.id as id_workshift, W.status as status_workshit,
                                               	  G.id as id_garrison, G.opened, G.name,
                                                 	P.type,
-                                                	V.initial_km, V.obs as vehicle_obs,
+                                                	V.initial_km, V.obs as vehicle_obs, V.id as id_rel_garrison_vehicle,
                                                 	F.nickname, F.plate, F.model, F.brand, F.id as id_vehicle
-                                              FROM sepud.oct_garrison G
-                                                   JOIN sepud.oct_rel_garrison_persona P ON P.id_garrison = G.id AND P.id_user = '".$_SESSION['id']."'
-                                              LEFT JOIN sepud.oct_rel_garrison_vehicle V ON V.id = P.id_rel_garrison_vehicle
-                                              LEFT JOIN sepud.oct_fleet                F ON F.id = V.id_fleet
-                                              		 JOIN sepud.oct_workshift 					 W ON W.id = G.id_workshift AND status = 'aberto'
+                                              FROM ".$schema."oct_garrison G
+                                                   JOIN ".$schema."oct_rel_garrison_persona P ON P.id_garrison = G.id AND P.id_user = '".$_SESSION['id']."'
+                                              LEFT JOIN ".$schema."oct_rel_garrison_vehicle V ON V.id = P.id_rel_garrison_vehicle
+                                              LEFT JOIN ".$schema."oct_fleet                F ON F.id = V.id_fleet
+                                              		 JOIN ".$schema."oct_workshift 					 W ON W.id = G.id_workshift AND status = 'aberto'
                                               WHERE G.closed is null";
                                       $res = pg_query($sql)or die("SQL Error: ".__LINE__);
                                       if(pg_num_rows($res))
                                       {
                                         $dados = pg_fetch_assoc($res);
                                         echo "<tr><th>Guarnição: ".strtoupper($dados['name'])."</th></tr>";
-                                        echo "<tr><td>";
-                                          echo $dados['nickname']." - ".$dados['brand']." ".$dados['model']." - Placa: ".$dados['plate'];
-                                        echo "</td></tr>";
-                                        echo "<tr><td>Posição: ";
-                                          echo $dados['type'];
-                                        echo "</td></tr>";
+                                        echo "<tr><td>Abertura: ".formataData($dados['opened'],1)."</td></tr>";
 
-                                        echo "<tr><td class='text-center'>";
-                                            echo "<button class='btn btn-warning'>Encerrar guarnição</button> ";
-                                        echo "</td></tr>";
+                                        if($dados['id_vehicle']!="")
+                                        {
+                                            echo "<tr><td>";
+                                              echo $dados['nickname']." - ".$dados['brand']." ".$dados['model']." - Placa: ".$dados['plate'];
+                                            echo "</td></tr>";
+                                            echo "<tr><td>Posição: ";
+                                              echo $dados['type'];
+                                            echo "</td></tr>";
+
+                                            echo "<tr><td class='text-center'>";
+                                                echo "<a href='oct/guarnicao_USERFORM.php?acao=encerrar_guarnicao&id_garrison=".$dados['id_garrison']."&id_rel_garrison_vehicle=".$dados['id_rel_garrison_vehicle']."'><button class='btn btn-warning'>Encerrar guarnição</button></a> ";
+                                            echo "</td></tr>";
+                                        }else{
+                                          echo "<tr><td>Observação: Sem veículo, guarnição a pé.</td></tr>";
+                                          echo "<tr><td class='text-center'>";
+                                              echo "<a href='oct/guarnicao_USERFORM_sql.php?acao=encerrar_guarnicao_a_pe&id_garrison=".$dados['id_garrison']."'><button class='btn btn-warning'>Encerrar guarnição</button></a> ";
+                                          echo "</td></tr>";
+                                        }
+
+
                                       }else {
                                         echo "<tr><th>Guarnição:</th></tr>";
                                         echo "<tr><td><div class='alert alert-warning text-center'>Você não esta associado a nenhuma guarnição ativa.</div></td></tr>";
                                         echo "<tr><td class='text-center'>";
                                             echo "<a href='oct/guarnicao_USERFORM.php?acao=existente'><button class='btn btn-success'>Entrar numa guarnição existente</button></a> ";
-                                            echo "<button class='btn btn-primary'>Criar uma nova guarnição</button>";
+                                            echo "<a href='oct/guarnicao_USERFORM.php?acao=nova'><button class='btn btn-primary'>Criar uma nova guarnição</button></a>";
                                         echo "</td></tr>";
                                       }
                                 }else {
@@ -99,13 +112,45 @@
 
                       <div class='col-sm-6'>
                           <?
+                              if($_GET['acao']=="encerrar_guarnicao")
+                              {
+                                $guarnicao    = guarnicoes($_GET['id_garrison'],'','dados');
+                                $qtd_veiculos = 0;
+                                echo "<form action='oct/guarnicao_USERFORM_sql.php' method='POST'>";
+                                echo "<table class='table'>
+                                      <thead><tr><th>#</th>
+                                             <th>Apelido</th>
+                                             <th>Km inicial</th>
+                                             <th>Km final</th>
+                                      </thead><tbody>";
+                                    foreach ($guarnicao['veiculos'] as $id_rel_garrison_vehicle => $vals){
+                                        $qtd_veiculos++;
+                                        echo "<tr>";
+                                            echo "<td><small class='text-muted'>".$vals['id']."</small></td>";
+                                            echo "<td>".$vals['nickname']."</td>";
+                                            echo "<td>".number_format($vals['initial_km'],0,'','.')."</td>";
+                                            echo "<td><input name='".$vals['id']."_kmfinal' type='number' class='form-control campo_km' value=''></td>";
+                                        echo "</tr>";
+                                    }
+                                echo "</tbody></table>";
+                                echo "<input type='hidden' name='qtd_veiculos' value='".$qtd_veiculos."'>";
+                                echo "<input type='hidden' name='id_garrison' value='".$_GET['id_garrison']."'>";
+                                echo "<input type='hidden' name='acao' value='".$_GET['acao']."'>";
+                                echo "<div class='text-center'>
+                                          <a href='oct/guarnicao_USERFORM.php'><button type='button' class='btn btn-default'>Voltar</button></a>
+                                          <button type='submit' class='btn btn-warning'>Encerrar guarnição</button>
+                                      </div>";
+                                echo "</form>";
+                              }
+
+
                               if($_GET['acao']=='existente')
                               {
                                 echo "<h4>Guarnição<sup><small class='text-muted'>(ões)</small></sup> aberta<sup><small class='text-muted'>(s)</small></sup>:</h4>";
 
                                 $sql = "SELECT *
                                         FROM
-                                        	sepud.oct_garrison G
+                                        	".$schema."oct_garrison G
                                         WHERE
                                         	  G.closed IS NULL
                                         AND G.id_workshift = '".$id_workshift."'";
@@ -131,7 +176,130 @@
                                           echo "<tr><td colspan='2'></td></tr>";
                                     }
                                     echo "</tbody></table>";
+                                }else {
+                                  echo "<div class='alert alert-default text-center'>Nenhuma guarnição aberta.</div>";
                                 }
+                              }
+
+                              if($_GET['acao']=='nova')
+                              {
+                                  echo "<form action='oct/guarnicao_USERFORM_sql.php' method='post'>";
+                                  echo "<h4>Nova guarnição:</h4>";
+                                  echo "<div class='row'>
+                                          <div class='col-sm-12'>";
+                                                $sql = "SELECT * FROM ".$schema."oct_fleet WHERE id_company = '".$_SESSION['id_company']."' ORDER BY brand DESC, model ASC, nickname ASC";
+                                                $res = pg_query($sql)or die("Erro ".__LINE__);
+                                                while($d = pg_fetch_assoc($res)){
+
+
+                                                  $sqlRelVeic = "SELECT
+                                                                  	G.closed, G.name,
+                                                                  	R.final_km
+                                                                  FROM
+                                                                  	".$schema."oct_rel_garrison_vehicle R
+                                                                  LEFT JOIN ".$schema."oct_garrison G ON G.id = R.id_garrison
+                                                                  WHERE
+                                                                  	R.id_fleet = '".$d['id']."'
+                                                                  ORDER BY R.id DESC
+                                                                  LIMIT 1";
+                                                  $resRelVeic = pg_query($sqlRelVeic)or die("SQL Error ".__LINE__);
+                                                  $aux        = pg_fetch_assoc($resRelVeic);
+
+                                                  $d['guarnicao'] = $aux;
+                                                  $autos[$d['type']][] = $d;
+
+                                                }
+                                                echo "<div class='form-group'>
+                                                <label class='control-label'>Associar veículo:</label>
+                                                <select id='id_fleet' name='id_fleet' class='form-control select2'>";
+                                                      echo "<option value=''></option>";
+                                                      foreach ($autos as $tipo => $auto)
+                                                      {
+                                                          echo "<optgroup label='".$tipo."'>";
+                                                          for($i=0;$i<count($auto);$i++)
+                                                          {
+                                                              if($auto[$i]['guarnicao']['name']!="" && $auto[$i]['guarnicao']['closed']=="")
+                                                              {
+                                                                  $guarnicao_em_uso .= "<option disabled value='".$auto[$i]["id"]."'>".$auto[$i]["nickname"]." [".$auto[$i]["plate"]."] - ".$auto[$i]["brand"]." ".$auto[$i]["model"]."</option>";
+                                                              }else{
+
+                                                                   if($auto[$i]['guarnicao']['final_km']!=""){
+                                                                      echo "<option rel='".$auto[$i]['guarnicao']['final_km']."' value='".$auto[$i]["id"]."'>".$auto[$i]["nickname"]." [".$auto[$i]["plate"]."] - ".$auto[$i]["brand"]." ".$auto[$i]["model"];
+                                                                      echo " [Km final: ".number_format($auto[$i]['guarnicao']['final_km'],0,'','.')."]";
+                                                                      echo "</option>";
+                                                                   }else {
+                                                                     echo "<option value='".$auto[$i]["id"]."'>".$auto[$i]["nickname"]." [".$auto[$i]["plate"]."] - ".$auto[$i]["brand"]." ".$auto[$i]["model"];
+                                                                     echo "</option>";
+                                                                   }
+
+                                                              }
+                                                          }
+                                                          echo "</optgroup>";
+                                                      }
+                                                      if($guarnicao_em_uso!="")
+                                                      {
+                                                        echo "<optgroup label='Veículo(s) em uso'>";
+                                                        echo $guarnicao_em_uso;
+                                                        echo "</optgroup>";
+                                                      }
+
+                                                echo "</select></div>";
+                                  echo "  </div>
+                                        </div>";
+
+                                  echo "<div class='row'>";
+                                      echo "<div class='col-sm-6'>";
+                                            echo "<div class='form-group'>
+                                                    <label class='control-label'>KM inicial:</label>
+                                                    <input name='initial_km' id='initial_km' type='number' class='form-control campo_km' onClick='$(this).val(\"\");'>
+                                                  </div>";
+                                      echo "</div>";
+                                          echo "<div class='col-sm-6'>";
+                                        echo "<div class='form-group'>
+                                                <label class='control-label'>Posição no veículo:</label>
+                                                <select id='type' name='type' class='form-control select2'>
+                                                  <option value='Motorista'>Motorista</option>
+                                                  <option value='Passageiro'>Passageiro</option>
+                                                </select>
+                                              </div>";
+                                  echo "  </div>
+                                        </div>";
+
+                                  echo "<div class='row'>
+                                          <div class='col-sm-12'>
+                                              <div class='form-group'>
+                                                   <label class='control-label'>Observações:</label>
+                                                   <textarea id='obs' name='obs' class='form-control' rows='3'></textarea>
+                                             </div>
+                                          </div>
+                                        </div>";
+
+                              echo "<div class='row'>
+                                      <div class='col-sm-12 text-center' style='margin-top:10px'>
+                                            <button type='submit' class='btn btn-primary'>Criar guarnição</button>
+                                      </div>
+                                    </div>";
+
+                              echo "<input type='hidden' name='acao' value='nova_guarnicao'>";
+                              echo "<input type='hidden' name='id_user' value='".$_SESSION['id']."'>";
+                              echo "<input type='hidden' name='id_workshift' value='".$id_workshift."'>";
+                              echo "</form>";
+                              }
+
+
+                              if($dados['id_vehicle']!="" && $_GET['acao']=="")
+                              {
+                                  //print_r_pre($dados);
+                                  $sql = "SELECT count(*) as qtd, status, active FROM ".$schema."oct_events WHERE id_garrison = '".$dados['id_garrison']."' GROUP BY status, active";
+                                  $res = pg_query($sql)or die("SQL error ".__LINE__);
+                                  while($d = pg_fetch_assoc($res))
+                                  {
+                                    $d['active'] = ($d['active']=="t"?"Ativa":"Terminada");
+                                    $stats[$d['active']][$d['status']]=$d['qtd'];
+                                  }
+
+
+                                  //print_r_pre($stats);
                               }
                           ?>
                       </div>
@@ -144,6 +312,10 @@
 
 
 <script>
+$("#id_fleet").change(function(){
+  var kmfinal      = $("option:selected", this).attr("rel");
+  $("#initial_km").val(kmfinal);
+})
 $('.select2').select2({
   language: {
         noResults: function() {
@@ -159,15 +331,15 @@ $(".loading2").click(function(){ $(this).addClass("disabled").html("<i class=\"f
 <?
 function guarnicoes($id_garrison, $id_workshift, $modelo = "resumido")
 {
-
+        $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
        if($id_garrison != "")//Buscando uma guarnição especifica
        {
               $sql = "SELECT
                         F.nickname, F.plate, F.model, F.brand,
                         G.*
                       FROM
-                        sepud.oct_garrison G
-                      LEFT JOIN sepud.oct_fleet F ON F.id = G.id_fleet
+                        ".$schema."oct_garrison G
+                      LEFT JOIN ".$schema."oct_fleet F ON F.id = G.id_fleet
                       WHERE
                         G.id = '".$id_garrison."'";
               $res = pg_query($sql)or die("SQL error ".__LINE__);
@@ -187,8 +359,8 @@ function guarnicoes($id_garrison, $id_workshift, $modelo = "resumido")
                                 F.plate,
                                 V.*
                               FROM
-                                sepud.oct_rel_garrison_vehicle V
-                                JOIN sepud.oct_fleet F ON F.ID = V.id_fleet
+                                ".$schema."oct_rel_garrison_vehicle V
+                                JOIN ".$schema."oct_fleet F ON F.ID = V.id_fleet
                               WHERE
                                 V.id_garrison = '".$id_garrison."'";
 
@@ -202,8 +374,8 @@ function guarnicoes($id_garrison, $id_workshift, $modelo = "resumido")
                                U.registration,
                                P.*
                              FROM
-                               sepud.oct_rel_garrison_persona P
-                               JOIN sepud.users U ON U.ID = P.id_user
+                               ".$schema."oct_rel_garrison_persona P
+                               JOIN ".$schema."users U ON U.ID = P.id_user
                              WHERE
                                P.id_garrison = '".$id_garrison."'
                              ORDER BY U.nickname ASC";
@@ -231,15 +403,34 @@ function guarnicoes($id_garrison, $id_workshift, $modelo = "resumido")
                     {
                         if(isset($guarnicao_empenhada['veiculos']))
                         {
+
                               foreach($guarnicao_empenhada['veiculos'] as $id_rel_garrison_vehicle => $d)
                               {
-                                   if(isset($info)){$info .= " | ";}
-                                   $info .= "<a href='oct/guarnicao_USERFORM_sql.php?acao=existente&id_fleet=".$d['id']."&id_garrison=".$guarnicao_empenhada['id']."'><button class='btn btn-sm btn-info'><i class='fa fa-user'></i><sup><i class='fa fa-plus'></i></sup></button></a> ".$d['nickname'].": ";
-                                   unset($pessoas);
+                                   if(isset($info)){$info .= "<br>";}
+                                   unset($pessoas, $motorista);
+                                   $motorista = false;
                                    for($i=0;isset($d['pessoas']) && $i<count($d['pessoas']);$i++)
                                    {
                                      $pessoas[] = ($d['pessoas'][$i]['nickname'] != ""?$d['pessoas'][$i]['nickname']:$d['pessoas'][$i]['name']);
+                                     if($d['pessoas'][$i]['type']=="Motorista"){ $motorista = true; }
                                    }
+
+                                   //$info .= "<a href='oct/guarnicao_USERFORM_sql.php?acao=existente&id_fleet=".$d['id']."&id_garrison=".$guarnicao_empenhada['id']."'><button class='btn btn-sm btn-info'><i class='fa fa-user'></i><sup><i class='fa fa-plus'></i></sup></button></a> ".$d['nickname'].": ";
+
+                                   $info .= "<div class='btn-group'>
+												<button type='button' class='mb-xs mt-xs mr-xs btn btn-info dropdown-toggle' data-toggle='dropdown'><i class='fa fa-user'></i><sup><i class='fa fa-plus'></i></sup> <span class='caret'></span></button>
+												<ul class='dropdown-menu' role='menu'>
+                          <li style='margin-left:10px'>Posição no veículo:</li>";
+                          if(!$motorista)
+                          {
+                            $info .= "<li><a href='oct/guarnicao_USERFORM_sql.php?id_user=".$_SESSION['id']."&posicao=Motorista&acao=inserir_user_guarnicao_existente&id_rel_garrison_vehicle=".$d['id']."&id_garrison=".$guarnicao_empenhada['id']."'><i class='text-muted fa fa-angle-double-right'></i> Motorista</a></li>";
+                          }
+										      $info .= "<li><a href='oct/guarnicao_USERFORM_sql.php?id_user=".$_SESSION['id']."&posicao=Passageiro&acao=inserir_user_guarnicao_existente&id_rel_garrison_vehicle=".$d['id']."&id_garrison=".$guarnicao_empenhada['id']."'><i class='text-muted fa fa-angle-double-right'></i> Passageiro</a></li>
+												</ul>
+											</div>";
+
+
+                                    $info .= "<b><i>".$d['nickname']."</i></b> - ";
                                    if(isset($pessoas) && count($pessoas)){ $info .= implode(", ",$pessoas); }
                                    else                                  { $info .= "<span class='text-danger'><i>Nenhum integrante</i></span>";}
                               }
@@ -268,6 +459,11 @@ function guarnicoes($id_garrison, $id_workshift, $modelo = "resumido")
                          $info .= implode(", ",$pessoas);
                          return array("name" => number_format($id_garrison,0,'','.'), "info" => $info);
                    }
+              }
+
+              if($modelo=="dados")
+              {
+                return $guarnicao_empenhada;
               }
         }
 }

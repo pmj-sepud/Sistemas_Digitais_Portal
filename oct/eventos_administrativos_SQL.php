@@ -2,6 +2,7 @@
     session_start();
     require_once("../libs/php/funcoes.php");
     require_once("../libs/php/conn.php");
+    $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
 
     foreach ($_POST as $var => $val)
@@ -26,7 +27,7 @@
       $description = str_replace("'","",$description);
       //$description = htmlspecialchars($description);
 
-      $sql = "INSERT INTO sepud.oct_administrative_events(
+      $sql = "INSERT INTO ".$schema."oct_administrative_events(
                           id_addressbook,
                           id_street,
                           opened_timestamp,
@@ -58,7 +59,7 @@
     if($acao == "Atualizar" && $id!="")
     {
 
-      $sql = "UPDATE sepud.oct_administrative_events
+      $sql = "UPDATE ".$schema."oct_administrative_events
               SET
                           id_addressbook   = $id_addressbook,
                           id_street        = $id_street,
@@ -78,7 +79,7 @@
 
     if($_GET['acao']=="Remover" && $_GET['id']!="")
     {
-      $sql = "DELETE FROM sepud.oct_administrative_events WHERE id = '".$_GET['id']."'";
+      $sql = "DELETE FROM ".$schema."oct_administrative_events WHERE id = '".$_GET['id']."'";
       pg_query($sql)or die("SQL Error ".__LINE__."<hr>SQL:<br>".$sql);
       //echo "<br>REMOVIDO...<br>".$sql;
       header("Location: eventos_administrativos_INDEX.php");
