@@ -32,8 +32,6 @@ height: 34px !important;
 <?
               //waze data retrive//
               $agora = now();
-
-              $tipos = "traffic,alerts,irregularities";
               $tipos = "traffic,alerts,irregularities";
               $url; // WAZE URL get from .env vars
               $json  = file_get_contents($url);
