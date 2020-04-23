@@ -15,3 +15,4 @@ http://www.jlle30.com.br/opendata
 - Gestão do sincronismo dos dados de contagem de tráfego dos radares da cidade.
 - ROTSS - Registro de Ocorrências de Trânsito, Segurança e Saúde.
 - SERP - Sistema de Estacionamento Rotativo Público.
+- Monitoramento Waze - Sistema de dashboard temporizado com informações de filas e tempos de congestionamentos.
