@@ -202,6 +202,14 @@
 		}).apply( this, [ jQuery ]);
 
 
+		<?
+				if($_GET['url'])
+				{
+						echo  "$('#wrap').load('".base64_decode($_GET['url'])."');";
+				}
+		?>
+
+
 		$(document.body).on('click', 'a' ,function(event)
 		{
 			var url           = $(this).attr('href');

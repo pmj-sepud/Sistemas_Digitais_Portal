@@ -7,7 +7,12 @@
   $id = $_GET['id'];
   $sistema_nao_config = false;
 
-  if($_SESSION['rotss_nav_retorno_origem']==""){ $retorno_origem = "ocorrencias.php";}else{ $retorno_origem = $_SESSION['rotss_nav_retorno_origem'];}
+  if($_SESSION['rotss_nav_retorno_origem']==""){ $retorno_origem = "ocorrencias.php?lastoc={$id}";}else{ $retorno_origem = $_SESSION['rotss_nav_retorno_origem']."?lastoc={$id}";}
+
+  if(!$_SERVER['HTTP_X_REQUESTED_WITH']){
+      header("Location: ../index_sistema.php?url=".base64_encode($_SERVER['REQUEST_URI']));
+  }
+
 
   if($id != "")
   {
@@ -292,13 +297,28 @@
                         while($s = pg_fetch_assoc($res))
                         {
                           if($dados["id_street"] == $s["id"]){ $sel = "selected";}else{$sel="";}
+                          if($dados["id_street_conner"] == $s["id"]){ $selconner = "selected";}else{$selconner="";}
+
                           echo "<option value='".$s['id']."' ".$sel.">".$s['name']."</option>";
+                          $select_street .= "<option value='".$s['id']."' ".$selconner.">".$s['name']."</option>";
                         }
                       ?>
                     </select>
                </div>
               </div>
 
+              <div class="col-sm-6">
+                <div class="form-group">
+                <label class="control-label">Esquina com:</label>
+                    <select id="id_street_conner" name="id_street_conner" class="form-control select2 changefield" style="width: 100%; height:100%">
+                      <option value="">- - -</option>
+                      <?=$select_street;?>
+                    </select>
+               </div>
+              </div>
+
+            </div>
+            <div class="row">
                   <div class="col-sm-2">
                     <div class="form-group">
                     <label class="control-label">Numero:</label>
@@ -306,6 +326,40 @@
                    </div>
                   </div>
 
+                  <div class="col-sm-4">
+                    <div class="form-group">
+                    <label class="control-label">Bairro:</label>
+                        <select id="id_neighborhood" name="id_neighborhood" class="form-control select2 changefield" style="width: 100%; height:100%">
+                          <option value="">- - -</option>
+                          <?
+                            $sql = "SELECT * FROM ".$schema."neighborhood ORDER BY neighborhood ASC";
+                            $res = pg_query($sql)or die();
+                            while($n = pg_fetch_assoc($res))
+                            {
+                              if($dados["id_neighborhood"]  == $n["id"]){ $sel = "selected";}else{$sel="";}
+                              echo "<option value='".$n['id']."' ".$sel.">".$n['neighborhood']."</option>";
+                            }
+                          ?>
+                        </select>
+                   </div>
+                  </div>
+
+                  <div class="col-md-2">
+                    <div class="form-group">
+                    <label class="control-label">Região:</label>
+                    <select id="region" name="region" class="form-control changefield">
+                      <option value="">- - -</option>
+                      <option value="Norte"    <?=($dados['region']=="Norte"?"selected":"");?>   >Norte</option>
+                      <option value="Sul"      <?=($dados['region']=="Sul"?"selected":"");?>     >Sul</option>
+                      <option value="Leste"    <?=($dados['region']=="Leste"?"selected":"");?>   >Leste</option>
+                      <option value="Oeste"    <?=($dados['region']=="Oeste"?"selected":"");?>   >Oeste</option>
+                      <option value="Nordeste" <?=($dados['region']=="Nordeste"?"selected":"");?>>Nordeste</option>
+                      <option value="Sudeste"  <?=($dados['region']=="Sudeste"?"selected":"");?> >Sudeste</option>
+                      <option value="Noroeste" <?=($dados['region']=="Noroeste"?"selected":"");?>>Noroeste</option>
+                      <option value="Sudoeste" <?=($dados['region']=="Sudoeste"?"selected":"");?>>Sudoeste</option>
+                    </select>
+                  </div>
+                  </div>
 
                   <div class="form-group">
 											<div class="col-md-4 text-center" style="margin-top:28px">
@@ -323,7 +377,7 @@
                  </div>
 
 
-                 <div class="col-md-4">
+                 <div class="col-md-6">
                    <script>
                     var livro_de_endereco = [];
                    <?
@@ -378,22 +432,7 @@
                                 </div>
                </div>
 
-                 <div class="col-md-2">
-                   <div class="form-group">
-                   <label class="control-label">Região:</label>
-                   <select id="region" name="region" class="form-control changefield">
-                     <option value="">- - -</option>
-                     <option value="Norte"    <?=($dados['region']=="Norte"?"selected":"");?>   >Norte</option>
-                     <option value="Sul"      <?=($dados['region']=="Sul"?"selected":"");?>     >Sul</option>
-                     <option value="Leste"    <?=($dados['region']=="Leste"?"selected":"");?>   >Leste</option>
-                     <option value="Oeste"    <?=($dados['region']=="Oeste"?"selected":"");?>   >Oeste</option>
-                     <option value="Nordeste" <?=($dados['region']=="Nordeste"?"selected":"");?>>Nordeste</option>
-                     <option value="Sudeste"  <?=($dados['region']=="Sudeste"?"selected":"");?> >Sudeste</option>
-                     <option value="Noroeste" <?=($dados['region']=="Noroeste"?"selected":"");?>>Noroeste</option>
-                     <option value="Sudoeste" <?=($dados['region']=="Sudoeste"?"selected":"");?>>Sudoeste</option>
-                   </select>
-                 </div>
-               </div>
+
 
              </div>
 
@@ -979,7 +1018,7 @@
 
       <section class="panel panel-featured panel-featured-primary">
         <header class="panel-heading">
-          <h4><span class="text-primary">Fotos:</h4>
+          <h4><span class="text-primary">Fotos e arquivos:</h4>
           <div class="panel-actions">
             <button id="bt_upload_imgs" type="button" class="mb-xs mt-xs mr-xs btn  btn-default disable_button"><i class="fa fa-camera"></i> <sup><i class="fa fa-plus"></i></sup></button>
             <input type="file" id="input_img_files" name="files[]" multiple="multiple" style="display:none" />
@@ -989,33 +1028,79 @@
             <? } ?>
           </div>
         </header>
+        <?
+            if(pg_num_rows($res))
+            {
+              while($f = pg_fetch_assoc($res))
+              {
+                if($_SESSION['origem'] == "devops"){ $dirdev   = "dev/"; }
+                $aux = explode(".", $f['image']);
+                $extensao = strtolower($aux[1]);
+                if($extensao == "png" || $extensao == "jpg" || $extensao == "jpeg")
+                {
+                  $fotos      .=  "<img src='oct/uploads/{$dirdev}{$id}/{$f['image']}' style='padding:2px; width:100px' data-toggle='modal' data-target='#modalFotos' />";
+                  $arqs_imgs[] = "oct/uploads/{$dirdev}{$id}/{$f['image']}";
+                  $qtd_fotos++;
+                }else{
+                  $qtd_arqs++;
+                  $arqs .= "<tr><td>{$f['image']}</td>
+                                <td class='text-center'><a href='oct/uploads/{$dirdev}{$id}/{$f['image']}' target='_blank' ajax='false'><i class='fa fa-eye text-success'></i></a></td>
+                                <td class='text-center remover_arq' style='display:none'><a href='oct/arq_remove.php?id={$f['id']}&id_oc={$id}&arq=oct/uploads/{$dirdev}{$id}/{$f['image']}'><i class='fa fa-trash text-danger'></i></a></td>
+                            </tr>";
+                }
+              }
+
+              unset($aux,$id_img);
+
+            }
+        ?>
+
+
+
+
         <div class="panel-body">
-          <div class="row">
-              <div class="col-sm-12 text-center">
-                <?
 
-                    if(pg_num_rows($res))
-                    {
-                      while($f = pg_fetch_assoc($res))
-                      {
-                        if($_SESSION['origem'] == "devops"){ $dirdev   = "dev/"; }
+            <?
+            if(!pg_num_rows($res)) //Não há nenhum tipo de arquivo
+            {
+              echo "<div class='row'>
+                      <div class='col-sm-12 text-center'>
+                          <i class='fa fa-camera fa-5x text-muted'></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class='fa fa-file-o fa-5x text-muted'></i>
+                      </div>
+                    </div>";
+            }else{
+              //FOTOS
+              echo  "<div class='row'>
+                        <div class='col-sm-12 text-center'>";
+                            if($qtd_fotos>0){ echo $fotos; }
+                            else{ echo "<i class='fa fa-camera fa-5x text-muted'></i>";}
+              echo      "</div>
+                    </div>";
 
-                        echo  "<img src='oct/uploads/".$dirdev.$id."/".$f['image']."' style='padding:2px; width:100px' data-toggle='modal' data-target='#modalFotos' />";
-                        $arqs_imgs[] = "oct/uploads/".$dirdev.$id."/".$f['image'];
-                      }
-                      unset($aux,$id_img);
+             //ARQUIVOS
+              echo "<div class='row'>
+                      <div class='col-sm-12'>";
+                            if($qtd_arqs>0){
+                              echo "<table class='table table-condensed'>
+                                    <thead><tr><td class='text-muted'><i>Arquivo</i></td>
+                                               <td class='text-muted text-center'><i>Visualizar</i></td>
+                                               <td class='text-muted text-center remover_arq' style='display:none'><i>Remover</i></td></div>
+                                    </thead><tbody>";
+                                echo $arqs;
+                              echo "</tbody><tfoot>";
+                                  echo "<tr><td colspan='3' class='text-right'><button class='btn btn-danger btn-xs' onclick='$(\".remover_arq\").toggle(\"slow\", function(){}); return false;'><i class='fa fa-trash'></i> Remover arquivo</button></td></tr>";
+                              echo "</tfoot></table>";
+                            }else{
+                              echo "<hr><div class='text-center' style='margin-bottom:20px'><i class='fa fa-file-o fa-5x text-muted'></i></div>";
+                            }
+              echo "</div>
+                </div>";
 
-                    }else {
-                      echo "<div class='text-center' style='margin-bottom:20px'><i class='fa fa-camera fa-5x text-muted'></i></div>";
-                    }
-                ?>
-
-
-              </div>
-          </div>
+}
+?>
        </div>
        <footer class="panel-footer text-right">
-         <span id="msg" class="text-muted"><?=pg_num_rows($res);?> foto(s)</span>
+         <span id="msg" class="text-muted"><b><?=$qtd_fotos;?></b> foto(s) e <b><?=$qtd_arqs?></b> arquivo(s)</span>
        </footer>
      </section>
 <? } ?>
@@ -1106,9 +1191,7 @@
                   $id_img = ltrim(end($aux),"0");
                   echo  "<img id='".$id_img."' class='loadimage img-responsive img-rounded img-thumbnail' src='".$arqs_imgs[$i]."' style='max-width:100px; max-height:90px' />";
                 }
-
             ?>
-
           </div>
           <div class="col-sm-8">
               <div class="row">
@@ -1133,6 +1216,7 @@
 </div>
 
 <script>
+ $(window).scrollTop(0);
 
 $("#bt_print").click(function(){
 	var vw = window.open('oct/oc_print.php?id_oc=<?=$id;?>&id_workshift=<?=$turno_oc['id'];?>',
@@ -1185,6 +1269,19 @@ $(".bt_recarregar_oc").click(function(){ $('#wrap').load("oct/FORM.php?id=<?=$id
 
 var id_img_remover;
 var removeu_image = false;
+
+
+function removeArq(id_oc, id_arq, arq)
+{
+
+//  var srcDel = $("#foto_ativa").attr("src");
+//  $("#debug_fotos").html("Removendo foto: "+srcDel);
+//  $("#area_foto").html("<i class='fa fa-camera fa-5x text-muted'></i>");
+//  $("#"+id_img_remover).hide();
+//  $("#debug_fotos").load("oct/image_remove.php?id_oc=<?=$id;?>&id="+id_img_remover+"&arq="+srcDel);
+//  removeu_image = true;
+
+};
 
 $("#bt_remover_foto").click(function(e){
 

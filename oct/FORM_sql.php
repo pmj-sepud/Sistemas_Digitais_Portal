@@ -4,16 +4,17 @@
     require_once("../libs/php/funcoes.php");
     require_once("../libs/php/conn.php");
     $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
+    $oct_form = ($_SESSION['company_configs']['oct_form']!=""?$_SESSION['company_configs']['oct_form']:"FORM.php");
 
     extract($_POST);
 
-    $datafinal = $data." ".$hora;
+    $datafinal = $data." ".$hora.":00";
 
 
     if($acao == "inserir" && $userid != "" && $_SESSION['id_company'])
     {
 
-      if($id_street          == ""){ $id_street           ="Null"; }else{ $id_street         = "'".$id_street."'";     }
+      if($id_street          == ""){ $id_street          ="Null"; }else{ $id_street          = "'".$id_street."'";     }
       if($street_number      == ""){ $street_number      ="Null"; }else{ $street_number      = "'".$street_number."'"; }
       if($id_workshift       == ""){ $id_workshift       ="Null"; }else{ $id_workshift       = "'".$id_workshift."'";  }
       if($id_addressbook     == ""){ $id_addressbook     ="Null"; }else{ $id_addressbook     = "'".$id_addressbook."'";}
@@ -22,6 +23,8 @@
       if($region             == ""){ $region             ="Null"; }else{ $region             = "'".$region."'";        }
       if($requester_origin   == ""){ $requester_origin   ="Null"; }else{ $requester_origin   = "'".$requester_origin."'";   }
       if($requester_protocol == ""){ $requester_protocol ="Null"; }else{ $requester_protocol = "'".$requester_protocol."'"; }
+      if($id_street_conner   == ""){ $id_street_conner   ="Null"; }else{ $id_street_conner   = "'".$id_street_conner."'";   }
+      if($id_neighborhood    == ""){ $id_neighborhood    ="Null"; }else{ $id_neighborhood    = "'".$id_neighborhood."'";    }
 
 
         $sql = "INSERT INTO ".$schema."oct_events
@@ -44,7 +47,9 @@
                      id_garrison,
                      region,
                      requester_origin,
-                     requester_protocol)
+                     requester_protocol,
+                     id_street_conner,
+                     id_neighborhood)
               VALUES ('".$datafinal."',
                       '".$description."',
                       '".$endereco."',
@@ -64,14 +69,16 @@
                       ".$id_garrison.",
                       ".$region.",
                       ".$requester_origin.",
-                      ".$requester_protocol.") returning id";
+                      ".$requester_protocol.",
+                      ".$id_street_conner.",
+                      ".$id_neighborhood.") returning id";
 
         $res = pg_query($sql) or die("Erro ".__LINE__."SQL: ".$sql);
         $aux = pg_fetch_assoc($res);
 
         logger("Inserção","OCT", "Ocorrência n.".$aux['id']);
 
-        header("Location: FORM.php?id=".$aux['id']);
+        header("Location: {$oct_form}?id=".$aux['id']);
         exit();
     }
 
@@ -99,6 +106,8 @@
         if($region          == ""){ $region         ="Null"; }else{ $region        = "'".$region."'";         }
         if($requester_origin   == ""){ $requester_origin   ="Null"; }else{ $requester_origin   = "'".$requester_origin."'";   }
         if($requester_protocol == ""){ $requester_protocol ="Null"; }else{ $requester_protocol = "'".$requester_protocol."'"; }
+        if($id_street_conner   == ""){ $id_street_conner   ="Null"; }else{ $id_street_conner   = "'".$id_street_conner."'";   }
+        if($id_neighborhood    == ""){ $id_neighborhood    ="Null"; }else{ $id_neighborhood    = "'".$id_neighborhood."'";    }
 
 
 
@@ -120,7 +129,9 @@
                      id_workshift       = ".$id_workshift.",
                      region             = ".$region.",
                      requester_origin   = ".$requester_origin.",
-                     requester_protocol = ".$requester_protocol."
+                     requester_protocol = ".$requester_protocol.",
+                     id_street_conner   = ".$id_street_conner.",
+                     id_neighborhood    = ".$id_neighborhood."
                      ".$sql_closure."
                      ".$sql_arrival."
                      ".$sql_on_way."

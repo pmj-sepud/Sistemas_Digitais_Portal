@@ -17,6 +17,8 @@
         $monit[] = "waze_stats_05.php";
         $monit[] = "waze_stats_00.php";
         $monit[] = "waze_stats_03.php";
+        $monit[] = "waze_stats_06.php";
+        $monit[] = "waze_stats_07.php";
         //$monit[] = "waze_stats_01.php"; // Evolução manhã
         //if($agora['hora']>11){ $monit[] = "waze_stats_02.php"; } //Evolução tarde
   }

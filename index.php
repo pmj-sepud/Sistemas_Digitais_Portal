@@ -148,6 +148,10 @@ margin-top: 50px;
 								<!--<a href="index2.php?param=smart" class="btn btn-success btn-lg btn-block">Smart Mobility</a>-->
 								<a href="index2.php?param=portal" class="btn btn-primary btn-lg btn-block">Portal de gestão</a>
 								<a href="index2.php?param=dev" class="btn btn-info btn-lg btn-block">Área de treinamento</a>
+
+								<? if($_GET['modulo']=="mobile"){ ?>
+										<a href="mobile/" class="btn btn-danger btn-lg btn-block">ROTSS - Mobile</a>
+								<? } ?>
 						</div>
 				</div>
 	    </div>

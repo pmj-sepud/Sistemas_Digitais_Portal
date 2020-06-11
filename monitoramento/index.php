@@ -13,6 +13,8 @@
   $mon[] = array("arq" => "waze_stats_04.php", "desc" => "Mapa do Waze em tempo real");
   $mon[] = array("arq" => "waze_stats_05.php", "desc" => "Alertas da plataforma WAZE no momento atual");
   $mon[] = array("arq" => "waze_stats_06.php", "desc" => "Evolução diária dos congestionamentos e tempos de atrasos acumulados na DATA DE ONTEM (".$data_format.")");
+  $mon[] = array("arq" => "waze_stats_07.php", "desc" => "Evolução mensal dos congestionamentos e tempos de atrasos acumulados");
+//  $mon[] = array("arq" => "weather_stats_00.php", "desc" => "Monitoramento das condições climáticas");
 ?>
 
 <section role="main" class="content-body">

@@ -13,7 +13,6 @@
 
   $_SESSION['rotss_nav_retorno_origem'] = "ocorrencias_todas.php";
 
-
   if(isset($_POST['filtro_data']) && $_POST['filtro_data'] != "")
   {
     $_GET['filtro_data'] = date2mkt($_POST['filtro_data']);
@@ -70,16 +69,17 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
                (SELECT COUNT(*) FROM ".$schema."oct_rel_events_providence WHERE id_event  = EV.id) as qtd_providencias,
                (SELECT COUNT(*) FROM ".$schema."oct_rel_events_images     WHERE id_events = EV.id) as qtd_fotos,
                U.NAME  as user_name,
-
-               AB.name  as addressbook_name
+               AB.name as addressbook_name,
+               NE.neighborhood
          FROM
-               ".$schema."oct_events     AS  EV
-             JOIN  ".$schema."oct_event_type  as EVT ON EV.id_event_type = EVT.id
-             JOIN  ".$schema."users           as   U ON U.id             = EV.id_user
-         JOIN  ".$schema."company             as   C ON C.id             = EV.id_company
-         LEFT JOIN ".$schema."streets         as   S ON S.id             = EV.id_street
-         LEFT JOIN ".$schema."oct_addressbook as  AB ON AB.id            = EV.id_addressbook
-         WHERE  (EV.id_company = '".$_SESSION['id_company']."' or EV.id in (SELECT id_event FROM ".$schema."oct_rel_events_providence WHERE id_company_requested = '".$_SESSION['id_company']."' AND id_providence = 53))
+                   {$schema}oct_events      as  EV
+             JOIN  {$schema}oct_event_type  as EVT ON EV.id_event_type = EVT.id
+             JOIN  {$schema}users           as   U ON U.id             = EV.id_user
+             JOIN  {$schema}company         as   C ON C.id             = EV.id_company
+         LEFT JOIN {$schema}streets         as   S ON S.id             = EV.id_street
+         LEFT JOIN {$schema}oct_addressbook as  AB ON AB.id            = EV.id_addressbook
+         LEFT JOIN {$schema}neighborhood    as  NE ON NE.id            = EV.id_neighborhood
+        WHERE  (EV.id_company = '{$_SESSION['id_company']}' or EV.id in (SELECT id_event FROM {$schema}oct_rel_events_providence WHERE id_company_requested = '{$_SESSION['id_company']}' AND id_providence = 53))
             AND EV.active = 't'
           ORDER BY EV.date DESC";
 
@@ -120,6 +120,10 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
      if($p["id"]==14 || $p["id"]==15) //ID 14 - Colocação de cones, 15 - Remoção de cones
      {
         $providencias[$p["id_event"]]["mat"] = true;
+     }
+     if($p["id"]==53) //ID 53 - Encaminhamento para outro órgão
+     {
+        $providencias[$p["id_event"]]["enc"] = true;
      }
    }
 
@@ -301,7 +305,7 @@ if($proximo >= $hoje){ $proximo = $hoje; $bt_prox = false; /*$filtro_ativo = " O
                       <table class="table mb-none">
 
 <?
-echo "<tr><td colspan='10' class='success'>Ocorrências ativas</td><tr>";
+echo "<tr><td colspan='13' class='success'>Ocorrências ativas</td><tr>";
 if(isset($dados) && count($dados))
 {
     for($i = 0; $i < count($dados); $i++)
@@ -318,15 +322,31 @@ if(isset($dados) && count($dados))
       else{                                           $prov_gui = "<span class='text-center text-muted'>-</span>";}
       if($providencias[$dados[$i]["id"]]["mat"]==1){  $prov_mat = "<span class='text-center mb-xs mt-xs mr-xs btn btn-warning'>MAT</span>";    }
       else{                                           $prov_mat = "<span class='text-center text-muted'>-</span>";}
+      if($providencias[$dados[$i]["id"]]["enc"]==1){  $prov_enc = "<span class='text-center mb-xs mt-xs mr-xs btn btn-info'>ENC</span>";    }
+      else{                                           $prov_enc = "<span class='text-center text-muted'>-</span>";}
 
       if($dados[$i]['status']=="Inativa"){$class_status="info";}else{ $class_status = "success"; }
 
+      if($_GET['lastoc']==$dados[$i]['id'])
+      {
+         $class_lastoc = "primary";
+         $icon_lastoc  = "<i class='fa fa-eye'></i><br>";
+         $style_lastoc = "style='background-color:#CFFFFE'";
+         $style_header = "style='background-color:#B5EEFF'";
+       }else{
+         $class_lastoc = $class_status;
+         $style_header = "style='background-color:#e2fee2'";
+         unset($icon_lastoc, $style_lastoc);
+       }
+
     ?>
                           <tr>
-                              <td rowspan="3" style="vertical-align: middle;" class="text-center <?=$class_status;?>"><?=$dados[$i]['id']; if($dados[$i]['id_workshift']!=""){ echo ".".$dados[$i]['id_workshift'];}?></td>
-                              <td colspan="9" style="background-color:#e2fee2"><b><?=$dados[$i]['event_type'];?></b></td>
+                              <td rowspan="3" style="vertical-align: middle;" class="text-center <?=$class_lastoc;?>" id="oc_<?=$dados[$i]['id'];?>">
+                                  <?=$icon_lastoc.$dados[$i]['id']; if($dados[$i]['id_workshift']!=""){ echo ".".$dados[$i]['id_workshift'];}?>
+                              </td>
+                              <td colspan="12" <?=$style_header;?>><b><?=$dados[$i]['event_type'];?></b></td>
                             </tr>
-                            <tr>
+                            <tr <?=$style_lastoc;?>>
 
                               <?
                                   $local = "";
@@ -340,19 +360,22 @@ if(isset($dados) && count($dados))
                               ?>
 
                               <td><small><i class="text-muted">Logradouro:</i></small><br><?=$local;?></td>
+                              <td><small><i class="text-muted">Bairro:</i></small><br><?=$dados[$i]['neighborhood'];?></td>
                               <td><small><i class="text-muted">Data de abertura:</i></small><br><?=$dt_abertura;?></td>
+                              <td><small><i class="text-muted">Data de chegada:</i></small><br><?=$dt_chegada;?></td>
                               <td><small><i class="text-muted">Origem:</i></small><br><?=($dados[$i]['company_acron']==$_SESSION['company_acron']?$dados[$i]['company_acron']:"<b class='text-success'>".$dados[$i]['company_acron']."</b>");?></td>
                               <td><small><i class="text-muted">Status:</i></small><br><?=($dados[$i]['status']=="Inativa"?"<b class='text-info'>Inativa</b>":$dados[$i]['status']);?></td>
 
+                              <td style="vertical-align: middle;" class="text-center"><?=$prov_enc;?></td>
                               <td style="vertical-align: middle;" class="text-center"><?=$prov_adm;?></td>
                               <td style="vertical-align: middle;" class="text-center"><?=$prov_gui;?></td>
                               <td style="vertical-align: middle;" class="text-center"><?=$prov_mat;?></td>
                               <td style="vertical-align: middle;" class="text-center"><?=$qtd_fotos;?></td>
                               <td style="vertical-align: middle;" class="text-center"><a href='oct/<?=$oct_form;?>?id=<?=$dados[$i]['id'];?>' class='mb-xs mt-xs mr-xs btn btn-default loading2'><i class='fa fa-pencil'></i></a></td>
                             </tr>
-                            <tr>
+                            <tr <?=$style_lastoc;?>>
                               <td colspan='2'><small><i class="text-muted">Responsável:</i></small><br><?=$dados[$i]['user_name'];?></td>
-                              <td colspan='7'>
+                              <td colspan='10'>
                                 <?
                                       unset($passenger, $garrison_txt, $guarnicao_empenhada, $str, $info);
                                       $sql = "SELECT
@@ -438,7 +461,12 @@ if(isset($dados) && count($dados))
 </section>
 
 <script>
-
+<?
+  if($_GET['lastoc'])
+  {
+    echo "$('html, body').animate({scrollTop: (($('#oc_{$_GET['lastoc']}').first().offset().top)-150)},100);";
+  }
+?>
 $("#bt_submit").click(function(){
     $('#modalFiltro').modal('hide');
     $('body').removeClass('modal-open');

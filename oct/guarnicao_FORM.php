@@ -210,7 +210,7 @@
                                             echo "</select></div>";
 
                                         }else{
-                                            $sql = "SELECT * FROM ".$schema."oct_fleet WHERE id_company = '".$_SESSION['id_company']."' ORDER BY brand DESC, model ASC, nickname ASC";
+                                            $sql = "SELECT * FROM ".$schema."oct_fleet WHERE active = 't' AND id_company = '".$_SESSION['id_company']."' ORDER BY brand DESC, model ASC, nickname ASC";
                                             $res = pg_query($sql)or die("Erro ".__LINE__);
                                             while($d = pg_fetch_assoc($res)){ $autos[$d['type']][] = $d;}
 

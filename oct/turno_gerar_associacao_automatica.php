@@ -93,20 +93,57 @@
                   echo "<br>04. Dia da semana do início do turno: <b>[".$dia_da_semana_txt[$dia_da_semana]['abreviado']."] ".$dia_da_semana_txt[$dia_da_semana]['completo']."</b>";
                   echo "<br>05. Orgão: <b>[".$_SESSION['id_company']."] ".$_SESSION['company_acron']." - ".$_SESSION['company_name']."</b>";
                   echo "<br>06. Preparando  colaboradores para inserção neste turno de trabalho: ";
-
-                  $sql = "SELECT
-                          		id, name, nickname, workshift_group_time_init, workshift_group_time_finish, initial_workshift_position, work_status
+/*
+              echo     $sql = "SELECT
+                          		id, name, nickname, workshift_group_time_init, workshift_group_time_finish, initial_workshift_position, work_status, workshift_subgroup_time_init, workshift_subgroup_time_finish, workshift_subgroup
                           FROM
-                          	".$schema."users
+                          	{$schema}users
                           WHERE
-                          	id_company = '".$_SESSION['id_company']."'
+                          	id_company = '{$_SESSION['id_company']}'
                           	AND active = TRUE
-                          	AND workshift_group IS NOT NULL
-                          	AND workshift_group_time_init IS NOT NULL
-                          	AND workshift_group_time_finish IS NOT NULL
-                          	AND (workshift_group = '".$dados_workshift['workshift_group']."' OR workshift_subgroup = '".$dados_workshift['workshift_group']."')
+                            AND
+                                ((workshift_group             IS NOT NULL AND
+                                  workshift_group_time_init   IS NOT NULL AND
+                                  workshift_group_time_finish IS NOT NULL AND
+                                  workshift_group = '{$dados_workshift['workshift_group']}')
+                                 OR
+                                 (workshift_subgroup_time_init   IS NOT NULL AND
+                                  workshift_subgroup_time_finish IS NOT NULL AND
+                                  workshift_subgroup = '{$dados_workshift['workshift_group']}'))
                           ORDER BY
                           	workshift_group_time_init ASC, name ASC";
+*/
+                            $sql = "SELECT id,
+                                    			 name,
+                                    			 nickname,
+                                    			 workshift_group_time_init,
+                                    			 workshift_group_time_finish,
+                                    			 initial_workshift_position,
+                                    			 work_status,
+                                    			 workshift_group
+                                    FROM
+                                    			sepud.users
+                                    WHERE
+                                    			id_company = '{$_SESSION['id_company']}' AND
+                                    			active = TRUE AND
+                                    			(workshift_group IS NOT NULL AND workshift_group_time_init IS NOT NULL AND workshift_group_time_finish IS NOT NULL AND workshift_group = '{$dados_workshift['workshift_group']}')
+                                    UNION
+                                    SELECT id,
+                                    			 name,
+                                    			 nickname,
+                                    			 workshift_subgroup_time_init,
+                                    			 workshift_subgroup_time_finish,
+                                    			 initial_workshift_position,
+                                    			 work_status,
+                                    			 workshift_subgroup
+                                    FROM
+                                    			sepud.users
+                                    WHERE
+                                    			id_company = '{$_SESSION['id_company']}' AND
+                                    			active = TRUE AND
+                                    			(workshift_subgroup_time_init IS NOT NULL AND workshift_subgroup_time_finish IS NOT NULL AND workshift_subgroup = '{$dados_workshift['workshift_group']}' )
+                                    ORDER BY
+                                    	workshift_group_time_init ASC, name ASC";
                   $res = pg_query($sql) or die("SQL error ".__LINE__);
 
                   if(pg_num_rows($res))

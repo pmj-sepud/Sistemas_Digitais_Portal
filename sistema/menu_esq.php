@@ -157,6 +157,7 @@ require_once("libs/php/conn.php");
                           <a><span>Configurações</span></a>
                           <ul class="nav nav-children">
                             <? if(check_perm("3_16","R")){ echo "<li><a href='oct/agenda_de_endereco_INDEX.php' menuautoclose='true'>Agenda de endereço</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Agenda de endereço</a></li>"; }?>
+                            <? if(check_perm("3_19","R")){ echo "<li><a href='oct/frota_INDEX.php' menuautoclose='true'>Frota de veículos</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Frota de veículos</a></li>"; }?>
                           </ul>
                         </li>
                     </ul>

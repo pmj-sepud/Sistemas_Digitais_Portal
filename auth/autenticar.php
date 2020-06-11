@@ -39,7 +39,13 @@ if((isset($username) && trim($username) != "") && (isset($password) && trim($pas
 			$res = pg_query($sql)or die("SQL Error: ".$sql);
 			while($cc = pg_fetch_assoc($res))
 			{
-				$_SESSION['company_configs'][$cc['name']]=$cc['value'];
+				if($cc['name']=="oct_form" && $_SESSION['id']==1)
+				{
+					$_SESSION['company_configs'][$cc['name']]=$cc['value'];	
+				}else {
+					$_SESSION['company_configs'][$cc['name']]=$cc['value'];
+				}
+
 			}
 
 		}

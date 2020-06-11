@@ -96,8 +96,8 @@
                                         echo "<tr><th>Guarnição:</th></tr>";
                                         echo "<tr><td><div class='alert alert-warning text-center'>Você não esta associado a nenhuma guarnição ativa.</div></td></tr>";
                                         echo "<tr><td class='text-center'>";
-                                            echo "<a href='oct/guarnicao_USERFORM.php?acao=existente'><button class='btn btn-success'>Entrar numa guarnição existente</button></a> ";
-                                            echo "<a href='oct/guarnicao_USERFORM.php?acao=nova'><button class='btn btn-primary'>Criar uma nova guarnição</button></a>";
+                                            echo "<div class='row'><div class='col-sm-12'><a href='oct/guarnicao_USERFORM.php?acao=existente'><button class='btn btn-lg btn-block btn-success'>Entrar numa guarnição existente</button></a></div></div>";
+                                            echo "<div class='row' style='margin-top:5px'><div class='col-sm-12'><a href='oct/guarnicao_USERFORM.php?acao=nova'><button class='btn btn-lg btn-block btn-primary'>Criar uma nova guarnição</button></a></div></div>";
                                         echo "</td></tr>";
                                       }
                                 }else {
@@ -121,7 +121,6 @@
                                       <thead><tr><th>#</th>
                                              <th>Apelido</th>
                                              <th>Km inicial</th>
-                                             <th>Km final</th>
                                       </thead><tbody>";
                                     foreach ($guarnicao['veiculos'] as $id_rel_garrison_vehicle => $vals){
                                         $qtd_veiculos++;
@@ -129,7 +128,9 @@
                                             echo "<td><small class='text-muted'>".$vals['id']."</small></td>";
                                             echo "<td>".$vals['nickname']."</td>";
                                             echo "<td>".number_format($vals['initial_km'],0,'','.')."</td>";
-                                            echo "<td><input name='".$vals['id']."_kmfinal' type='number' class='form-control campo_km' value=''></td>";
+                                        echo "</tr>";
+                                        echo "<tr>";
+                                        echo "<td colspan='3'><small>Km final:</small><input name='".$vals['id']."_kmfinal' type='number' class='form-control campo_km' value=''></td>";
                                         echo "</tr>";
                                     }
                                 echo "</tbody></table>";

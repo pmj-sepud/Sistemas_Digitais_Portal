@@ -10,6 +10,7 @@
   $data_db      = $agora['datasrv'];
   //$filtro_ativo = " OR  EV.active = 't'";
   $hoje         = time();
+  $filtro_data  = true;
 
   if($_GET['rotss_nav_filtro_data_reset']=="true"){ unset($_SESSION['rotss_nav_filtro_data']);}
   $_SESSION['rotss_nav_retorno_origem'] = "ocorrencias.php";
@@ -57,18 +58,19 @@
       while($dP = pg_fetch_assoc($res)){ $vetPlacas[] = $dP["id_events"];}
       $filtro_placa = implode(",",$vetPlacas);
       $bt_filtro_placa = true;
+      $filtro_data     = false;
   }
 
-  if(isset($_POST['filtro_num_oc']) && $_POST['filtro_num_oc'] != "")
-  {
-        $filtro_num_oc = $_POST['filtro_num_oc'];
-  }
+  if(isset($_POST['filtro_num_oc'])    && $_POST['filtro_num_oc']    != ""){ $filtro_num_oc    = $_POST['filtro_num_oc'];   $filtro_data = false;}
+  if(isset($_POST['filtro_num_proto']) && $_POST['filtro_num_proto'] != ""){ $filtro_num_proto = $_POST['filtro_num_proto'];$filtro_data = false;}
+  if(isset($_POST['filtro_id_street']) && $_POST['filtro_id_street'] != ""){ $filtro_id_street = $_POST['filtro_id_street'];$filtro_data = false;}
 
-/*
+
   $sql = "SELECT
                EVT.name as event_type,
                EV.id,
                EV.date,
+               EV.closure,
                EV.arrival,
                EV.status,
                EV.victim_inform,
@@ -86,65 +88,31 @@
                (SELECT COUNT(*) FROM ".$schema."oct_rel_events_providence WHERE id_event  = EV.id) as qtd_providencias,
                (SELECT COUNT(*) FROM ".$schema."oct_rel_events_images     WHERE id_events = EV.id) as qtd_fotos,
                U.NAME  as user_name,
-               --UG.name as user_name_garrison, UG.nickname as nickname_garrison,
-	             --F.plate, F.brand, F.model,
-               AB.name  as addressbook_name
+               AB.name  as addressbook_name,
+               NE.neighborhood
          FROM
-               ".$schema."oct_events     AS  EV
-        --LEFT JOIN ".$schema."oct_rel_garrison_persona GP ON GP.id_garrison = EV.id_garrison AND GP.type = 'Motorista'
-       	--LEFT JOIN ".$schema."users 									 UG ON UG.id = GP.id_user
+                   ".$schema."oct_events      as EV
+              JOIN ".$schema."oct_event_type  as EVT ON EV.id_event_type = EVT.id
+              JOIN ".$schema."users           as U   ON U.id             = EV.id_user
+              JOIN ".$schema."company         as C   ON C.id             = EV.id_company
+         LEFT JOIN ".$schema."streets         as S   ON S.id             = EV.id_street
+         LEFT JOIN ".$schema."oct_addressbook as AB  ON AB.id            = EV.id_addressbook
+         LEFT JOIN {$schema}neighborhood      as  NE ON NE.id            = EV.id_neighborhood
+         WHERE 1=1 ";
+           if($filtro_placa != ""){     $sql .= " AND EV.id in (".$filtro_placa.")";                         }
+           if($filtro_num_oc != ""){    $sql .= " AND EV.id = '".$filtro_num_oc."'";                         }
+           if($filtro_num_proto != ""){ $sql .= " AND EV.requester_protocol ilike '%".$filtro_num_proto."%'";}
+           if($filtro_id_street != ""){ $sql .= " AND EV.id_street =  '".$filtro_id_street."'";              }
 
-       	--LEFT JOIN ".$schema."oct_garrison 							G ON G.id  = EV.id_garrison
-       	--LEFT JOIN ".$schema."oct_fleet                 F ON F.id  = G.id_fleet
-             JOIN  ".$schema."oct_event_type  as EVT ON EV.id_event_type = EVT.id
-             JOIN  ".$schema."users           as   U ON U.id             = EV.id_user
-         JOIN  ".$schema."company             as   C ON C.id             = EV.id_company
-         LEFT JOIN ".$schema."streets         as   S ON S.id             = EV.id_street
-         LEFT JOIN ".$schema."oct_addressbook as  AB ON AB.id            = EV.id_addressbook
-         WHERE ";
-*/
-$sql = "SELECT
-             EVT.name as event_type,
-             EV.id,
-             EV.date,
-             EV.arrival,
-             EV.status,
-             EV.victim_inform,
-             EV.victim_found,
-             EV.active,
-             EV.address_reference,
-             EV.id_street,
-             EV.id_workshift,
-             EV.id_garrison,
-             C.id    as id_company,
-             C.name  as company,
-             C.acron as company_acron,
-             S.name  as street_name,
-             (SELECT COUNT(*) FROM ".$schema."oct_victim                WHERE id_events = EV.ID) as vitimas_encontradas,
-             (SELECT COUNT(*) FROM ".$schema."oct_rel_events_providence WHERE id_event  = EV.id) as qtd_providencias,
-             (SELECT COUNT(*) FROM ".$schema."oct_rel_events_images     WHERE id_events = EV.id) as qtd_fotos,
-             U.NAME  as user_name,
-             AB.name  as addressbook_name
-       FROM
-                 ".$schema."oct_events     as EV
-            JOIN ".$schema."oct_event_type as EVT ON EV.id_event_type = EVT.id
-            JOIN ".$schema."users          as U   ON U.id             = EV.id_user
-            JOIN ".$schema."company        as C   ON C.id             = EV.id_company
-       LEFT JOIN ".$schema."streets         as S   ON S.id             = EV.id_street
-       LEFT JOIN ".$schema."oct_addressbook as AB  ON AB.id            = EV.id_addressbook
-       WHERE ";
-         if($filtro_placa != "")
-         {
-              $sql .= " EV.id in (".$filtro_placa.")";
-         }elseif($filtro_num_oc != ""){
-              $sql .= " EV.id = '".$filtro_num_oc."'";
-         }else{
+           $sql .= " AND (EV.id_company = '".$_SESSION['id_company']."' or EV.id in (SELECT id_event FROM ".$schema."oct_rel_events_providence WHERE id_company_requested = '".$_SESSION['id_company']."' AND id_providence = 53))";
 
-           $sql .= " (EV.id_company = '".$_SESSION['id_company']."' or EV.id in (SELECT id_event FROM ".$schema."oct_rel_events_providence WHERE id_company_requested = '".$_SESSION['id_company']."' AND id_providence = 53))
-                      AND EV.date BETWEEN '".$data_db." 00:00:00' AND '".$data_db." 23:59:59'".$filtro_ativo;
-         }
-         $sql .= " ORDER BY EV.id DESC";
+           if($filtro_data){
+             $sql .= " AND (EV.date BETWEEN '".$data_db." 00:00:00' AND '".$data_db." 23:59:59'
+                        OR  EV.closure BETWEEN '".$data_db." 00:00:00' AND '".$data_db." 23:59:59')";
+           }
 
+
+           $sql .= " ORDER BY EV.id DESC";
 
 
  $rs  = pg_query($sql);
@@ -185,6 +153,10 @@ $sql = "SELECT
      if($p["id"]==14 || $p["id"]==15) //ID 14 - Colocação de cones, 15 - Remoção de cones
      {
         $providencias[$p["id_event"]]["mat"] = true;
+     }
+     if($p["id"]==53) //ID 53 - Encaminhamento para outro órgão
+     {
+        $providencias[$p["id_event"]]["enc"] = true;
      }
    }
 
@@ -345,7 +317,6 @@ $sql = "SELECT
         <a href="oct/<?=$oct_form;?>?filtro_data=<?=$_GET['filtro_data'];?>">
           <button type="button" class="mb-xs mt-xs mr-xs btn  btn-danger"><i class="fa fa-exclamation-triangle"></i> Nova ocorrência</button>
         </a>
-
         <button type='button' class='btn btn-primary' data-toggle='modal' data-target='#modalFiltro'><i class='fa fa-search'></i></button><br>
         <?
         if(!$bt_filtro_placa){ ?>
@@ -386,6 +357,17 @@ $sql = "SELECT
                         <button type="button" class="mb-xs mt-xs mr-xs btn  btn-danger"><i class="fa fa-exclamation-triangle"></i> Nova ocorrência</button>
                       </a>
 
+
+                      <?
+                      /******************************************
+                      if($_SESSION['id']==1){ ?>
+                        <a href="oct/FORM.php?filtro_data=<?=$_GET['filtro_data'];?>">
+                          <button type="button" class="mb-xs mt-xs mr-xs btn  btn-danger"><i class="fa fa-exclamation-triangle"></i> Nova ocorrência FORM Original</button>
+                        </a>
+                      <?  }
+
+                      *************/
+                      ?>
   <?
 
     echo "<button type='button' class='btn btn-primary' data-toggle='modal' data-target='#modalFiltro'>
@@ -428,23 +410,12 @@ if(!$bt_filtro_placa){ ?>
                   </header>
 									<div class="panel-body">
 
-<?/*
-    if($_SESSION['id']==1)
-    {
-      print_r_pre($_POST);
-      print_r_pre($sql);
-    }
-  */
-?>
-
-
-
                     <div class="table-responsive">
 
                       <table class="table mb-none">
 
 <?
-echo "<tr><td colspan='10' class='success'>Ocorrências ativas</td><tr>";
+echo "<tr><td colspan='13' class='success'>Ocorrências ativas</td><tr>";
 if(isset($dados) && count($dados))
 {
     for($i = 0; $i < count($dados); $i++)
@@ -461,15 +432,36 @@ if(isset($dados) && count($dados))
       else{                                           $prov_gui = "<span class='text-center text-muted'>-</span>";}
       if($providencias[$dados[$i]["id"]]["mat"]==1){  $prov_mat = "<span class='text-center mb-xs mt-xs mr-xs btn btn-warning'>MAT</span>";    }
       else{                                           $prov_mat = "<span class='text-center text-muted'>-</span>";}
+      if($providencias[$dados[$i]["id"]]["enc"]==1){  $prov_enc = "<span class='text-center mb-xs mt-xs mr-xs btn btn-info'>ENC</span>";    }
+      else{                                           $prov_enc = "<span class='text-center text-muted'>-</span>";}
 
       if($dados[$i]['status']=="Inativa"){$class_status="info";}else{ $class_status = "success"; }
 
+      if($_GET['lastoc']==$dados[$i]['id'])
+      {
+         $class_lastoc = "primary";
+         $icon_lastoc  = "<i class='fa fa-eye'></i><br>";
+         $style_lastoc = "style='background-color:#CFFFFE'";
+         $style_header = "style='background-color:#B5EEFF'";
+
+       }else{
+         $class_lastoc = $class_status;
+         $style_header = "style='background-color:#e2fee2'";
+         unset($icon_lastoc, $style_lastoc);
+       }
+
+
     ?>
                           <tr>
-                              <td rowspan="3" style="vertical-align: middle;" class="text-center <?=$class_status;?>"><?=$dados[$i]['id']; if($dados[$i]['id_workshift']!=""){ echo ".".$dados[$i]['id_workshift'];}?></td>
-                              <td colspan="9" style="background-color:#e2fee2"><b><?=$dados[$i]['event_type'];?></b></td>
+                              <td rowspan="3" style="vertical-align: middle;" class="text-center <?=$class_lastoc;?>" id="oc_<?=$dados[$i]['id'];?>">
+                                <?=$icon_lastoc.$dados[$i]['id']; if($dados[$i]['id_workshift']!=""){ echo ".".$dados[$i]['id_workshift'];}?>
+                              </td>
+                              <td colspan="12" <?=$style_header;?>><b><?=$dados[$i]['event_type'];?></b></td>
                             </tr>
-                            <tr>
+
+
+
+                            <tr <?=$style_lastoc?>>
 
                               <?
                                   $local = "";
@@ -483,19 +475,29 @@ if(isset($dados) && count($dados))
                               ?>
 
                               <td><small><i class="text-muted">Logradouro:</i></small><br><?=$local;?></td>
+                              <td><small><i class="text-muted">Bairro:</i></small><br><?=$dados[$i]['neighborhood'];?></td>
                               <td><small><i class="text-muted">Data de abertura:</i></small><br><?=$dt_abertura;?></td>
+                              <td><small><i class="text-muted">Data de chegada:</i></small><br><?=$dt_chegada;?></td>
                               <td><small><i class="text-muted">Origem:</i></small><br><?=($dados[$i]['company_acron']==$_SESSION['company_acron']?$dados[$i]['company_acron']:"<b class='text-success'>".$dados[$i]['company_acron']."</b>");?></td>
                               <td><small><i class="text-muted">Status:</i></small><br><?=($dados[$i]['status']=="Inativa"?"<b class='text-info'>Inativa</b>":$dados[$i]['status']);?></td>
 
+                              <td style="vertical-align: middle;" class="text-center"><?=$prov_enc;?></td>
                               <td style="vertical-align: middle;" class="text-center"><?=$prov_adm;?></td>
                               <td style="vertical-align: middle;" class="text-center"><?=$prov_gui;?></td>
                               <td style="vertical-align: middle;" class="text-center"><?=$prov_mat;?></td>
                               <td style="vertical-align: middle;" class="text-center"><?=$qtd_fotos;?></td>
                               <td style="vertical-align: middle;" class="text-center"><a href='oct/<?=$oct_form;?>?id=<?=$dados[$i]['id'];?>' class='mb-xs mt-xs mr-xs btn btn-default loading2'><i class='fa fa-pencil'></i></a></td>
+                              <?
+                                /**************************
+                                if($_SESSION['id']==1){ ?>
+                                <td style="vertical-align: middle;" class="text-center"><a href='oct/FORM.php?id=<?=$dados[$i]['id'];?>' class='mb-xs mt-xs mr-xs btn btn-default loading2'><i class='fa fa-pencil'></i></a></td>
+                              <? }
+                               ***************************/
+                              ?>
                             </tr>
-                            <tr>
+                            <tr <?=$style_lastoc?>>
                               <td colspan='2'><small><i class="text-muted">Responsável:</i></small><br><?=$dados[$i]['user_name'];?></td>
-                              <td colspan='7'>
+                              <td colspan='10'>
                                 <?
                                         unset($passenger, $garrison_txt, $guarnicao_empenhada, $str, $info);
                                         $sql = "SELECT
@@ -533,7 +535,7 @@ if(isset($dados) && count($dados))
     <? }
 }else {
   echo "<tr><td class='success'>&nbsp;</td>
-            <td colspan='9' class='text-center'>
+            <td colspan='11' class='text-center'>
                 <div class='alert alert-warning'>
                     Nenhuma ocorrênca aberta para esta data.<br><b>".$data_atual."</b>
                 </div>
@@ -541,17 +543,18 @@ if(isset($dados) && count($dados))
         </tr>";
 }
 
-echo "<tr><td colspan='10' class='warning'>Ocorrências terminadas</td><tr>";
+echo "<tr><td colspan='13' class='warning'>Ocorrências terminadas</td><tr>";
 if(isset($dados_baixados) && count($dados_baixados))
 {
       $dados = $dados_baixados;
       for($i = 0; $i < count($dados); $i++)
       {
 
-        $dt_abertura = formataData($dados[$i]['date'],1);
-        $dt_chegada  = formataData($dados[$i]['arrival'],1);
-        $qtd_prov    = ($dados[$i]['qtd_providencias'] > 0 ? "<span class='text-center mb-xs mt-xs mr-xs btn btn-default disabled'>".$dados[$i]['qtd_providencias']."</span>":"-");
-        $qtd_fotos   = ($dados[$i]['qtd_fotos']        > 0 ? "<span class='text-center mb-xs mt-xs mr-xs btn btn-default disabled'><b>".$dados[$i]['qtd_fotos']."</b> <sup><i class='fa fa-camera'></i></sup></span>":"-");
+        $dt_abertura    = formataData($dados[$i]['date'],1);
+        $dt_chegada     = formataData($dados[$i]['arrival'],1);
+        $dt_fechamento  = formataData($dados[$i]['closure'],1);
+        $qtd_prov       = ($dados[$i]['qtd_providencias'] > 0 ? "<span class='text-center mb-xs mt-xs mr-xs btn btn-default disabled'>".$dados[$i]['qtd_providencias']."</span>":"-");
+        $qtd_fotos      = ($dados[$i]['qtd_fotos']        > 0 ? "<span class='text-center mb-xs mt-xs mr-xs btn btn-default disabled'><b>".$dados[$i]['qtd_fotos']."</b> <sup><i class='fa fa-camera'></i></sup></span>":"-");
 
         if($providencias[$dados[$i]["id"]]["adm"]==1){  $prov_adm = "<span class='text-center mb-xs mt-xs mr-xs btn btn-success'>ADM</span>"; }
         else{                                           $prov_adm = "<span class='text-center text-muted'>-</span>";}
@@ -559,13 +562,31 @@ if(isset($dados_baixados) && count($dados_baixados))
         else{                                           $prov_gui = "<span class='text-center text-muted'>-</span>";}
         if($providencias[$dados[$i]["id"]]["mat"]==1){  $prov_mat = "<span class='text-center mb-xs mt-xs mr-xs btn btn-warning'>MAT</span>";    }
         else{                                           $prov_mat = "<span class='text-center text-muted'>-</span>";}
+        if($providencias[$dados[$i]["id"]]["enc"]==1){  $prov_enc = "<span class='text-center mb-xs mt-xs mr-xs btn btn-info'>ENC</span>";    }
+        else{                                           $prov_enc = "<span class='text-center text-muted'>-</span>";}
+
+        if($_GET['lastoc']==$dados[$i]['id'])
+        {
+           $class_lastoc = "primary";
+           $icon_lastoc  = "<i class='fa fa-eye'></i><br>";
+           $style_lastoc = "style='background-color:#CFFFFE'";
+           $style_header = "style='background-color:#B5EEFF'";
+         }else{
+           $class_lastoc = "warning";
+           $style_header = "style='background-color:#FFF6E8'";
+           unset($icon_lastoc, $style_lastoc);
+         }
+
+
 
       ?>
       <tr>
-          <td rowspan="3" style="vertical-align: middle;" class="text-center warning"><a id='<?=$dados[$i]['id'];?>'></a><?=$dados[$i]['id']; if($dados[$i]['id_workshift']!=""){ echo ".".$dados[$i]['id_workshift'];}?></td>
-          <td colspan="8"><b><?=$dados[$i]['event_type'];?></b></td>
+          <td rowspan="3" style="vertical-align: middle;" class="text-center <?=$class_lastoc;?>" id="oc_<?=$dados[$i]['id'];?>">
+              <a id='<?=$dados[$i]['id'];?>'></a><?=$icon_lastoc.$dados[$i]['id']; if($dados[$i]['id_workshift']!=""){ echo ".".$dados[$i]['id_workshift'];}?>
+          </td>
+          <td colspan="12" <?=$style_header?>><b><?=$dados[$i]['event_type'];?></b></td>
         </tr>
-        <tr>
+        <tr <?=$style_lastoc;?>>
           <?
               $local = "";
               if($dados[$i]["addressbook_name"]!=""){$local = $dados[$i]['addressbook_name'];}
@@ -577,19 +598,22 @@ if(isset($dados_baixados) && count($dados_baixados))
               }
           ?>
           <td><small><i class="text-muted">Logradouro:</i></small><br><?=$local;?></td>
+          <td><small><i class="text-muted">Bairro:</i></small><br><?=$dados[$i]['neighborhood'];?></td>
           <td><small><i class="text-muted">Data de abertura:</i></small><br><?=$dt_abertura;?></td>
+          <td><small><i class="text-muted">Data de fechamento:</i></small><br><?=$dt_fechamento;?></td>
           <td><small><i class="text-muted">Origem:</i></small><br><?=($dados[$i]['company_acron']==$_SESSION['company_acron']?$dados[$i]['company_acron']:"<b class='text-warning'>".$dados[$i]['company_acron']."</b>");?></td>
           <td><small><i class="text-muted">Status:</i></small><br><?=$dados[$i]['status'];?></td>
 
+          <td style="vertical-align: middle;" class="text-center"><?=$prov_enc;?></td>
           <td style="vertical-align: middle;" class="text-center"><?=$prov_adm;?></td>
           <td style="vertical-align: middle;" class="text-center"><?=$prov_gui;?></td>
           <td style="vertical-align: middle;" class="text-center"><?=$prov_mat;?></td>
           <td style="vertical-align: middle;" class="text-center"><?=$qtd_fotos;?></td>
           <td style="vertical-align: middle;" class="text-center"><a href='oct/<?=$oct_form;?>?id=<?=$dados[$i]['id'];?>' class='mb-xs mt-xs mr-xs btn btn-default loading2'><i class='fa fa-pencil'></i></a></td>
         </tr>
-        <tr>
+        <tr <?=$style_lastoc;?>>
           <td colspan='2'><small><i class="text-muted">Responsável:</i></small><br><?=$dados[$i]['user_name'];?></td>
-          <td colspan='7'>
+          <td colspan='10'>
             <?
                       $sql = "SELECT
                                 U.name, U.nickname
@@ -626,7 +650,7 @@ if(isset($dados_baixados) && count($dados_baixados))
       <? }
       }else{
       echo "<tr><td class='warning'>&nbsp;</td>
-                <td colspan='9' class='text-center'>
+                <td colspan='12' class='text-center'>
                     <div class='alert alert-warning'>
                         Nenhuma ocorrênca fechada ou cadastrada para esta data.<br><b>".$data_atual."</b>
                     </div>
@@ -675,6 +699,14 @@ if(isset($dados_baixados) && count($dados_baixados))
 </section>
 
 <script>
+
+<?
+  if($_GET['lastoc'])
+  {
+    echo "$('html, body').animate({scrollTop: (($('#oc_{$_GET['lastoc']}').first().offset().top)-150)},100);";
+  }
+?>
+
 $("#bt_submit").click(function(){
     $('#modalFiltro').modal('hide');
     $('body').removeClass('modal-open');
