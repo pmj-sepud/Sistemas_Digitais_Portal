@@ -36,7 +36,7 @@
                       id_company,
                       observation,
                       phone,
-                      in_ativaction,
+                      in_activation,
                       nickname,
                       registration,
                       initial_workshift_position,
@@ -51,7 +51,7 @@
                     '".$id_company."',
                     '".$observation."',
                     '".$phone."',
-                    'f',
+                    't',
                     '".$nickname."',
                     ".$registration.",
                     ".$initial_workshift_position.",
@@ -100,7 +100,8 @@
                         nickname     = '".$nickname."',
                         registration = ".$registration.",
                         initial_workshift_position = ".$initial_workshift_position.",
-                        work_status  = '".$work_status."'
+                        work_status  = '".$work_status."',
+                        in_activation = '".$in_activation."'
                   WHERE id = '".$id."'";
       pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
       logger("Atualização","Usuário","Atualizou dados do usuário: [".$id."] - ".$name);

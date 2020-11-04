@@ -110,7 +110,6 @@ require_once("libs/php/conn.php");
                               <li><a href="oct/eventos_administrativos_INDEX.php" menuautoclose="true">Diário administrativo</a></li>
 
                               <? if($_SESSION['id']==1|| $_SESSION['id']==10){ ?>
-                                  <li><a href="oct/dashboard_oc.php" menuautoclose="true">Dashboard - Ocorrências <sup><small>(DEV)</small></sup></a></li>
                                   <li><a href="oct/guarnicao_USERFORM.php" menuautoclose="true">Guarnição <sup><small>(DEV)</small></sup></a></li>
                               <? } ?>
                           </ul>
@@ -135,6 +134,9 @@ require_once("libs/php/conn.php");
                                 echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Evolução mensal</a></li>";
                                 echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Exportação CSV</a></li>";
                               }
+
+                              echo "<li><a href='oct/dashboard_oc.php' menuautoclose='true'>Dashboard - Ocorrências <sup><small>(DEV)</small></sup></a></li>";
+
                               if($_SESSION['id_company']==8)
                               {
                                     echo "<li class='nav-parent'>
@@ -156,23 +158,16 @@ require_once("libs/php/conn.php");
                         <li class="nav-parent">
                           <a><span>Configurações</span></a>
                           <ul class="nav nav-children">
-                            <? if(check_perm("3_16","R")){ echo "<li><a href='oct/agenda_de_endereco_INDEX.php' menuautoclose='true'>Agenda de endereço</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Agenda de endereço</a></li>"; }?>
+                            <? if(check_perm("3_16")){ echo "<li><a href='oct/agenda_de_endereco_INDEX.php' menuautoclose='true'>Agenda de endereço</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Agenda de endereço</a></li>"; }?>
                             <? if(check_perm("3_19","R")){ echo "<li><a href='oct/frota_INDEX.php' menuautoclose='true'>Frota de veículos</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Frota de veículos</a></li>"; }?>
+                            <? if($_SESSION['id']==1){ echo "<li><a href='oct/tipos_ocorrencias_INDEX.php' menuautoclose='true'>Tipos de ocorrências <sup>dev <i class='fa fa-cogs'></i></sup></a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Tipos de ocorrências <sup>dev <i class='fa fa-cogs'></i></sup></a></li>"; }?>
+
                           </ul>
                         </li>
                     </ul>
               </li>
 
-          <li class="nav-parent">
-            <a><span>SERP</span></a>
-            <ul class="nav nav-children">
-                <?
-                    if(check_perm("4_10"))    { echo "<li><a href='erg/index.php' menuautoclose='true'>Dashboard</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Dashboard</a></li>"; }
-                    if(check_perm("4_11"))    { echo "<li><a href='erg/rel_autuados.php' menuautoclose='true'>Autuações</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Autuações</a></li>"; }
-                    if(check_perm("4_12","R")){ echo "<li><a href='erg/vagas.php' menuautoclose='true'>Vagas</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Vagas</a></li>"; }
-                ?>
-            </ul>
-          </li>
+
 
           <li class="nav-parent">
             <a><span>Monitoramento</span></a>
@@ -183,6 +178,78 @@ require_once("libs/php/conn.php");
                 ?>
             </ul>
           </li>
+
+          <li class="nav-parent">
+            <a><span>SEPROT - SERP</span></a>
+            <ul class="nav nav-children">
+                <?
+                    if(check_perm("4_10"))    { echo "<li><a href='erg/index.php' menuautoclose='true'>Dashboard</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Dashboard</a></li>"; }
+                    if(check_perm("4_11"))    { echo "<li><a href='erg/rel_autuados.php' menuautoclose='true'>Autuações</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Autuações</a></li>"; }
+                    if(check_perm("4_12","R")){ echo "<li><a href='erg/vagas.php' menuautoclose='true'>Vagas</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Vagas</a></li>"; }
+                ?>
+            </ul>
+          </li>
+
+          <li class="nav-parent">
+            <a><span>SAS - Benefícios Eventuais</span></a><!-- Sec. de Asst. Social - Beneficios Eventuais -->
+            <ul class="nav nav-children">
+                <?
+                    if(check_perm("7_21","R") || check_perm("7_23","R")){ echo "<li><a href='sas/cidadao.php' menuautoclose='true'>1 - Cidadãos cadastrados</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> 1 - Cidadãos cadastrados</a></li>"; }
+                    if(check_perm("7_21","R") || check_perm("7_23","R")){ echo "<li><a href='sas/beneficio.php' menuautoclose='true'>2 - Benefício em aberto</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> 2 - Benefício</a></li>"; }
+                ?>
+
+                <li class="nav-parent">
+                  <a><span>Relatórios</span></a>
+                    <ul class="nav nav-children">
+                      <?
+                          if(check_perm("7_21","R") || check_perm("7_23","R")){ echo "<li><a href='sas/dashboard.php' menuautoclose='true'>Dashboard</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Dashboard</a></li>"; }
+                          if(check_perm("7_21","R") || check_perm("7_23","R")){ echo "<li><a href='sas/dashboard_eqp.php' menuautoclose='true'>Equipamento</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Equipamento</a></li>"; }
+                          if(check_perm("7_21","R") || check_perm("7_23","R")){ echo "<li><a href='sas/rel_atividades_diaria.php' menuautoclose='true'>Atividades diária</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Atividades diária</a></li>"; }
+                      ?>
+                    </ul>
+                </li>
+
+                <li class="nav-parent">
+                  <a><span>Configurações</span></a>
+                    <ul class="nav nav-children">
+                      <?
+                          if(check_perm("7_22"))    { echo "<li><a href='sas/variaveis.php' menuautoclose='true'>Variáveis de classificação</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Variáveis de classificação</a></li>"; }
+                      ?>
+                    </ul>
+                </li>
+
+            </ul>
+          </li>
+
+
+          <li class="nav-parent">
+              <a><span>SES - PNCD</span></a>
+              <ul class="nav nav-children">
+                  <?
+                      if(check_perm("8_26")){ echo "<li><a href='ses/rds.php' menuautoclose='true'>Registro diário de serviços</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Registro diário de serviços</span></a></li>"; }
+
+                  ?>
+
+                  <li class="nav-parent">
+                    <a><span>Armadilhas</span></a>
+                      <ul class="nav nav-children">
+                          <?   if(check_perm("8_26")){ echo "<li><a href='ses/armadilhas_dashboard.php' menuautoclose='true'>Dashboard</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Dashboard</span></a></li>"; } ?>
+                          <?   if(check_perm("8_26")){ echo "<li><a href='ses/armadilhas.php' menuautoclose='true'>Cadastro</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Cadastro</span></a></li>"; } ?>
+                      </ul>
+                  </li>
+
+
+                  <li class="nav-parent">
+                    <a><span>Pontos Estratégicos</span></a>
+                      <ul class="nav nav-children">
+                          <?   if(check_perm("8_26")){ echo "<li><a href='ses/pontosestrategicos_dashboard.php' menuautoclose='true'>Dashboard</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Dashboard</span></a></li>"; } ?>
+                          <?   if(check_perm("8_26")){ echo "<li><a href='ses/pontosestrategicos.php' menuautoclose='true'>Cadastro</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Cadastro</span></a></li>"; } ?>
+                      </ul>
+                  </li>
+
+              </ul>
+          </li>
+
 
             </ul>
           </li>
@@ -246,8 +313,11 @@ $("#linkfulls").attr('title','Tela cheia');
             <ul class="nav nav-children">
               <?
                   if(check_perm("1_1","R")){ echo "<li><a href='usuarios/index.php' menuautoclose='true'>Usuários</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true'  class='not-allowed'><i class='fa fa-lock'></i> Usuários</a></li>"; }
+                  if(check_perm("2_20","R")){ echo "<li><a href='configs/company.php' menuautoclose='true'>Órgãos</a></li>";}else{echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Órgãos</a></li>"; }
                   if(check_perm("2_3"))    { echo "<li><a href='sistema/logviewer.php' menuautoclose='true'>Logs do sistema</a></li>";}else{echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Logs do sistema</a></li>"; }
                   if(check_perm("2_5"))    { echo "<li><a href='sistema/teste.php' menuautoclose='true'>Desenvolvimento</a></li>";}else{echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Desenvolvimento</a></li>"; }
+
+
               ?>
             </ul>
           </li>

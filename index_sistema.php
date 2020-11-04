@@ -72,8 +72,11 @@
 
 		<style>
 			.select2-container { width: 100% !important;}
+
 			.select2-selection__rendered {line-height: 32px !important;	}
 			.select2-selection 					 {height: 34px !important;		  }
+
+
 			.box_shadow
 			{
 			  -webkit-box-shadow: 10px 10px 56px -12px rgba(0,0,0,0.3);
@@ -83,6 +86,7 @@
 		</style>
 	</head>
 	<body>
+		
 		<section class="body">
 					<? require_once("sistema/menu_top.php"); ?>
 					<div class="inner-wrapper">

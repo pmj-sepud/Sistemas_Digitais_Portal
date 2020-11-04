@@ -125,7 +125,7 @@
                             echo "<td nowrap>".$d['neighborhood']."</td>";
                             echo "<td nowrap>".$d['zone']."</td>";
                             echo "<td class='text-center'>";
-                            if(check_perm("3_16","U"))
+                            if(check_perm("3_16"))
                             {
                               echo "<a href='oct/agenda_de_endereco_FORM.php?id=".$d['id']."'><button class='btn btn-xs btn-default text-muted'><i class='fa fa-cogs'></i></button></a>";
                             }

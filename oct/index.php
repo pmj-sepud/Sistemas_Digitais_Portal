@@ -22,6 +22,8 @@
         $turno = pg_fetch_assoc($res);
         $ano   = substr($turno['opened'],0,4);
         logger("Acesso","OCT", "Sistema - página inicial, Turno nº ".$turno['id']);
+        $aux = explode(" ",formataData($turno['opened'],1));
+        $data_abertura_filtro = $aux[0];
 
         $sql = "SELECT
                     U.name as nome, U.id as id_user, U.registration, U.nickname,
@@ -174,7 +176,8 @@
       <ol class="breadcrumbs">
         <li><a href="index_sistema.php"><i class="fa fa-home"></i></a></li>
         <li><span class='text-muted'>Aplicações</span></li>
-        <li><span class='text-muted'>Gestão do sistema</span></li>
+        <li><a href="oct/turnos_INDEX.php?filtro_id_workshift=<?=$turno['id'];?>&tab=<?=$_GET['tab'];?>&filtro_mes=<?=$data_abertura_filtro;?>">Turnos</a></li>
+        <li><span class='text-muted'>Turno nº <?=$turno['id'];?></span></li>
       </ol>
       <!--<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>-->
     </div>
@@ -229,7 +232,7 @@
         echo "<li><a href='oct/turnos_INDEX.php'><i class='fa fa-file-text-o'></i> <sup><i class='fa fa-search'></i></sup> Visualizar turnos</a></li>";
         echo "<li><a href='oct/turno.php'><i class='fa fa-calendar'></i> <sup><i class='fa fa-plus'></i></sup> Novo turno</a></li>";
       }
-
+      echo "<li><a href='oct/turnos_INDEX.php?filtro_id_workshift={$turno['id']}&tab={$_GET['tab']}&filtro_mes={$data_abertura_filtro}'><i class='fa fa-mail-reply'></i> Voltar</a></li>";
       echo '</ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
@@ -242,60 +245,9 @@
                 <?=$_SESSION['company_acron']." - ".$_SESSION['company_name'];?><br>
                 <span class="text-muted"><small><i>Data atual:</i></small> <b><?=$agora['data'];?></b></span>
                 <div class="panel-actions" style="margin-top:5px">
-                    <?
-
-                    /*
-                      if($turno['id']!="")
-                      {
-                            echo " <a href='oct/turno.php?id=".$turno['id']."'><button id='bt_atualizar_turno' type='button' class='btn btn-primary'><i class='fa fa-cogs'></i> Turno <sup>(nº ".$turno['id'].")</sup></button></a>";
-                            echo " <a href='oct/turno_associar_pessoa.php?id_workshift=".$turno['id']."'><button type='button' class='btn btn-primary'><i class='fa fa-users'></i> Pessoal</button></a>";
-
-                            if(isset($qtd_agentes) && $qtd_agentes > 0)
-                            {
-
-                                    echo " <a href='oct/guarnicao_FORM.php?id_workshift=".$turno['id']."'><button id='bt_atualizar_veiculo' type='button' class='btn btn-primary'><i class='fa fa-cab'></i> Guarnições</button></a>";
-
-                                    echo "<style>";
-                                    echo ".panel-actions a,
-                                    .panel-actions .panel-action {
-                                    	text-align: left;
-                                    	width: 100%;
-                                    }";
-                                    echo "</style>";
-
-                                    echo " <div class='btn-group'>
-              												        <button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown'><i class='fa fa-file-text-o'></i> Registros do turno <small><sup><i class='fa fa-chevron-down'></i></sup></small></button>
-              												        <ul class='dropdown-menu'><span style='margin-left:5px;color:#BBBBBB'><i>Novo registro:</i></span>
-              												            <li><a href='oct/registros_de_turno_FORM.php?id_workshift=".$turno['id']."&tipo_registro=veiculo'>Veículo</a></li>
-              												            <li><a href='oct/registros_de_turno_FORM.php?id_workshift=".$turno['id']."&tipo_registro=pessoa'>Pessoa</a></li>";
-                                            echo "<li><a href='oct/registros_de_turno_FORM.php?id_workshift=".$turno['id']."&tipo_registro=guarnicao'>Guarnição</a></li>";
-                                            echo "<!--<hr style='margin-top:5px;margin-bottom:5px'>-->
-                                                  <span style='margin-left:5px;color:#BBBBBB'><i>Visualizar:</i></span>
-                                                  <li><a href='oct/registros_de_turno_VIS.php?id_workshift=".$turno['id']."'><i class='fa fa-search'></i> Registros</a></li>
-              												        </ul>
-              												    </div>";
-
-                            }else{
-
-                                  echo " <button type='button' class='btn  btn-primary disabled'><i class='fa fa-cab'></i> Inserir guarnições</button>";
-
-                            }
-
-                            echo " <button id='bt_print' class='btn btn-primary'><i class='fa fa-print'></i> Imprimir</button>";
-
-                            echo " <a href='oct/turno.php'><button type='button' class='btn btn-info'><i class='fa fa-calendar'></i> <sup><i class='fa fa-plus'></i></sup> Novo turno</button></a>";
-                      }else {
-                        echo " <a href='oct/turnos_INDEX.php'><button type='button' class='btn btn-primary'><i class='fa fa-file-text-o'></i> <sup><i class='fa fa-search'></i></sup> Visualizar turnos</button></a>";
-                        echo " <a href='oct/turno.php'><button type='button' class='btn btn-info'><i class='fa fa-calendar'></i> <sup><i class='fa fa-plus'></i></sup> Novo turno</button></a>";
-                      }
-
-                    */
-                  ?>
                 </div>
             </header>
             <div class="panel-body">
-<?
-?>
               <div class="row">
                 <div class="col-sm-12">
                     <h4><b>Informações gerais</b></h4>
@@ -304,7 +256,6 @@
 <? if($turno_aberto){ ?>
   <div class="row">
     <div class="col-sm-2 text-center">
-
           <?
               echo "<small class='text-muted'><i>Turno atual:</i></small>";
               echo "<h2 style='margin-top:0px'><b>".str_pad($turno['id'],5,"0",STR_PAD_LEFT)."</b></h2>";
@@ -375,8 +326,6 @@
                                               <?
                                                 if(isset($dados_turno['coordenacao']) || isset($dados_turno['gerencia']))
                                                 {
-
-                                                  //print_r($dados_turno['gerencia']);
                                                   echo "<table class='table table-condensed'>
                                                         <thead><tr>
                                                           <th class='text-center' width='25px'><small><i>Matrícula</i></small></th>

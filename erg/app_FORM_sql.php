@@ -6,7 +6,8 @@
     extract($_POST);
 
 
-    if($acao == "inserir" && (($license_plate_letters && $license_plate_numbers != "") || $license_plate_numbers_mercosul != ""))
+    //if($acao == "inserir" && (($license_plate_letters && $license_plate_numbers != "") || $license_plate_numbers_mercosul != ""))
+    if($acao == "inserir" && $fullplate != "")
     {
 
       $agora     = now();
@@ -15,8 +16,8 @@
       //Dia de semana após as 18:30
       if(($agora['dia_semana']>=1 && $agora['dia_semana']<=5) && (($agora['hora']>=18 && $agora['min']>=30) || $agora['hora']>=19))
       {
-        header("Location: app_FORM.php?erro=fora_do_horario");
-        exit();
+        //header("Location: app_FORM.php?erro=fora_do_horario");
+      //  exit();
       }
       //Sabado após as 13h ou domingo o dia todo
       if(($agora['dia_semana']==6 && $agora['hora']>13) || $agora['dia_semana']==7)
@@ -42,8 +43,9 @@
 
 
       $timestamp = $agora['datatimesrv'];
-      if($license_plate_numbers != ""){ $placa = $license_plate_letters.$license_plate_numbers;         }
-      else                            { $placa = $license_plate_numbers_mercosul;}
+      //if($license_plate_numbers != ""){ $placa = $license_plate_letters.$license_plate_numbers;         }
+      //else                            { $placa = $license_plate_numbers_mercosul;}
+      $placa = $fullplate;
 
       //checagem se a vaga não esta ocupada//
       if($multi_parking == "false") //Se a vaga não permite multiplos veiculos, baixa o anterior (caso exista)
@@ -73,6 +75,11 @@
                         ".$id_user.",
                         '".$placa."',
                         '".$obs."') RETURNING id";
+
+        //print_r_pre($sql);
+      //  exit();
+
+
       $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
       $aux = pg_fetch_assoc($res);
 

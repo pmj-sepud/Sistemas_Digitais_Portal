@@ -7,7 +7,6 @@
   $agora = now();
   if($id != "")
   {
-
       $sql   = "SELECT
                   P.id            AS parking_id,
                   P.name          AS parking_code,
@@ -137,6 +136,16 @@
     50%  { border-color: rgba(255, 0, 0, .2); }
     100% { border-color: rgba(255, 0, 0, 1); }
 }
+.pl_merc{
+  border-width:0px;
+  border:none;
+  border-bottom: 1px solid lightgrey;
+  font-size:26px;
+  font-weight: bold;
+  text-align: center;
+  padding-bottom: 2px;
+
+}
 </style>
 <form id="form_eri" action="erg/app_FORM_sql.php" method="post">
 <section role="main" class="content-body">
@@ -149,6 +158,13 @@
               echo "<h2>Registro n° ".str_pad($_GET['id'],3,"0",STR_PAD_LEFT)."</h2>";
           }
       ?>
+      <?
+        if($acao!="inserir"){
+      ?>
+      <div  style='position: absolute;top: 8px;right: 70px;'>
+          <a href='erg/app_FORM.php'><button type="button" class="btn btn-success">Novo</button></a>
+      </div>
+    <? } ?>
       <div  style='position: absolute;top: 8px;right: 10px;'>
           <a href='auth/logout.php' ajax="false"><button type="button" class="btn btn-default">Sair</button></a>
       </div>
@@ -213,24 +229,28 @@ echo "</div>";
                     <div class="row">
                       <div class="col-xs-6">
                           <div class="form-group">
-                              <label class="control-label" id='label_letters'>Placa:</label>
+                              <label class="control-label" id='label_letters'>Letras:</label>
                               <input placeholder="XXX" type="text" id="license_plate_letters" name="license_plate_letters"  maxlength="3" class="form-control input-lg text-center" value="<?=substr($dados['licence_plate'],0,3);?>" />
                          </div>
                        </div>
                        <div class="col-xs-6" id='div_placa'>
                            <div class="form-group">
                                <label class="control-label" id='label_numbers'>Números:</label>
-                               <label class="control-label" id='label_mercosul'  style="display:none;">Placa Mercosul:</label>
                                <input style="width:100%" placeholder="9999" type="number" pattern="\d*" id="license_plate_numbers" name="license_plate_numbers"           maxlength="4" size="4" class="form-control input-lg text-center" value="<?=substr($dados['licence_plate'],3);?>" />
-                               <!--<input placeholder="9X99" type="text" id="license_plate_numbers_mercosul" name="license_plate_numbers_mercosul"  maxlength="4" size="4" class="form-control input-lg text-center" value="<?=substr($dados['licence_plate'],3);?>" style="display:none;" />-->
-                               <input placeholder="XXXXXXX" type="text" id="license_plate_numbers_mercosul" name="license_plate_numbers_mercosul"  maxlength="7" size="4" class="form-control input-lg text-center" value="" style="display:none;" />
+
+                                  <input placeholder="AAA" type="text"   id="plate_m_part0" name="plate_m_part0" class="pl_merc" value="" onclick="this.value=''" style="margin-left: -105px; width:85px; display:none; margin-top:20px"/>
+                                  <input placeholder="0"   type="tel"    id="plate_m_part1" name="plate_m_part1" class="pl_merc" value="" onclick="this.value=''" style="width:25px; display:none;"/>
+                                  <input placeholder="A"   type="text"   id="plate_m_part2" name="plate_m_part2" class="pl_merc" value="" onclick="this.value=''" style="width:30px; display:none;"/>
+                                  <input placeholder="00"  type="tel"    id="plate_m_part3" name="plate_m_part3" class="pl_merc" value="" onclick="this.value=''" style="width:35px;display:none;"/>
+
                           </div>
                         </div>
                   </div>
                   <div class='row'>
                     <div class="col-xs-12 text-center">
                         <? if($acao=="inserir"){ ?>
-                          <button type="button" class="btn bt-sm btn-default" id="bt_mercosul" style="margin-top:22px"><span class="text-muted">Modelo Mercosul</span></button>
+                          <button type="button" class="btn bt-sm btn-default bt_placas" id="bt_mercosul" style="margin-top:22px"><span class="text-muted">Modelo Mercosul</span></button>
+                          <button type="button" class="btn bt-sm btn-default bt_placas" id="bt_placa_padrao" style="margin-top:22px;display:none"><span class="text-muted">Modelo antigo</span></button>
                         <? } ?>
                      </div>
                   </div>
@@ -331,18 +351,10 @@ echo "</div>";
             </div>
 
     </div>
-<!--
-<div class="row">
-  <div class="col-sm-12">
-    <div class="form-group">
-        <label class="control-label">Observações:</label>
-        <textarea class="form-control" name="obs"><?=$dados['obs'];?></textarea>
-   </div>
-  </div>
-</div>
--->
+
     <footer class="panel-footer text-center" style="margin-top:20px">
 
+          <input type="hidden" id="fullplate" name="fullplate" value="">
           <input type="hidden" id="data" name="data" value="<?=$agora['data'];?>">
           <input type="hidden" id="hora" name="hora" value="<?=$agora['hms'];?>">
 
@@ -370,6 +382,9 @@ echo "</div>";
 </form>
 <script>
 
+var tipo_placa_selecionada = "padrao";
+
+
 $("form :input").attr("autocomplete", "off");
 
 $(document).ready(function() {
@@ -383,50 +398,62 @@ $(document).ready(function() {
 $("#bt_imprimir").click(function(){
     var win = window.open('erg/app_IMPRIMIR.php?id=<?=$id;?>', '_blank', 'location=no,toolbar=no,menubar=no,scrollbars=yes,resizable=yes');
     win.print();
-    //win.close();
-
 });
 
 $("#bt_inserir_oc").click(function(){
+
+  var placa;
+  var enviar_form = false;
+
 
   $("#pesquisa").removeClass("error");
   $("#license_plate_letters").removeClass("error");
   $("#license_plate_numbers").removeClass("error");
   $("#license_plate_numbers_mercosul").removeClass("error");
+  $("#plate_m_part0").removeClass("error");
+  $("#plate_m_part1").removeClass("error");
+  $("#plate_m_part2").removeClass("error");
+  $("#plate_m_part3").removeClass("error");
 
-  var placa;
+  if(jQuery.type($("#id_parking").val()) === "undefined"){ enviar_form = false; $("#pesquisa").addClass("error"); }
 
-  var enviar_form = true;
-  if(jQuery.type($("#id_parking").val()) === "undefined"){ enviar_form = false; $("#pesquisa").addClass("error");}
 
-    if($("#license_plate_letters").val().length != 3){ enviar_form = false; $("#license_plate_letters").addClass("error"); }
-    if($("#license_plate_numbers").val().length != 4){ enviar_form = false; $("#license_plate_numbers").addClass("error"); }
-
-    if(!enviar_form && $("#license_plate_numbers_mercosul").val().length < 6){ enviar_form = false; $("#license_plate_numbers_mercosul").addClass("error"); }
-    else{ enviar_form = true; }
-
-/*
-  if( ($("#license_plate_letters").val().length == 3 && $("#license_plate_numbers").val().length == 4)) ||
-       $("#license_plate_numbers_mercosul").val().length >= 6)
+  if(tipo_placa_selecionada == "padrao")
   {
-       enviar_form = true;
+          if($("#license_plate_letters").val().length == 3 &&
+             $("#license_plate_numbers").val().length == 4){
+                enviar_form = true;
+                placa = $("#license_plate_letters").val()+$("#license_plate_numbers").val();
+          }else{
+            if($("#license_plate_letters").val().length != 3){ $("#license_plate_letters").addClass("error"); }
+            if($("#license_plate_numbers").val().length != 4){ $("#license_plate_numbers").addClass("error"); }
+          }
+  }else{ //Placa do mercosul
+          if($("#plate_m_part0").val().length == 3 &&
+             $("#plate_m_part1").val().length == 1 &&
+             $("#plate_m_part2").val().length == 1 &&
+             $("#plate_m_part3").val().length == 2){
+
+            enviar_form = true;
+            placa = $("#plate_m_part0").val()+$("#plate_m_part1").val()+$("#plate_m_part2").val()+$("#plate_m_part3").val();
+
+          }else{
+            if($("#plate_m_part0").val().length != 3){  $("#plate_m_part0").addClass("error"); }
+            if($("#plate_m_part1").val().length != 1){  $("#plate_m_part1").addClass("error"); }
+            if($("#plate_m_part2").val().length != 1){  $("#plate_m_part2").addClass("error"); }
+            if($("#plate_m_part3").val().length != 2){  $("#plate_m_part3").addClass("error"); }
+          }
   }
-*/
 
 
 
   if(enviar_form == true)
   {
-      if($("#license_plate_letters").val().length == 3 && $("#license_plate_numbers").val().length == 4){
-        placa = $("#license_plate_letters").val()+$("#license_plate_numbers").val();
-      }else {
-        placa = $("#license_plate_numbers_mercosul").val();
-      }
-
       if(placa == $("#placa_anterior").val())
       {
         enviar_form = false;
         $("#license_plate_numbers_mercosul").addClass("error");
+        $(".pl_merc").addClass("error");
                  $("#license_plate_numbers").addClass("error");
                  $("#license_plate_letters").addClass("error");
                               $("#ret_pesq").addClass("error");
@@ -435,6 +462,7 @@ $("#bt_inserir_oc").click(function(){
 
   if(enviar_form)
   {
+      $("#fullplate").val(placa);
       $(this).attr('disabled', 'disabled');
       $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> <small>Aguarde</small>");
       $("#form_eri").submit();
@@ -445,6 +473,27 @@ $("#bt_inserir_oc").click(function(){
          //$("#pesquisa_txt").mask('0000');
 $('#license_plate_numbers').mask('0000');
 $('#license_plate_letters').mask('SSS');
+
+
+$('#plate_m_part0').mask('SSS');
+$('#plate_m_part1').mask('0');
+$('#plate_m_part2').mask('S');
+$('#plate_m_part3').mask('00');
+
+$('#plate_m_part0').keyup(function () {
+  var letrasM = $(this).val().toUpperCase();
+  $(this).val(letrasM);
+  if(letrasM.length == 3){ $('#plate_m_part1').focus();}
+});
+$('#plate_m_part1').keyup(function () {
+  var letrasM = $(this).val();
+  if(letrasM.length == 1){ $('#plate_m_part2').focus();}
+});
+$('#plate_m_part2').keyup(function () {
+  var letrasM = $(this).val().toUpperCase();
+  $(this).val(letrasM);
+  if(letrasM.length == 1){ $('#plate_m_part3').focus();}
+});
 
 
 $("#pesquisa").click(function(){
@@ -471,9 +520,6 @@ $("#pesquisa").keyup(function(){
 $('#license_plate_letters').keyup(function () {
   var letras = $(this).val();
   var letrasM = $(this).val().toUpperCase();
-<? if($_SESSION['id']==35){ ?>
-  //alert(letrasM);
-<? } ?>
   $(this).val(letrasM);
   if(letras.length == 3){ $('#license_plate_numbers').focus();}
 });
@@ -487,12 +533,12 @@ $('#license_plate_numbers').keyup(function(){
   }
 });
 
-$('#license_plate_numbers_mercosul').keyup(function(){$(this).val($(this).val().toUpperCase());});
+//$('#license_plate_numbers_mercosul').keyup(function(){$(this).val($(this).val().toUpperCase());});
 //$('#license_plate_numbers_mercosul').mask('0S00');
 
 
-
-$('#bt_mercosul').click(function(){
+//$('#bt_mercosul').click(function(){
+$('.bt_placas').click(function(){
 
            $('#license_plate_numbers').val('');
   $('#license_plate_numbers_mercosul').val('');
@@ -504,6 +550,20 @@ $('#bt_mercosul').click(function(){
              $('#license_plate_letters').toggle();
     $('#license_plate_numbers_mercosul').toggle();
 
+    $('#plate_m_part0').toggle();
+    $('#plate_m_part1').toggle();
+    $('#plate_m_part2').toggle();
+    $('#plate_m_part3').toggle();
+
+    $('#bt_mercosul').toggle();
+    $('#bt_placa_padrao').toggle();
+
+    if(tipo_placa_selecionada=="padrao"){ tipo_placa_selecionada = "mercosul"; $("#plate_m_part0").focus();$('#plate_m_part0').click(); }
+                                    else{ tipo_placa_selecionada = "padrao";   $("#license_plate_letters").focus();$('#license_plate_letters').click(); }
+
+
+    /*
+
     if($('#license_plate_numbers_mercosul').is(":visible"))
     {
       $('#license_plate_numbers_mercosul').focus();
@@ -512,6 +572,7 @@ $('#bt_mercosul').click(function(){
       $('#license_plate_numbers').focus();
       $('#div_placa').removeClass('col-xs-12').addClass('col-xs-6');
     }
+    */
 
 });
 

@@ -82,15 +82,12 @@ $sql = "SELECT
                 //echo "<span>Nenhum veículo notificado para esta data.";
               }
             ?>
+          <h5><i class="text-muted">Data de referência:</i> <b><?=$agora['dthm'];?></b></h5>
           <div class="panel-actions">
-
             <button type='button' class='btn btn-sm btn-info' data-toggle='modal' data-target='#modalFiltro'>
-            <i class='fa fa-search'></i>
+              <i class='fa fa-search'></i>
             </button>
-
-            <!--<button id="bt_placa" style='' type='button' class='btn btn-sm btn-primary'><i id="bt_placa_icon" class='fa fa-refresh'></i></button>-->
             <button id="bt_refresh" style='' type='button' class='btn btn-sm btn-primary'><i id="bt_refresh_icon" class='fa fa-refresh'></i></button>
-            &nbsp;&nbsp;&nbsp;<h5 class='pull-right'>Referência <?=$agora['dthm'];?></h5>
           </div>
         </header>
 

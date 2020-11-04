@@ -7,6 +7,7 @@
   if($_GET['filtro_mes']!=""){
     $filtro = true;
     $agora = mkt2date(date2mkt($_GET['filtro_mes']." 00:00:00"));
+    $agora = mkt2date(date2mkt($_GET['filtro_mes']." 00:00:00"));
     $prox_mes = date("01/m/Y", strtotime('+1 month', $agora['mkt']));
     $ant_mes  = date("01/m/Y", strtotime('-1 month', $agora['mkt']));
   }else{
@@ -37,6 +38,7 @@
     <div class="right-wrapper pull-right" style='margin-right:15px;'>
       <ol class="breadcrumbs">
         <li><a href="index_sistema.php"><i class="fa fa-home"></i></a></li>
+        <li><span class='text-muted'>Aplicações</span></li>
         <li><span class='text-muted'>Turnos</span></li>
       </ol>
     </div>
@@ -68,27 +70,37 @@
 									  </div>
                   </header>
 <div class="panel-body">
+  <?
+      switch ($_GET['tab'])
+      {
+          case 'turno_pag1': $tabActive['turno_pag1'] = "active"; break;
+          case 'turno_pag2': $tabActive['turno_pag2'] = "active"; break;
+          case 'turno_pag3': $tabActive['turno_pag3'] = "active"; break;
+        default:
+          case 'turno_pag1': $tabActive['turno_pag1'] = "active"; break;
+      }
+  ?>
   <div class="tabs">
               <ul class="nav nav-tabs text-right tabs-primary">
-                <li class="active">
+                <li class="<?=$tabActive['turno_pag1'];?>">
                   <a href="#turno_pag1" data-toggle="tab" ajax="false"><i class="fa fa-folder-open-o"></i> Aberto <b><sup><?=(isset($turnos['aberto'])?count($turnos['aberto']):"0");?></sup></b></a>
                 </li>
-                <li>
+                <li class="<?=$tabActive['turno_pag2'];?>">
                   <a href="#turno_pag2" data-toggle="tab" ajax="false"><i class="fa fa-folder-o"></i> Inativos <b><sup><?=(isset($turnos['inativo'])?count($turnos['inativo']):"0");?></sup></b></a>
                 </li>
-                <li>
+                <li class="<?=$tabActive['turno_pag3'];?>">
                   <a href="#turno_pag3" data-toggle="tab" ajax="false"><i class="fa fa-folder"></i> Fechados <b><sup><?=(isset($turnos['fechado'])?count($turnos['fechado']):"0");?></sup></b></a>
                 </li>
               </ul>
+
               <div class="tab-content">
-                <div id="turno_pag1" class="tab-pane active">
+                <div id="turno_pag1" class="tab-pane <?=$tabActive['turno_pag1'];?>">
                               <table class="table table-hover mb-none">
                                 <thead>
                                   <tr class='success'><td colspan='3'>Turno aberto:</td><td colspan='3' class='text-right'><b><?=(isset($turnos['aberto'])?count($turnos['aberto']):"0");?></b> turno(s)</td></tr>
                                 </thead>
                                 <tbody>
                                     <?
-                                        unset($i, $d);
                                         if(isset($turnos['aberto']) && count($turnos['aberto']))
                                         {
                                             echo "<tr>
@@ -101,8 +113,15 @@
                                             for($i = 0; $i<count($turnos['aberto']);$i++)
                                             {
                                               $d = $turnos['aberto'][$i];
-                                              echo "<tr>";
-                                              echo "<td><b>".$d['id']." </b></td>";
+
+                                              if($_GET['filtro_id_workshift'] == $d['id']){
+                                                  $classvis = "info"; $iconvis = "<i class='fa fa-eye'></i>";
+                                              }else{
+                                                  unset($classvis, $iconvis);
+                                              }
+
+                                              echo "<tr id='tc_{$d['id']}' class='{$classvis}'>";
+                                              echo "<td>{$iconvis}<b>{$d['id']}</b></td>";
                                               echo "<td nowrap>".ucfirst($d['workshift_group'])."</td>";
                                               echo "<td nowrap>".formataData($d['opened'],1)."</td>";
                                               echo "<td nowrap>".formataData($d['closed'],1)."</td>";
@@ -111,7 +130,7 @@
                                               else                        { $icon = "fa-eye"; }
 
                                               echo "<td class='actions text-center'>
-                                                      <a href='oct/index.php?id_workshift=".$d['id']."' class='btn btn-default loading2'><i class='fa ".$icon."'></i></a>
+                                                      <a href='oct/index.php?tab=turno_pag1&id_workshift=".$d['id']."' class='btn btn-default loading2'><i class='fa ".$icon."'></i></a>
                                                     </td>";
 
                                               echo "</tr>";
@@ -126,8 +145,7 @@
                                 </tbody>
                               </table>
                 </div>
-                <div id="turno_pag2" class="tab-pane">
-
+                <div id="turno_pag2" class="tab-pane <?=$tabActive['turno_pag2'];?>">
                   <div class="row">
                     <div class="col-sm-12">
 
@@ -145,16 +163,24 @@
                             </thead>
                             <tbody>
                                 <?
-                                    unset($i, $d);
                                     if(isset($turnos['inativo']) && count($turnos['inativo']))
                                     {
 
                                         for($i = 0; $i<count($turnos['inativo']);$i++)
                                         {
+
                                           $d = $turnos['inativo'][$i];
+
+                                          if($_GET['filtro_id_workshift'] == $d['id']){
+                                              $classvis = "info"; $iconvis = "<i class='fa fa-eye'></i>";
+                                          }else{
+                                              unset($classvis, $iconvis);
+                                          }
+
+
                                           if($qtd_turno_por_datas[substr($d['opened'],0,10)] > 1){ $bg_color="background:#FFFFD0";}else{ $bg_color = "";}
-                                          echo "<tr>";
-                                          echo "<td class='text-muted'>".$d['id']."</td>";
+                                          echo "<tr id='tc_{$d['id']}' class='{$classvis}'>";
+                                          echo "<td class='text-muted'>{$iconvis}<b>{$d['id']}</b></td>";
                                           echo "<td nowrap>".ucfirst($d['workshift_group'])."</td>";
                                           echo "<td nowrap style='".$bg_color."'>".formataData($d['opened'],1)."</td>";
                                           echo "<td nowrap>".formataData($d['closed'],1)."</td>";
@@ -164,7 +190,7 @@
                                           else                        { $icon = "fa-eye"; }
 
                                           echo "<td class='actions text-center'>
-                                                  <a href='oct/index.php?id_workshift=".$d['id']."' class='btn btn-default loading2'><i class='fa ".$icon."'></i></a>
+                                                  <a href='oct/index.php?tab=turno_pag2&id_workshift=".$d['id']."' class='btn btn-default loading2'><i class='fa ".$icon."'></i></a>
                                                 </td>";
                                           echo "</tr>";
                                       }
@@ -182,7 +208,7 @@
 
 
                 </div>
-                <div id="turno_pag3" class="tab-pane">
+                <div id="turno_pag3" class="tab-pane <?=$tabActive['turno_pag3'];?>">
 
                         <table class="table table-hover mb-none tabela_dinamica">
                           <thead>
@@ -198,15 +224,24 @@
                           </thead>
                           <tbody>
                               <?
-                                  unset($i, $d);
+
                                   if(isset($turnos['fechado']) && count($turnos['fechado']))
                                   {
                                       for($i = 0; $i<count($turnos['fechado']);$i++)
                                       {
                                         $d = $turnos['fechado'][$i];
+
+                                        if($_GET['filtro_id_workshift'] == $d['id']){
+                                            $classvis = "info"; $iconvis = "<i class='fa fa-eye'></i>";
+                                        }else{
+                                            unset($classvis, $iconvis);
+                                        }
+
+                                        if($_GET['filtro_id_workshift'] == $d['id']){ $classvis = "info"; $iconvis = "<i class='fa fa-eye'></i>"; }else{unset($classvis, $iconvis);}
+                                        $d = $turnos['fechado'][$i];
                                         if($qtd_turno_por_datas[substr($d['opened'],0,10)] > 1){ $bg_color="background:#FFFFD0";}else{ $bg_color = "";}
-                                        echo "<tr>";
-                                        echo "<td><b>".$d['id']."</b></td>";
+                                        echo "<tr id='tc_{$d['id']}' class='{$classvis}'>";
+                                        echo "<td>{$iconvis}<b>{$d['id']}</b></td>";
                                         echo "<td nowrap>".ucfirst($d['workshift_group'])."</td>";
                                         echo "<td nowrap style='".$bg_color."'>".formataData($d['opened'],1)."</td>";
                                         echo "<td nowrap>".formataData($d['closed'],1)."</td>";
@@ -216,7 +251,7 @@
                                         else                        { $icon = "fa-eye"; }
 
                                         echo "<td class='actions text-center'>
-                                                <a href='oct/index.php?id_workshift=".$d['id']."' class='btn btn-default loading2'><i class='fa ".$icon."'></i></a>
+                                                <a href='oct/index.php?tab=turno_pag3&id_workshift=".$d['id']."' class='btn btn-default loading2'><i class='fa ".$icon."'></i></a>
                                               </td>";
 
                                         echo "</tr>";
@@ -246,6 +281,13 @@
 
 </section>
 <script>
+<?
+  if($_GET['filtro_id_workshift'])
+  {
+    echo "$('html, body').animate({scrollTop: (($('#tc_{$_GET['filtro_id_workshift']}').first().offset().top)-150)},100);";
+  }
+?>
+
 $(document).ready( function () {
     $('.tabela_dinamica').DataTable({
       responsive: true,

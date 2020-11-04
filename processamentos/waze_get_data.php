@@ -187,38 +187,3 @@ print_r($obj);
 echo "\n\n-------------------- WAZE DATAFILE --------------------------\n\n";
 
 echo "\n\n\n";
-
-
-function makeSql($table, $fieldvals, $type, $returning="")
-{
-    switch ($type) {
-      case 'ins':
-              foreach ($fieldvals as $key => $val)
-              {
-                $keys[] = $key;
-                $vals[] = ($val!=""?"'".$val."'":"Null");
-              }
-
-              $sql = "INSERT INTO ".$table." (".implode(", ", $keys).") VALUES (".implode(", ",$vals).") ".($returning!=""?"RETURNING ".$returning:"");
-      break;
-      case 'upd':
-              foreach ($fieldvals as $key => $val)
-              {
-                if($val!="")
-                {
-                  $upds[] = $key."='".$val."'";
-                }else {
-                  $upds[] = $key."=Null";
-                }
-              }
-              if($returning != "")
-              {
-                $sql = "UPDATE ".$table." SET ".implode(", ",$upds)." WHERE ".$returning;
-              }
-      break;
-
-      default:
-        break;
-    }
-  return $sql;
-}

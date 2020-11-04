@@ -23,7 +23,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
 		<!-- Web Fonts  -->
-		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800|Shadows+Into+Light" rel="stylesheet" type="text/css">
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800|Shadows+Into+Light" rel="stylesheet" type="text/css">
 
 		<!-- Vendor CSS -->
 		<link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.css" />
@@ -51,7 +51,7 @@
 				integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
 				crossorigin=""></script>
 
-		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
 
 		<!-- Theme CSS -->
 		<link rel="stylesheet" href="assets/stylesheets/theme.css" />
@@ -106,8 +106,8 @@
 		<script src="assets/vendor/flot/jquery.flot.categories.js"></script>
 		<script src="assets/vendor/flot/jquery.flot.resize.js"></script>
 		<script src="assets/vendor/jquery-sparkline/jquery.sparkline.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
 		<script src="assets/vendor/gauge/gauge.js"></script>
 		<script src="assets/vendor/snap-svg/snap.svg.js"></script>
 		<script src="assets/vendor/liquid-meter/liquid.meter.js"></script>
@@ -125,7 +125,7 @@
 		<script src="assets/vendor/jquery-mockjax/jquery.mockjax.js"></script>
 		<script src="assets/vendor/gauge/gauge.js"></script>
 
-		<script src="http://oss.maxcdn.com/jquery.form/3.50/jquery.form.min.js"></script>
+		<script src="https://oss.maxcdn.com/jquery.form/3.50/jquery.form.min.js"></script>
 
 
 

@@ -77,7 +77,7 @@
                           <div class="col-md-10">
                             <select class="form-control" id="id_company" name="id_company">
                                 <?
-                                    $sql = "SELECT * FROM ".$schema."company ORDER BY name ASC";
+                                    $sql = "SELECT * FROM ".$schema."company WHERE active = 't' ORDER BY name ASC";
                                     $res = pg_query($sql)or die();
                                     while($d = pg_fetch_assoc($res))
                                     {

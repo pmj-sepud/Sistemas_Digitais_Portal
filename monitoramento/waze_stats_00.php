@@ -4,6 +4,8 @@ require("../libs/php/funcoes.php");
 require("../libs/php/conn.php");
 
 $agora = now();
+
+
 ?>
 <div style="position:absolute;z-index:10;margin-top:5px;margin-left:5px"><img src="../assets/images/waze-logo.png" width="200px"></div>
 <div class='row'>

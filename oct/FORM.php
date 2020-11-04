@@ -973,8 +973,19 @@
 <? if($acao != "inserir"){ ?>
             <div class="row">
             <div class="col-sm-12">
-            <table class="table table-condensed">
-              <tbody>
+
+<table class="table table-condensed">
+  <thead><tr><th colspan='3' class='text-right info'>Programação de prazo:</th></thead>
+  <tbody>
+    <tr>
+      <td>Inicia em:</td><td>
+        <input class='changefield' style='border-width:0px;border:none;height:15px;font-weight:bold;' type='datetime-local' name='init' value='<?=substr(str_replace(" ","T",$dados['init']),0,16);?>'> <i class='fa fa-pencil'></i>
+      </td></tr>
+    <tr><td>Encerra em:</td><td>
+        <input class='changefield' style='border-width:0px;border:none;height:15px;font-weight:bold;' type='datetime-local' name='finish' value='<?=substr(str_replace(" ","T",$dados['finish']),0,16);?>'> <i class='fa fa-pencil'></i>
+    </td></tr>
+
+<tr><th colspan='3'  class='text-right info'>Operação:</th></thead>
                 <tr><td>Abertura:</td>     <td class=""><b><?=substr(formataData($dados['date'],1),0,16);?></b></td></tr>
                 <?
                     if($dados['on_way']!=""){

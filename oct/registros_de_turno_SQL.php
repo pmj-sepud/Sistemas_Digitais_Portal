@@ -4,7 +4,7 @@
     require_once("../libs/php/conn.php");
     $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
-    //echo "<div class='row'><div class='col-md-6 col-md-offset-3'><pre>";
+  
 
     foreach ($_POST as $var => $val)
     {
@@ -75,64 +75,11 @@
           $res =  pg_query($sql)or die("<div class='row'><div class='col-md-6 col-md-offset-3'><pre>SQL error ".__LINE__."<br>SQL: ".$sql."</div></div>");
           $id  = pg_fetch_assoc($res);
 
-        //print_r_pre($_POST);
         header("Location: registros_de_turno_FORM.php?id=".$id['id']."&tipo_registro=".$tipo_registro."&gotoback=".$gotoback."&id_workshift=".$id_workshift);
         exit();
 
     }
-/*
 
-"id_garrison" int4,
-"id_vehicle" int4,
-"id_user" int4,
-"obs" text COLLATE "pg_catalog"."default",
-"id_workshift" int4,
-"km_initial" int4,
-"km_final" int4,
-"type"
 
-Veiculo:
-    [id_fleet] => '9'
-    [id_user] => Null
-    [km_initial] => '2222'
-    [km_final] => Null
-    [status] => 'obs'
-    [id_garrison] => '920'
-    [opened] => '2019-08-09T16:01'
-    [closed] => Null
-    [observation] => 'teste'
-    [id_workshift] => '191'
-    [acao] => Inserir
-
-Pessoa:
-    [id_fleet] => Null
-    [status] => 'obs'
-    [km_initial] => Null
-    [km_final] => Null
-    [id_user] => '115'
-    [id_garrison] => '920'
-    [opened] => '2019-08-09T16:19'
-    [closed] => '2019-08-09T18:00'
-    [observation] => 'teste de inserção de pessoas'
-    [id_workshift] => '191'
-    [acao] => Inserir
-
-Guarnição:
-    [id_fleet] => Null
-    [status] => 'lanche'
-    [km_initial] => Null
-    [km_final] => Null
-    [id_user] => Null
-    [id_garrison] => '920'
-    [opened] => '2019-08-09T16:20'
-    [closed] => Null
-    [observation] => 'teste de inserção para guarnição...'
-    [id_workshift] => '191'
-    [acao] => Inserir
-
-*/
-  //print_r_pre($_POST);
-
-  echo "</pre></div></div>";
 
 ?>

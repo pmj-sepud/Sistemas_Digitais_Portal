@@ -165,12 +165,12 @@
                             <a href="oct/agenda_de_endereco_INDEX.php"><button type="button" class="btn btn-default">Voltar</button></a>
                             <? if($acao=="Atualizar")
                                 {
-                                    if(check_perm("3_16","D"))
+                                    if(check_perm("3_16"))
                                     {
                                       echo " <a href='oct/agenda_de_endereco_SQL.php?id=".$d['id']."&acao=Remover'><button type='button' class='btn btn-danger loading'>Remover</button></a>";
                                     }
 
-                                    if(check_perm("3_16","U"))
+                                    if(check_perm("3_16"))
                                     {
                                       echo " <button type='submit' class='btn btn-primary loading'>".$acao."</button>";
                                     }
@@ -178,7 +178,7 @@
 
                                 if($acao=="Inserir")
                                 {
-                                    if(check_perm("3_16","C"))
+                                    if(check_perm("3_16"))
                                     {
                                       echo " <button type='submit' class='btn btn-primary loading'>".$acao."</button>";
                                     }

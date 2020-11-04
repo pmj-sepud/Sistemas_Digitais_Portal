@@ -71,7 +71,8 @@
                       ".$requester_origin.",
                       ".$requester_protocol.",
                       ".$id_street_conner.",
-                      ".$id_neighborhood.") returning id";
+                      ".$id_neighborhood.")
+                      returning id";
 
         $res = pg_query($sql) or die("Erro ".__LINE__."SQL: ".$sql);
         $aux = pg_fetch_assoc($res);
@@ -102,6 +103,10 @@
         if($closure         != ""){ $sql_closure    = ",closure = '".$closure."'";  }else{ $sql_closure    = ",closure = Null"; }
         if($arrival         != ""){ $sql_arrival    = ",arrival = '".$arrival."'";  }else{ $sql_arrival    = ",arrival = Null";}
         if($on_way          != ""){ $sql_on_way     = ",on_way = '".$on_way."'";    }else{ $sql_on_way     = ",on_way = Null";}
+
+        if($init            != ""){ $sql_init     = ",init   = '".$init."'";    }else{ $sql_init   = ",init = Null";  }
+        if($finish          != ""){ $sql_finish   = ",finish = '".$finish."'";  }else{ $sql_finish = ",finish = Null";}
+
         if($victim_inform   == ""){ $victim_inform  ="Null"; }else{ $victim_inform = "'".$victim_inform."'";  }
         if($region          == ""){ $region         ="Null"; }else{ $region        = "'".$region."'";         }
         if($requester_origin   == ""){ $requester_origin   ="Null"; }else{ $requester_origin   = "'".$requester_origin."'";   }
@@ -135,6 +140,8 @@
                      ".$sql_closure."
                      ".$sql_arrival."
                      ".$sql_on_way."
+                     ".$sql_init."
+                     ".$sql_finish."
                WHERE id                 = '".$id."'";
 
         pg_query($sqlCond.$sql) or die("Erro ".__LINE__."<br>SQL: ".$sql);

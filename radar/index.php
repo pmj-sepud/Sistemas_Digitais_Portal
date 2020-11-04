@@ -6,26 +6,34 @@
 
   $agora = now();
 
-
-
   if($_GET['filtro']=="dia"){
     $ontem = date('Y-m-d',strtotime("-1 days"));
-    $filtro_sql = " F.date = '".$ontem."' ";
+    $filtro_sql = " F.date = '".$ontem."' AND";
     $txt_filtro = "Referência: ".formataData($ontem,1);
     logger("Acesso","Radares","Filtro: último dia");
   }else{
-    $filtro_sql = " F.date >= '".$agora['ano']."-".$agora['mes']."-01' ";
+    //$filtro_sql = " F.date >= '".$agora['ano']."-".$agora['mes']."-01' AND";
     $txt_filtro = "Referência: ".$agora['mes_txt_c']."/".$agora['ano'];
     logger("Acesso","Radares");
   }
-
-      $sql  = "SELECT E.id, E.equipment, E.address,
+/*
+       $sql  = "SELECT E.id, E.equipment, E.address,
               			 max(F.date) as last_file_imported, sum(total) as contador_veiculos
               FROM radars.radars_flows F, radars.radars_equipments E
               WHERE $filtro_sql
-              AND F.equipament_id = E.id
+              F.equipament_id = E.id
               GROUP BY E.id, E.equipment, E.address
               ORDER BY E.id ASC";
+*/
+   $sql = "SELECT
+          	E.id, E.equipment, E.address,
+          	(SELECT max(date)  FROM radars.radars_flows WHERE equipament_id = E.id) as last_file_imported,
+          	(SELECT sum(total) FROM radars.radars_flows WHERE equipament_id = E.id
+              AND date BETWEEN '{$agora["ano"]}-{$agora["mes"]}-01' AND '{$agora["ano"]}-{$agora["mes"]}-{$agora["ultimo_dia"]}') as contador_veiculos
+          FROM
+          	radars.radars_equipments E
+          ORDER BY
+          	E.id ASC";
 
   $res  = pg_query($conn_neogrid,$sql);
   while($d = pg_fetch_assoc($res)){

@@ -20,14 +20,20 @@ function check_perm($perm, $tipo="")
     $offset = array("C"=>0, "R"=>1, "U"=>2, "D"=>3);
     if($tipo=="") //Permissão do tipo ação (1 byte)
     {
-      if(strlen($_SESSION['permissoes'][$perm])==1) //Permissão do tipo acao (1 byte)
-      {
-        return ($_SESSION['permissoes'][$perm]?true:false);
-      }else{
-        return false;
-      }
+        if(strlen($_SESSION['permissoes'][$perm])==1) //Permissão do tipo acao (1 byte)
+        {
+          return ($_SESSION['permissoes'][$perm]?true:false);
+        }else{
+          return false;
+        }
     }else{ //Permissão do tipo CRUD (4 bytes)
-      return ($_SESSION['permissoes'][$perm][$offset[$tipo]]?true:false);
+      if($tipo == "CRUD")
+      {
+          $ret = strpos($_SESSION['permissoes'][$perm],"1");
+          if($ret===false){ return false; }else{ return true; }
+      }else{
+          return ($_SESSION['permissoes'][$perm][$offset[$tipo]]?true:false);
+      }
     }
 
 }
@@ -219,5 +225,40 @@ function date2mkt($data){
 			$dt   = explode("/",$dtAux[0]);
 			return mktime(0,0,0,$dt[1],$dt[0],$dt[2]);
 		}
+}
+
+function makeSql($table, $fieldvals, $type, $returning="")
+{
+    switch ($type) {
+      case 'ins':
+              foreach ($fieldvals as $key => $val)
+              {
+                $keys[] = $key;
+                $vals[] = ($val!=""?"'".$val."'":"Null");
+              }
+              $sql = "INSERT INTO ".$table." (".implode(", ", $keys).") VALUES (".implode(", ",$vals).") ".($returning!=""?"RETURNING ".$returning:"");
+      break;
+      case 'upd':
+
+            if($returning != "")
+            {
+              foreach ($fieldvals as $key => $val)
+              {
+                if($returning != $key)
+                {
+                    if($val!=""){ $upds[] = $key."='".$val."'"; }
+                    else{         $upds[] = $key."=Null";       }
+                }
+              }
+              $sql = "UPDATE ".$table." SET ".implode(", ",$upds)." WHERE ".$returning ." = '".$fieldvals[$returning]."'";
+            }else {
+              return false;
+            }
+      break;
+
+      default:
+        break;
+    }
+  return $sql;
 }
 ?>

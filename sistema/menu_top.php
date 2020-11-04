@@ -44,7 +44,7 @@ if($_SESSION['tem_foto'] == "sim")
         <ul class="list-unstyled">
           <li class="divider"></li>
           <li>
-            <a role="menuitem" tabindex="-1" href='#'><i class="fa fa-user"></i> Meu perfil</a>
+            <a role="menuitem" tabindex="-1" href='usuarios/FORM_change_pass.php'><i class="fa fa-user"></i> Trocar senha</a>
           </li>
           <li>
             <a role="menuitem" tabindex="-1" href="#" data-lock-screen="true"><i class="fa fa-lock"></i> Bloquear tela</a>
