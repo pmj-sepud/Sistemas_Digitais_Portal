@@ -29,13 +29,15 @@
                 TO_CHAR(E.date::date, 'dd/mm/yyyy') as data_de_abertura,  E.date::time as hora,
                 E.arrival::time as chegada, E.closure::time as fechamento,
                 E.victim_inform as qtd,
-                S.name as logradouro,
-                AB.num_ref as numero, AB.name as agenda,
+                ST.name as logradouro,
+                --S.name as logradouro,
+                E.street_number as numero, AB.name as agenda,
                 E.id_garrison as id_guarnição
             FROM ".$schema."oct_events E
                  JOIN ".$schema."oct_event_type  ET ON ET.id = E.id_event_type
             LEFT JOIN ".$schema."oct_addressbook AB ON AB.id = E.id_addressbook
-            LEFT JOIN ".$schema."streets          S ON  S.id = AB.id_street
+            --LEFT JOIN ".$schema."streets          S ON  S.id = AB.id_street
+            LEFT JOIN ".$schema."streets         ST ON ST.id = E.id_street
             WHERE E.date BETWEEN '".$filtro_data_ini['datasrv']." 00:00:00' AND '".$filtro_data_fim['datasrv']." 23:59:59'
             AND E.id_company = '".$_SESSION['id_company']."'
             ORDER BY E.date DESC";
@@ -45,6 +47,9 @@
     {
         while($a=pg_fetch_assoc($res))
         {
+
+              $a['relato'] = nl2br($a['relato']);
+              
               if($c==0){ $cabecalho = array_keys($a); }
               unset($linha,$veic, $pess, $abordagens, $conduzidos);
 
@@ -80,31 +85,6 @@
                                           $linha["GM".($count_pass+1)] = $aux['nickname'];
                                           $linha["GM".($count_pass+1)."_posicao"] = $aux['type'];
                                         }
-/*
-                                        $count_pass=1;
-                                        while($aux = pg_fetch_assoc($resPe))
-                                        {
-                                          $pess[]=$aux;
-                                          $cabecalho[] = "GM".$count_pass;
-                                          $cabecalho[] = "GM".$count_pass."_posicao";
-                                          $linha["GM".$count_pass] = $aux['nickname'];
-                                          $linha["GM".$count_pass++."_posicao"] = $aux['type'];
-                                        }
-
-                                        if($count_pass <= 5)
-                                        {
-                                            for($count_pass; $count_pass <= 5; $count_pass++)
-                                            {
-                                              $linha["GM".$count_pass] = "[".$count_pass."]";
-                                              $linha["GM".$count_pass."_posicao"] = "[".$count_pass."]";
-                                              if($c==0)
-                                              {
-                                                $cabecalho[] = "GM".$count_pass;
-                                                $cabecalho[] = "GM".$count_pass."_posicao";
-                                              }
-                                            }
-                                        }
-*/
 
                                       }
                                     }
@@ -163,22 +143,24 @@
                           TO_CHAR(E.date::date, 'dd/mm/yyyy') as data_de_abertura,  E.date::time as hora,
                           E.arrival::time as chegada, E.closure::time as fechamento,
                           E.victim_inform as qtd,
-	                        S.name as logradouro,
-	                        AB.num_ref as numero, AB.name as agenda,
+                          ST.name as logradouro,
+                          --S.name as logradouroAgenda,
+	                        E.street_number as numero, AB.name as agenda,
                           E.id_garrison as id_guarnição
                       FROM ".$schema."oct_events E
                            JOIN ".$schema."oct_event_type  ET ON ET.id = E.id_event_type
                       LEFT JOIN ".$schema."oct_addressbook AB ON AB.id = E.id_addressbook
-                      LEFT JOIN ".$schema."streets          S ON  S.id = AB.id_street
+                      --LEFT JOIN ".$schema."streets        S ON  S.id = AB.id_street
+                      LEFT JOIN ".$schema."streets         ST ON ST.id = E.id_street
                       WHERE E.date BETWEEN '".$filtro_data_ini['datasrv']." 00:00:00' AND '".$filtro_data_fim['datasrv']." 23:59:59'
                       AND E.id_company = '".$_SESSION['id_company']."'
                       ORDER BY E.date DESC";
-              $res = pg_query($sql)or die("SQL Error ".__LINE__);
+              $res = pg_query($sql)or die("SQL Error ".__LINE__."<pre class='text-center'>{$sql}</pre>");
               if(pg_num_rows($res))
               {
                   while($a=pg_fetch_assoc($res)){
 
-
+//print_r_pre($a);
                       if($a['id_guarnição']!="")
                       {
                         unset($veic, $pess, $abordagens, $conduzidos);
@@ -323,6 +305,7 @@
                               if($error=="")
                               {
                                 monta_tabela($dados);
+                              //print_r_pre($dados);
                               }
                             }
                             if($error)

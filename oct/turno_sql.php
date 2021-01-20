@@ -151,4 +151,13 @@ if($_GET['acao']=="remover_associado" && $_GET['id']!="" && $_GET["id_workshift"
   header("location: turno_associar_pessoa.php?id_workshift=".$_GET['id_workshift']);
   exit();
 }
+if($_GET['acao']=="remover_todos"  && $_GET["id_workshift"]!="")
+{
+  $sql = "DELETE FROM ".$schema."oct_rel_workshift_persona WHERE id_shift = '".$_GET['id_workshift']."'";
+  pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
+  $sqlu = "UPDATE ".$schema."oct_workshift SET is_populate = 'f' WHERE id = '".$_GET["id_workshift"]."'";
+  pg_query($sqlu)or die("SQL Error ".__LINE__."<br>Query: ".$sqlu);
+  header("location: turno_associar_pessoa.php?id_workshift=".$_GET['id_workshift']);
+  exit();
+}
 ?>

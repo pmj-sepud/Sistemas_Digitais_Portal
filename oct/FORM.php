@@ -1433,17 +1433,28 @@ zoommap 		= <?=$zoommap;?>;
 var latlon  = new L.latLng(<?=$posicao;?>);
 var map 		= new L.map('map', {attributionControl: false, zoomControl: true}).setView(latlon, zoommap);
 
-
+/*
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoiam9uc25pZSIsImEiOiJjazdvdHg2cmQwY3NoM2VwOXg1YWdzNWN0In0.teqXLAHyVSJwut8hqAMONw', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     maxZoom: 18,
     id: 'mapbox.streets',
     accessToken: 'pk.eyJ1Ijoiam9uc25pZSIsImEiOiJjazdvdHg2cmQwY3NoM2VwOXg1YWdzNWN0In0.teqXLAHyVSJwut8hqAMONw'
 }).addTo(map);
+*/
 
-map.on("dragend",   function (e) {$("#mapinfo").html("MAPA: dragend");	count=0;	});
+L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1Ijoiam9uc25pZSIsImEiOiJjazdvdHg2cmQwY3NoM2VwOXg1YWdzNWN0In0.teqXLAHyVSJwut8hqAMONw', {
+  attributionControl: false,
+  maxZoom: 18,
+  id: 'mapbox/streets-v11',
+  tileSize: 512,
+  zoomOffset: -1,
+  accessToken: 'pk.eyJ1Ijoiam9uc25pZSIsImEiOiJjazdvdHg2cmQwY3NoM2VwOXg1YWdzNWN0In0.teqXLAHyVSJwut8hqAMONw'
+}).addTo(map);
+
+
+map.on("dragend",   function (e) {var count; $("#mapinfo").html("MAPA: dragend");	count=0;	});
 map.on("dragstart", function (e) {});
-map.on("drag",      function (e) {$("#mapinfo").html("MAPA: drag    ["+count+++"]");});
+map.on("drag",      function (e) {var count; $("#mapinfo").html("MAPA: drag    ["+count+++"]");});
 map.on("zoom",      function (e) {$("#mapinfo").html("MAPA: zoom"); map.flyTo(marco.getLatLng()); });
 
 map.removeControl(map.zoomControl);

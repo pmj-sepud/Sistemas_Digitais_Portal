@@ -251,7 +251,11 @@
           <section class="panel box_shadow">
               <header class="panel-heading" style="height:70px">
                   <?="<h5>Agentes associados ao turno de trabalho <b>nº ".str_pad($id_workshift,5,"0",STR_PAD_LEFT)."</b></h5>";?>
-                  <div class="panel-actions text-right"></div>
+                  <div class="panel-actions text-right">
+                      <a href='oct/turno_sql.php?id_workshift=<?=$id_workshift;?>&acao=remover_todos'>
+                          <button class="btn btn-danger"><i class='fa fa-trash'></i> Remover todos</button>
+                      </a>
+                  </div>
               </header>
               <div class="panel-body">
                   <div class="row">
@@ -265,7 +269,8 @@
                                            JOIN ".$schema."users                      U ON U.id = WP.id_person
                                       WHERE
                                       	WP.id_shift =  '".$id_workshift."'
-                                      ORDER BY WP.opened ASC, U.name ASC";
+                                        --ORDER BY WP.opened ASC, U.name ASC
+                                        ORDER BY WP.opened ASC, U.nickname ASC";
                             $res = pg_query($sql)or die("Erro ".__LINE__."<br>SQL: ".$sql);
                             if(pg_num_rows($res))
                             {

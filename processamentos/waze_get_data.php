@@ -128,8 +128,8 @@ echo "Processando IRREGULARIDADES: ";
                         $array['n_thumbs_up']           = $array['nThumbsUp'];
                         $array['n_comments']            = $array['nComments'];
                         $array['n_images']              = $array['nImages'];
-                        $array['end_node']              = $array['endNode'];
-                        $array['start_node']            = $array['startNode'];
+                        $array['end_node']              = str_replace("'","",$array['endNode']);
+                        $array['start_node']            = str_replace("'","",$array['startNode']);
                         $array['datafile_id']           = $datafile_id;
 
                         unset($array['detectionDateMillis'],$array['detectionDate'],$array['updateDateMillis'],$array['updateDate'],$array['highway'],$array['regularSpeed'],$array['delaySeconds'],$array['jamLevel'],$array['driversCount'],$array['alertsCount'],$array['nThumbsUp'],$array['nComments'],$array['nImages'],$array['endNode'],$array['startNode']);
@@ -145,23 +145,29 @@ echo "Processando CONGESTIONAMENTOS: ";
                 $inserts = 0;
                 for($i=0;is_array($congest) && $i<count($congest);$i++)
                 {
+
                     $array                      = json_decode(json_encode($congest[$i]), True);
                     $array['line']              = json_encode($array['line']);
                     $array['datafile_id']       = $datafile_id;
                     $array['id']                = md5(json_encode($array));
                     $array['pub_millis']        = $array['pubMillis'];
-                    $array['end_node']          = $array['endNode'];
-                    $array['start_node']        = $array['startNode'];
+                    $array['street']            = str_replace("'","",$array['street']);
+                    $array['end_node']          = str_replace("'","",$array['endNode']);
+                    $array['start_node']        = str_replace("'","",$array['startNode']);
                     $array['road_type']         = $array['roadType'];
                     $array['speed_kmh']         = $array['speedKMH'];
                     $array['turn_type']         = $array['turnType'];
 
-                    $jam_stats['jam_street']        = $array['street'];
+                    $jam_stats['jam_street']        = str_replace("'","",$array['street']);
                     $jam_stats['jam_speedkmh']      = $array['speedKMH'];
                     $jam_stats['jam_length']        = $array['length'];
                     $jam_stats['jam_delay']         = $array['delay'];
                     $jam_stats['jam_timestamp_utc'] = $stats["start_time"];
 
+
+//echo "\n==============================================================\n";
+///  print_r($array);
+//echo "\n==============================================================\n";
 
                     $dttmp                  = mkt2date($array['pub_millis']/1000);
                     $array['pub_utc_date']  = $dttmp['datatimesrv_utc'];
@@ -169,6 +175,7 @@ echo "Processando CONGESTIONAMENTOS: ";
                     $array['blocking_alert_id'] = $array['blockingAlertUuid'];
                     unset($array['segments'], $array['pubMillis'],$array['endNode'],$array['speedKMH'],$array['turnType'],$array['blockingAlertUuid'],$array['roadType'],$array['startNode']);
                     $sql = makeSql("waze.jams", $array, "ins");
+
                     @pg_query($sql);
                     $inserts++;
 

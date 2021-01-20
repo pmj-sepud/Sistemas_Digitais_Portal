@@ -191,6 +191,9 @@ text-decoration: none;
 -->
     	</div>
 			<div class="card-body">
+
+
+<? if(true){ ?>
 				<form action="auth/autenticar.php" method="post">
 					<div class="input-group form-group">
 						<div class="input-group-prepend">
@@ -205,11 +208,7 @@ text-decoration: none;
 						</div>
 						<input name="password" type="password" class="form-control" placeholder="password">
 					</div>
-<!--
-  				<div class="row align-items-center remember">
-						<input type="checkbox">Lembrar
-					</div>
--->
+
     			<div class="form-group">
 						<input type="hidden" name="modulo" value="<?=$modulo;?>" />
 						<input type="submit" value="Entrar" class="btn float-right login_btn">
@@ -217,16 +216,18 @@ text-decoration: none;
 					</div>
 				</form>
 			</div>
+<? }else{
+
+	echo "<div class='alert alert-warning text-center'>Desculpe, o sistema encontra-se em manutenção. Assim que possível iremos reestabelecer o acesso.</div>";
+} ?>
+
 			<div class="card-footer">
 <!--
-							<div class="d-flex justify-content-center links">
-								<a href="#">Solicitar acesso ao sistema.</a>
-							</div>
--->
 							<div class="d-flex justify-content-center links">
 								<a class="btn btn-outline-warning" href="#">Solicitar acesso</a>
 								<a class="btn btn-outline-warning" href="#">Esqueci minha senha</a>
 							</div>
+-->
 						</div>
 
     	</div>
