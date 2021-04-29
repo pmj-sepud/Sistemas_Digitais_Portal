@@ -68,6 +68,9 @@
 		<link rel='stylesheet' type='text/css' href='https://api.tomtom.com/maps-sdk-for-web/cdn/5.x/5.36.1/maps/maps.css'>
 
 
+		<link rel='stylesheet' type='text/css' href='https://cdn.jsdelivr.net/datatables.mark.js/2.0.0/datatables.mark.min.css'>
+
+
 
 
 		<style>
@@ -86,7 +89,7 @@
 		</style>
 	</head>
 	<body>
-		
+
 		<section class="body">
 					<? require_once("sistema/menu_top.php"); ?>
 					<div class="inner-wrapper">
@@ -146,7 +149,8 @@
 		<script src="assets/vendor/jquery-mockjax/jquery.mockjax.js"></script>
 
 
-		<script src="https://oss.maxcdn.com/jquery.form/3.50/jquery.form.min.js"></script>
+		<!--<script src="https://oss.maxcdn.com/jquery.form/3.50/jquery.form.min.js"></script>-->
+		<script src="https://cdn.jsdelivr.net/gh/jquery-form/form@4.3.0/dist/jquery.form.min.js" integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn" crossorigin="anonymous"></script>
 
 
 
@@ -167,8 +171,23 @@
 		<script src="assets/vendor/jquery-datatables/extras/TableTools/js/dataTables.tableTools.min.js"></script>
 		<script src="assets/vendor/jquery-datatables-bs3/assets/js/datatables.js"></script>
 -->
-		<script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-		<script src="//cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
+
+		<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+		<script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/g/mark.js(jquery.mark.min.js)"></script>
+		<script src="https://cdn.datatables.net/plug-ins/1.10.13/features/mark.js/datatables.mark.js"></script>
+
+<!--
+		<script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.html5.min.js"></script>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+
+-->
+
+
+
 
 		<!--<script src="assets/javascripts/jquery-html5-uploader/jquery.html5uploader.js"></script>-->
 
@@ -180,6 +199,8 @@
 		<script src="assets/javascripts/jquery.mask.min.js"></script>
 
 		<script src="https://code.highcharts.com/highcharts.js"></script>
+
+
 
 
 
@@ -228,45 +249,44 @@
 				//Fechar o menu quando estiver no dispositivo móvel ou de pequena resolução
 				//if( $("#menu_bt_top").is(":visible")){ $("#menu_bt_top").click(); }
 				if(menuautoclose == "true" && $("#menu_bt_top").is(":visible")){ $("#menu_bt_top").click(); }
-
 				$('#wrap').load(url);
 				return false;
 			}
 		});
 
-
-
-
-
-
+		var inProgress = false;
 		$(document.body).on('submit', 'form', function(event)
 		{
 				var rel   = $(this).attr('rel');
 				var alvo  = $(this).attr('alvo');
 				var debug = $(this).attr('debug');
-        if(debug == 1){
-            alert("Formulario: "+$(this).attr('name')+"\nRel: "+ $(this).attr('rel')+"\nalvo: "+ $(this).attr('alvo')+"\nMetodo: "+$(this).attr("method")+"\nURL: "+ $(this).attr("action")+"\nDados:"+$(this).serialize());
-        }
 
+        		if(debug == 1){ alert("Formulario: "+$(this).attr('name')+"\nRel: "+ $(this).attr('rel')+"\nalvo: "+ $(this).attr('alvo')+"\nMetodo: "+$(this).attr("method")+"\nURL: "+ $(this).attr("action")+"\nDados:"+$(this).serialize());}
 				if(rel != "no_ajax")
 				{
-
-					$.ajax(
+					if(!inProgress)
 					{
-						type: $(this).attr("method"),
-						url:  $(this).attr("action"),
-						cache: false,
-						data: $(this).serialize(),
-						beforeSend: function(){	},
-						success: function(data)
-						{
-              //if(debug == 1){ alert("Enviado com sucesso !"); }
-							if($("#id").val() != ""){ var show_id = '#'+$("#id").val();}
-							if(typeof alvo == "undefined"){ $('#wrap').html(data);  }
-							else		  		   		  			  { $('#'+alvo).html(data); }
-						},
-            error: function(){ }
-					});
+							$.ajax(
+							{
+								type: $(this).attr("method"),
+								url:  $(this).attr("action"),
+								cache: false,
+								data: $(this).serialize(),
+								beforeSend: function(){
+									inProgress = true;
+								},
+								success: function(data)
+								{
+		              			//if(debug == 1){ alert("Enviado com sucesso !"); }
+									if($("#id").val() != ""){ var show_id = '#'+$("#id").val();}
+									if(typeof alvo == "undefined"){ $('#wrap').html(data);  }
+									else		  		   		  			  { $('#'+alvo).html(data); }
+									inProgress = false;
+								},
+		            		error: function(){ inProgress = false; }
+							});
+					}
+
 				return false;
 				}
 		});

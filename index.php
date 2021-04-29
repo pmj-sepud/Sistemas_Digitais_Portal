@@ -77,7 +77,7 @@ margin-top: 50px;
 */ ?>
 	<div class="row">
 		<div class="col-sm-6 text-center">
-			<h4 style="margin-top:10px;color:white">Secretaria de Planejamento Urbano<br>e Desenvolvimento Sustentável</h4>
+			<h4 style="margin-top:10px;color:white">Prefeitura Municipal de Joinville<br><small>Santa Catarina - Brasil</small></h4>
 		</div>
 		<div class="col-sm-6">
 			<img class="float-right" style="margin-top:10px" src="https://www.joinville.sc.gov.br/wp-content/uploads/2017/07/logoPMJ2x.png">

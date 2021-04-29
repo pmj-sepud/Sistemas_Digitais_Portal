@@ -6,6 +6,17 @@
   $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
 ?>
+<?
+if(check_perm("2_20","U")){
+?>
+   <style>.link:hover{ cursor: pointer; }</style>
+   <script>
+      $(".link").click(function(){ $('#wrap').load("configs/company_FORM.php?id="+$(this).attr("id"));});
+   </script>
+<? }else{ ?>
+   <style>.link:hover{ cursor: not-allowed; }</style>
+<? } ?>
+
 
 <section role="main" class="content-body">
   <header class="page-header">
@@ -22,21 +33,12 @@
 
 
 <?
+  if($_GET['filtro_status']=="inativos"){ $fitrosql = "C.active = 'f'";}
+                                    else{ $fitrosql = "C.active = 't'";}
 
-  if($_GET['filtro_status']!="inativos"){ $filtro[] = " U.active = 't'";                             }
-  else{                                   $filtro[] = " U.active = 'f'";                             }
-  if($_GET['filtro_orgaos']!= "todos") {  $filtro[] = " id_company = '".$_SESSION['id_company']."'"; }
+   $sql = "SELECT C.* FROM {$schema}company C WHERE {$fitrosql} AND id_father is null ORDER BY name ASC";
+   $rs  = pg_query($conn_neogrid,$sql);
 
-  $sql = "SELECT
-          	C.*
-          FROM
-          	   ".$schema."company C";
-  $rs  = pg_query($conn_neogrid,$sql);
-
-  $traducao["agente"]      = "Agente de campo";
-  $traducao["central"]     = "Central de atendimento";
-  $traducao["coordenacao"] = "Coordenação";
-  $traducao["gerencia"]    = "Gerência";
 ?>
 <div class="col-md-12">
 								<section class="panel">
@@ -49,25 +51,15 @@
                       </a>
                      <? } ?>
 
-                      <!--<a href="#" ic-get-from="sistema/logs.php" ic-target="#wrap" class="mb-xs mt-xs mr-xs btn btn-xs btn-primary"><i class="fa fa-user-plus"></i> Novo usuário !</a>-->
+                     <?
+                      echo "<a href='configs/company.php?filtro_status=".($_GET['filtro_status']!=""?"":"inativos")."'>
+                           <button type='button' class='mb-xs mt-xs mr-xs btn btn-xs btn-".($_GET['filtro_status']!=""?"success":"danger")." loading'><i class='fa fa-".($_GET['filtro_status']!=""?"level-up":"level-down")."'></i> Ver ".($_GET['filtro_status']!=""?"ativos":"inativos")."</button>
+                           </a>";
+                     ?>
+
 									  </div>
                   </header>
 									<div class="panel-body">
-                    <?
-
-                      //  print_r_pre($d);
-                        /*
-                        [id] => 1
-                            [name] => Secretaria de Planejamento Urbano e Desenvolvimento Sustentável
-                            [acron] => SEPUD
-                            [workshift_groups_repetition] =>
-                            [workshift_groups] =>
-                            [workshift_subgroups_repetition] =>
-                            [workshift_subgroups] =>
-                            [workshift_rel_config] =>
-                        */
-
-                    ?>
 										<div class="table-responsive">
 											<table class="table table-hover mb-none" id="tabela_dinamica">
 												<thead>
@@ -75,9 +67,9 @@
 														<th>#</th>
 														<th>Órgão/Entidade</th>
 														<th>Apelido</th>
-                            <th class='text-center'>Ativo</th>
-                            <th class='text-center'>É externo</th>
-                            <th class='text-center'><i class='fa fa-cogs'></i></th>
+                                          <th class='text-center'>Ativo</th>
+                                          <th class='text-center'>É externo</th>
+                                          <!--<th class='text-center'><i class='fa fa-cogs'></i></th>-->
 													</tr>
 												</thead>
 												<tbody>
@@ -85,7 +77,7 @@
   while($d = pg_fetch_assoc($rs))
   {
     //array2utf8($d);
-    echo "<tr id='".$d['id']."'>";
+    echo "<tr class='link' id='".$d['id']."'>";
     echo "<td class='text-muted'>".$d['id']."</td>";
     echo "<td nowrap>".$d['name']."</td>";
     echo "<td>".$d['acron']."</td>";
@@ -98,11 +90,11 @@
       echo ($d['is_external'] == 't'?"<i class='fa fa-check-square-o'></i>":"<i class='fa fa-square-o'></i>");
     echo "</td>";
 
-
+/*
     echo "<td class='actions text-center' nowrap>";
       if(check_perm("2_20","U")){ echo "<a href='configs/company_FORM.php?id=".$d['id']."'><i class='fa fa-pencil'></i></a>"; }else{ echo " <span class='text-muted'><i class='fa fa-lock'></i></span>";}
     echo "</td>";
-
+*/
     echo "</tr>";
   }
 
@@ -120,6 +112,7 @@
 //$(".loading").click(function(event){ $(this).addClass("disabled").html("<i class=\"fa fa-spinner fa-spin\"></i> <small>Aguarde</small>");});
 $(document).ready( function () {
     $('#tabela_dinamica').DataTable({
+      mark: true,
       responsive: true,
       language: {
         processing:     "Pesquisando...",

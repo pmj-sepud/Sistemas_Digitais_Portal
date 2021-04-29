@@ -1027,18 +1027,38 @@
   $res = pg_query($sql)or die("Erro ".__LINE__."SQL: ".$sql);
 ?>
 
-      <section class="panel panel-featured panel-featured-primary">
-        <header class="panel-heading">
-          <h4><span class="text-primary">Fotos e arquivos:</h4>
-          <div class="panel-actions">
-            <button id="bt_upload_imgs" type="button" class="mb-xs mt-xs mr-xs btn  btn-default disable_button"><i class="fa fa-camera"></i> <sup><i class="fa fa-plus"></i></sup></button>
-            <input type="file" id="input_img_files" name="files[]" multiple="multiple" style="display:none" />
+<? if($_SESSION['id']==1){ ?>
+   <section class="panel panel-featured panel-featured-warning">
+     <header class="panel-heading">
+       <h4><span class="text-primary">Fotos <sup>v1</sup>:</h4>
+       <div class="panel-actions">
+          <button type="button" class="btn btn-success loadingfoto" id="bt_foto"><i class="fa fa-camera"></i> <sup><i class="fa fa-plus"></i></sup></button>
+       </div>
+     </header>
+     <div class="panel-body text-center">
+        <input type="file" id="arqimg" accept = "image/*" class="hidden">
+        <canvas id="canvasboxthumb" width="170px" height="128px"  style="background-color:#FFFFF4;display:none"></canvas>
+        <canvas id="canvasbox"      width="170px" height="128px"  style="background-color:#FFFFF0;display:none"></canvas>
+        <br><small class="text-muted" id="statusuploadimg"></small>
+     </div>
+  </section>
+  <hr><hr>
 
-            <? if(pg_num_rows($res)){   ?>
-                <button id="bt_ver_imgs" type="button" class="mb-xs mt-xs mr-xs btn  btn-default disable_button" data-toggle='modal' data-target='#modalFotos'><i class="fa fa-image"></i> <sup><i class="fa fa-eye"></i></sup></button>
-            <? } ?>
-          </div>
-        </header>
+<? } ?>
+
+      <section class="panel panel-featured panel-featured-primary">
+           <header class="panel-heading">
+             <h4><span class="text-primary">Fotos e arquivos:</h4>
+             <div class="panel-actions">
+               <button id="bt_upload_imgs" type="button" class="mb-xs mt-xs mr-xs btn  btn-default disable_button"><i class="fa fa-camera"></i> <sup><i class="fa fa-plus"></i></sup></button>
+               <input type="file" id="input_img_files" name="files[]" multiple="multiple" style="display:none" />
+
+               <? if(pg_num_rows($res)){   ?>
+                   <button id="bt_ver_imgs" type="button" class="mb-xs mt-xs mr-xs btn  btn-default disable_button" data-toggle='modal' data-target='#modalFotos'><i class="fa fa-image"></i> <sup><i class="fa fa-eye"></i></sup></button>
+               <? } ?>
+             </div>
+           </header>
+
         <?
             if(pg_num_rows($res))
             {
@@ -1532,4 +1552,102 @@ function geocode(){
 
       return false;
 };
+
+<? if($_SESSION['id']==1){ ?>
+//////// UPLOAD DE FOTOS V1 /////////////
+$("#bt_foto").click(function(){ $("#arqimg").click(); });
+
+var maxWidth  = 800;
+var maxHeight = 600;
+let imgInput  = document.getElementById('arqimg');
+
+imgInput.addEventListener('change', function(e)
+{
+      if(e.target.files)
+      {
+         let imageFile = e.target.files[0]; //here we get the image file
+         var reader    = new FileReader();
+         reader.readAsDataURL(imageFile);
+
+         reader.onloadend = function (e)
+         {
+                  var myImage      = new Image();     // Creates image object
+                  myImage.src      = e.target.result; // Assigns converted image to image object
+                  var width        = myImage.width;
+                  var height       = myImage.height;
+
+                  if(width == 0 || height == 0){width = 800; height = 600;  }
+
+                  var shouldResize = (width > maxWidth) || (height > maxHeight);
+                  var newWidth;
+                  var newHeight;
+
+                  if(!shouldResize){ newWidth = width; newHeight = height; }
+
+                  if (width > height) {
+                      newHeight = height * (maxWidth / width);
+                      newWidth  = maxWidth;
+                  } else {
+                      newWidth  = width * (maxHeight / height);
+                      newHeight = maxHeight;
+                  }
+
+                  myImage.onload = function(ev)
+                  {
+                     var myCanvasThumb  = document.getElementById("canvasboxthumb"); // Creates a canvas object
+                     var myContextThumb = myCanvasThumb.getContext("2d"); // Creates a contect object
+
+                    var myCanvas  = document.getElementById("canvasbox"); // Creates a canvas object
+                    var myContext = myCanvas.getContext("2d"); // Creates a contect object
+
+                    myCanvas.width  = newWidth;
+                    myCanvas.height = newHeight;
+                    //myCanvas.width  = 400;
+                    //myCanvas.height = 400;
+                    //myCanvas.width = myImage.width; // Assigns image's width to canvas
+                    //myCanvas.height = myImage.height; // Assigns image's height to canvas
+                    myContext.drawImage(myImage,0,0,newWidth, newHeight); // Draws the image on canvas
+                    myContextThumb.drawImage(myImage,0,0,170,128); // Draws the image on canvas
+                    //myContext.drawImage(myImage,0,0,200,200); // Draws the image on canvas
+
+                    let imgData = myCanvas.toDataURL("image/jpeg",0.75); // Assigns image base64 string in jpeg format to a variable
+
+                    $("#statusuploadimg").html('Imagem preparada e pronta para envio');
+                    sendFile(imgData);
+                    //console.log(myCanvas);
+                 }
+            }
+      }
+});
+
+function sendFile(fileData) {
+
+   var formData = new FormData();
+   formData.append('img', fileData);
+   formData.append('id_oc', <?=$_GET['id'];?>);
+
+   $.ajax({
+      type: 'POST',
+      url: 'oct/fotos_upload.php',
+      dataType: 'json',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (data){
+       if (data.success) {
+             $("#statusuploadimg").html('Foto enviada com sucesso.<br>'+data.status);
+             $('#wrap').load("oct/FORM.php?id=<?=$id;?>");
+             //$('#wrap').load("gsec/callcenter_FORM.php?id=<?=$_GET['id'];?>&tab=fotos");
+          }else{
+             $("#statusuploadimg").html('<b><span class="text-danger">Houve um erro no envio da foto.</span></b><br>'+data.status);
+          }
+      },
+      error: function (data) {
+          $("#statusuploadimg").html('Houve um grave.<br>'+data.status);
+          $("#bt_foto").removeClass("disabled");
+          $("#bt_foto").html("<i class='fa fa-camera'></i><sup><i class='fa fa-plus'></i></sup>");
+      }
+   });
+}
+<? } ?>
 </script>

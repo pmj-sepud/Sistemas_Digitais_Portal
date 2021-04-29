@@ -17,7 +17,7 @@ if($modulo=="devops"){
 
 if((isset($username) && trim($username) != "") && (isset($password) && trim($password) != "")){
 	$res = pg_prepare($conn_neogrid, "qry1", "SELECT U.id, U.name, U.area, U.job, U.active, U.in_activation, U.phone, U.cpf, U.date_of_birth, U.registration,
-																									 C.name as company_name, C.acron as company_acron, C.id as id_company,
+																									 C.name as company_name, C.acron as company_acron, C.id as id_company, C.id_father as id_company_father,
 																									 P.value as permissoes
 																						FROM {$schema}users U
 																						JOIN {$schema}company C ON C.id = U.id_company

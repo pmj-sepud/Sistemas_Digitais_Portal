@@ -41,6 +41,23 @@
     $res   = pg_query($conn_neogrid,$sql)or die("Error ".__LINE__);
     $dados = pg_fetch_assoc($res);
 
+
+            $sql = "SELECT
+                     	U.name as onwer,
+                     	UR.name as resp,
+                     	TP.area, TP.providence,
+                     	P.opened_date, P.observation
+                     FROM
+                     	{$schema}oct_rel_events_providence P
+                     LEFT JOIN {$schema}users U ON U.id = P.id_owner
+                     LEFT JOIN {$schema}users UR ON UR.id = P.id_user_resp
+                     LEFT JOIN {$schema}oct_providence TP ON TP.id = P.id_providence
+                     WHERE
+                     	P.id_event = '{$dados['id']}'
+                     ORDER BY P.opened_date ASC";
+            $res   = pg_query($conn_neogrid,$sql)or die("Error ".__LINE__);
+            while($d = pg_fetch_assoc($res)){ $providencias[] = $d;}
+
 /*
     $sql = "SELECT * FROM ".$schema."oct_rel_events_event_conditions WHERE id_events = '".$id."'";
     $res   = pg_query($conn_neogrid,$sql)or die("Error ".__LINE__);
@@ -181,6 +198,24 @@
                         <tr>
                           <td colspan='4'><small class='text-muted'>Descrição:</small><br><?=nl2br($dados['description']);?></td>
                         </tr>
+
+                        <? if(isset($providencias)){
+
+                           echo "<tr><td colspan='4'><b>Providências:</b></td></tr>";
+                              for($i=0;$i<count($providencias);$i++)
+                              {
+                                 echo "<tr>";
+                                    echo "<td><small class='text-muted'>Data de abertura:</small></br>".formataData($providencias[$i]['opened_date'],1)."</td>";
+                                    echo "<td><small class='text-muted'>Responsável:</small></br>{$providencias[$i]['resp']}</td>";
+                                    echo "<td><small class='text-muted'>Responsável:</small></br>{$providencias[$i]['area']}:{$providencias[$i]['providence']}</td>";
+                                 echo "</tr>";
+                                 echo "<tr>";
+                                 echo "<td colspan='4'><small class='text-muted'>Observações:</small></br>{$providencias[$i]['observation']}</td>";
+                              echo "</tr>";
+                              }
+
+                           }
+                        ?>
 
                         <tr>
                           <td colspan="4">

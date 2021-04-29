@@ -359,8 +359,12 @@
                                                         echo "<td class='text-center'>".$ger[$i]['registration']."</td>";
                                                         echo "<td>".$ger[$i]['nome']."</td>";
                                                         echo "<td>Gerência</td>";
-                                                        echo "<td width='125px' class='text-center'>".$dt_opened."</td>";
-                                                        echo "<td width='125px' class='text-center'>".$dt_closed."</td>";
+                                                        if($ger[$i]['status']=="ativo"){
+                                                           echo "<td width='125px' class='text-center'>".$dt_opened."</td>";
+                                                           echo "<td width='125px' class='text-center'>".$dt_closed."</td>";
+                                                        }else{
+                                                           echo "<td class='text-center' colspan='2'><b>".ucfirst($ger[$i]['status'])."</b></td>";
+                                                        }
                                                       echo "</tr>";
                                                     }
                                                   }
@@ -388,8 +392,12 @@
                                                             echo "<td class='text-center'>".$coord[$i]['registration']."</td>";
                                                             echo "<td>".$coord[$i]['nome']."</td>";
                                                             echo "<td>Coordenação</td>";
-                                                            echo "<td width='125px' class='text-center'>".$dt_opened."</td>";
-                                                            echo "<td width='125px' class='text-center'>".$dt_closed."</td>";
+                                                            if($coord[$i]['status']=="ativo"){
+                                                              echo "<td width='125px' class='text-center'>".$dt_opened."</td>";
+                                                              echo "<td width='125px' class='text-center'>".$dt_closed."</td>";
+                                                           }else{
+                                                              echo "<td class='text-center' colspan='2'><b>".ucfirst($coord[$i]['status'])."</b></td>";
+                                                           }
                                                           echo "</tr>";
                                                         }
                                                     }
@@ -456,8 +464,12 @@
                                                 echo "<tr>";
                                                   echo "<td class='text-center'>".$central[$i]['registration']."</td>";
                                                   echo "<td>".$central[$i]['nome']."</td>";
-                                                  echo "<td width='125px' class='text-center'>".$dt_opened."</td>";
-                                                  echo "<td width='125px' class='text-center'>".$dt_closed."</td>";
+                                                  if($central[$i]['status']=="ativo"){
+                                                     echo "<td width='125px' class='text-center'>".$dt_opened."</td>";
+                                                     echo "<td width='125px' class='text-center'>".$dt_closed."</td>";
+                                                  }else{
+                                                     echo "<td class='text-center' colspan='2'><b>".ucfirst($central[$i]['status'])."</b></td>";
+                                                  }
                                                 echo "</tr>";
                                               }
 

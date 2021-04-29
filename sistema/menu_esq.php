@@ -96,12 +96,48 @@ require_once("libs/php/conn.php");
             <a><i class="fa fa-bank" aria-hidden="true"></i><span>Aplicações</span></a>
             <ul class="nav nav-children">
 
+                <li class="nav-parent">
+                     <a><span>GSEC</span></a>
+                     <ul class="nav nav-children">
+                              <?
+                                 if(check_perm("9_28","CRUD")){ echo "<li><a href='gsec/callcenter.php' menuautoclose='true'>Atendimento</a></li>"; }
+                                                         else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Atendimentos</a></li>"; }
+                              ?>
+                              <li class="nav-parent">
+                                   <a><span>Relatórios</span></a>
+                                   <ul class="nav nav-children">
+                                      <?
+                                        if(check_perm("9_30")){ echo "<li><a href='gsec/dashboard.php' menuautoclose='true'>Dashboard</a></li>"; }
+                                                          else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Dashboard</a></li>"; }
+                                       if($_SESSION['id']==1){ echo "<li><a href='gsec/dashboard_geral.php' menuautoclose='true'>Dashboard - Todos</a></li>"; }
+                                      ?>
+                                   </ul>
+                              </li>
+
+                        <? if($_SESSION['id']==1){ ?>
+<!--
+                              <li><a href="#" menuautoclose="true">Ordens de Serviço</a></li>
+                              <li><a href="#" menuautoclose="true">Contratos</a></li>
+                              <li><a href="#" menuautoclose="true">Inventário de estoque</a></li>
+                              <li><a href="#" menuautoclose="true">Orçamento</a></li>
+-->
+                        <? }else{ ?>
+<!--
+                           <li><a href="#" menuautoclose="true" class="not-allowed" ><i class='fa fa-lock'></i> Atendimentos</a></li>
+                           <li><a href="#" menuautoclose="true" class="not-allowed" ><i class='fa fa-lock'></i> Ordens de Serviço</a></li>
+                           <li><a href="#" menuautoclose="true" class="not-allowed" ><i class='fa fa-lock'></i> Contratos</a></li>
+                           <li><a href="#" menuautoclose="true" class="not-allowed" ><i class='fa fa-lock'></i> Inventário de estoque</a></li>
+                           <li><a href="#" menuautoclose="true" class="not-allowed" ><i class='fa fa-lock'></i> Orçamento</a></li>
+-->
+                        <? } ?>
+                     </ul>
+                </li>
+
 
 
                 <li class="nav-parent">
                     <a><span>Sistema ROTSS</span></a>
                     <ul class="nav nav-children">
-
                       <li class="nav-parent">
                           <a><span>Operação</span></a>
                           <ul class="nav nav-children">
@@ -110,7 +146,7 @@ require_once("libs/php/conn.php");
                               <li><a href="oct/eventos_administrativos_INDEX.php" menuautoclose="true">Diário administrativo</a></li>
 
                               <? if($_SESSION['id']==1|| $_SESSION['id']==10){ ?>
-                                  <li><a href="oct/guarnicao_USERFORM.php" menuautoclose="true">Guarnição <sup><small>(DEV)</small></sup></a></li>
+                                  <li><a href="oct/guarnicao_USERFORM.php" menuautoclose="true">Guarnição <sup>dev <i class='fa fa-cogs'></i></sup></a></li>
                               <? } ?>
                           </ul>
                       </li>
@@ -135,7 +171,9 @@ require_once("libs/php/conn.php");
                                 echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Exportação CSV</a></li>";
                               }
 
-                              echo "<li><a href='oct/dashboard_oc.php' menuautoclose='true'>Dashboard - Ocorrências <sup><small>(DEV)</small></sup></a></li>";
+                              if($_SESSION['id']==1){
+                                 echo "<li><a href='oct/dashboard_oc.php' menuautoclose='true'>Dashboard - Ocorrências <sup><small>(DEV)</small></sup></a></li>";
+                              }
 
                               if($_SESSION['id_company']==8)
                               {
@@ -242,7 +280,7 @@ require_once("libs/php/conn.php");
                   <li class="nav-parent">
                     <a><span>Pontos Estratégicos</span></a>
                       <ul class="nav nav-children">
-                          <?   if(check_perm("8_26")){ echo "<li><a href='ses/pontosestrategicos_dashboard.php' menuautoclose='true'>Dashboard</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Dashboard</span></a></li>"; } ?>
+                          <?   //if(check_perm("8_26")){ echo "<li><a href='ses/pontosestrategicos_dashboard.php' menuautoclose='true'>Dashboard</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Dashboard</span></a></li>"; } ?>
                           <?   if(check_perm("8_26")){ echo "<li><a href='ses/pontosestrategicos.php' menuautoclose='true'>Cadastro</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Cadastro</span></a></li>"; } ?>
                       </ul>
                   </li>
@@ -316,6 +354,8 @@ $("#linkfulls").attr('title','Tela cheia');
                   if(check_perm("2_20","R")){ echo "<li><a href='configs/company.php' menuautoclose='true'>Órgãos</a></li>";}else{echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Órgãos</a></li>"; }
                   if(check_perm("2_3"))    { echo "<li><a href='sistema/logviewer.php' menuautoclose='true'>Logs do sistema</a></li>";}else{echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Logs do sistema</a></li>"; }
                   if(check_perm("2_5"))    { echo "<li><a href='sistema/teste.php' menuautoclose='true'>Desenvolvimento</a></li>";}else{echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Desenvolvimento</a></li>"; }
+                  if(check_perm("2_5"))    { echo "<li><a href='sistema/fotos.php' menuautoclose='true'>Upload fotos</a></li>";}else{echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Upload fotos</a></li>"; }
+                  if(check_perm("2_27"))    { echo "<li><a href='sistema/backups.php' menuautoclose='true'>Backups</a></li>";}else{echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Backups</a></li>"; }
 
 
               ?>

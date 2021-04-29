@@ -7,6 +7,17 @@
 
 ?>
 
+<?
+if(check_perm("1_1","U")){
+?>
+<style>.link:hover{ cursor: pointer; }</style>
+<script>
+   $(".link").click(function(){ $('#wrap').load("usuarios/FORM.php?id="+$(this).attr("id"));});
+</script>
+<? }else{ ?>
+<style>.link:hover{ cursor: not-allowed; }</style>
+<? } ?>
+
 <section role="main" class="content-body">
   <header class="page-header">
     <h2>Listagem de usuários do sistema</h2>
@@ -81,7 +92,7 @@
                             <th>Turno</th>
                             <th>Sub-turno</th>
                             <th>Inicia como</th>
-                            <th class='text-center'>Orgão</th>
+                            <th class='text-center'>Setor</th>
                             <!--<th class='text-center'>Setor</th>
                             <th class='text-center'>Função</th>-->
                             <th class='text-center'>Ativo</th>
@@ -95,7 +106,7 @@
   while($d = pg_fetch_assoc($rs))
   {
     //array2utf8($d);
-    echo "<tr id='".$d['id']."'>";
+    echo "<tr id='".$d['id']."' class='link'>";
     echo "<td class='text-muted'>".$d['id']."</td>";
     echo "<td nowrap>".$d['name']."</td>";
     echo "<td>".$d['nickname']."</td>";
@@ -119,8 +130,8 @@
     echo "<td class='text-center'>".formataData($d['ultimo_acesso'],1)."</td>";
 
     echo "<td class='actions text-center' nowrap>";
-      if(check_perm("1_1","U")){ echo "<a href='usuarios/FORM.php?id=".$d['id']."'><i class='fa fa-pencil'></i></a>"; }else{ echo " <span class='text-muted'><i class='fa fa-lock'></i></span>";}
-      if(check_perm("1_1","D")){ echo "<a href='usuarios/FORM_sql.php?acao=remover&id=".$d['id']."' class='delete-row'><i class='fa fa-trash-o'></i></a>"; }else{ echo " <span class='text-muted'><i class='fa fa-lock'></i></span>";}
+   //   if(check_perm("1_1","U")){ echo "<a href='usuarios/FORM.php?id=".$d['id']."'><i class='fa fa-pencil'></i></a>"; }else{ echo " <span class='text-muted'><i class='fa fa-lock'></i></span>";}
+   //   if(check_perm("1_1","D")){ echo "<a href='usuarios/FORM_sql.php?acao=remover&id=".$d['id']."' class='delete-row'><i class='fa fa-trash-o'></i></a>"; }else{ echo " <span class='text-muted'><i class='fa fa-lock'></i></span>";}
     echo "</td>";
 
     echo "</tr>";

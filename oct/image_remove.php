@@ -3,7 +3,7 @@
   require_once("../libs/php/funcoes.php");
   require_once("../libs/php/conn.php");
   $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
-  
+
   extract($_GET);
 
   echo "Imagem ID: ".$id."<br>Arquivo: ".$arq;
@@ -18,6 +18,7 @@
     {
       echo "<br><span class='text-success'><b><i class='fa fa-check'></i></b> Arquivo físico removido com sucesso.</span>";
       $sql = "DELETE FROM ".$schema."oct_rel_events_images WHERE id = '".$id."'";
+      //echo "<br>".$sql;
       pg_query($sql)or die("Erro ".__LINE__);
       echo "<br><span class='text-success'><b><i class='fa fa-check'></i></b> Registro no banco de dados removido com sucesso.</span>";
     }else {

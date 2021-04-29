@@ -269,7 +269,7 @@
       <div class="row">
         <div class="col-md-12">
             <?
-              for($i=1;$i<count($evo_mensal_dados);$i++)
+              for($i=1;$i<=count($evo_mensal_dados);$i++)
               {
                 $evo_mensal_d[] = $evo_mensal_dados[$i];
               }

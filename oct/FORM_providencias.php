@@ -51,7 +51,7 @@
                <div class="col-sm-12">
                  <div class="form-group">
                  <label class="control-label">Providência:</label>
-                 <select id="id_providence_type" name="id_providence_type" class="form-control">
+                 <select id="id_providence_type" name="id_providence_type" class="form-control select2">
                     <?
                           $sql = "SELECT * FROM ".$schema."oct_providence ORDER BY area, providence ASC";
                           $res = pg_query($sql)or die("Erro ".__LINE__);
@@ -345,6 +345,8 @@ if($_SESSION["company_configs"]["oct_submodule_envolvidos"]!="false")
 
 
            <div class="row">
+
+             <!--
              <div class="col-sm-6">
 
                  <div class="form-group">
@@ -368,14 +370,20 @@ if($_SESSION["company_configs"]["oct_submodule_envolvidos"]!="false")
                  </div>
 
                </div>
+            -->
 
-
-             <div class="col-sm-6">
+             <div class="col-sm-12">
                <div class="form-group">
                    <label class="control-label">Orgão:</label>
+
+
+
+
+<!--
                     <select id="id_company" name="id_company" class="form-control">
                       <option value="">- - -</option>
                       <?
+                      /*
                           $sql = "SELECT
                                   	*
                                   FROM
@@ -389,8 +397,41 @@ if($_SESSION["company_configs"]["oct_submodule_envolvidos"]!="false")
                             if($dados['id_company_requested']==$d['id']){ $sel = "selected"; }else{ $sel = ""; }
                             echo "<option value='".$d['id']."' ".$sel.">".$d['acron']." - ".$d['name']."</option>";
                           }
+                        */
                       ?>
                     </select>
+-->
+
+                    <select class="form-control select2" id="id_company" name="id_company">
+                       <?
+                           $sql = "SELECT id, name, acron, id_father FROM ".$schema."company WHERE active = 't' ORDER BY name DESC";
+                           $res = pg_query($sql)or die();
+                           while($comp = pg_fetch_assoc($res))
+                           {
+                                if($comp['id_father']!=""){
+                                  $orgao_filhos[$comp['id_father']]['filhos'][]=$comp;
+                                }else{
+                                  $orgao[$comp['id']]=$comp;
+                                }
+                           }
+                           foreach ($orgao_filhos as $id_pai => $filhos) { $orgao[$id_pai]['filhos'] = $filhos['filhos'];}
+                           echo "<option value=''>- - -</option>";
+                           foreach ($orgao as $id_orgao => $orgao_dados){
+                              echo "<optgroup label='".$orgao_dados['name']."'>";
+                                  for($i=0;$i<count($orgao_dados['filhos']);$i++)
+                                  {
+
+                                    if($dados['id_company_requested']==$orgao_dados['filhos'][$i]['id']){ $sel = "selected"; }else{ $sel = ""; }
+                                    //if($orgao_dados['filhos'][$i]['id'] == $d['id']){ $sel = "selected"; }else{ $sel = "";}
+                                    echo "<option value='".$orgao_dados['filhos'][$i]['id']."' ".$sel.">".$orgao_dados['filhos'][$i]['name']."</option>";
+                                  }
+
+                              echo "</option>";
+                           }
+
+                       ?>
+                    </select>
+
                </div>
              </div>
 
