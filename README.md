@@ -12,7 +12,10 @@ http://www.jlle30.com.br/opendata
 ### Sistemas:
 
 - Gestão e controle de sincronização dos dados vindo da plataforma do Waze.
+- Monitoramento Waze - Sistema de dashboard temporizado com informações de filas e tempos de congestionamentos.
 - Gestão do sincronismo dos dados de contagem de tráfego dos radares da cidade.
 - ROTSS - Registro de Ocorrências de Trânsito, Segurança e Saúde.
 - SERP - Sistema de Estacionamento Rotativo Público.
-- Monitoramento Waze - Sistema de dashboard temporizado com informações de filas e tempos de congestionamentos.
+- SAS-BEV - Sistema de gestão de benefícios eventuais (Cesta básica, Auxílio maternidade e Auxílio funeral) fornecidos pela Secretaria de Assistencia Social
+- SES-PNCD - Sistema de gestão do Plano Nacional de Combate a Dengue.
+- GSEC - Gestão de Secretarias públicas (Gestão de atendimento ao munícipe, solicitações, autoatendimento, controle de ordens de serviços, gestão orçamentário e de contratos).
