@@ -18,4 +18,4 @@ http://www.jlle30.com.br/opendata
 - SERP - Sistema de Estacionamento Rotativo Público.
 - SAS-BEV - Sistema de gestão de benefícios eventuais (Cesta básica, Auxílio maternidade e Auxílio funeral) fornecidos pela Secretaria de Assistencia Social
 - SES-PNCD - Sistema de gestão do Plano Nacional de Combate a Dengue.
-- GSEC - Gestão de Secretarias públicas (Gestão de atendimento ao munícipe, solicitações, autoatendimento, controle de ordens de serviços, gestão orçamentário e de contratos).
+- GSEC - Gestão de Secretaria pública (Gestão de atendimento ao munícipe, solicitações, autoatendimento, controle de ordens de serviços, gestão orçamentário e de contratos).
