@@ -1,4 +1,4 @@
-## Sistemas digitais<br>Portal de Gestão de processo públicos e dados abertos
+## Sistemas digitais<br>Portal de gestão de processo públicos e dados abertos
 Portal de gestão dos sistemas digitais da Secretaria de Planejamento Urbano e Desenvolvimento Sustentável da cidade de Joinville, Santa Catarina, Brasil.
 
 ### Objetivos
