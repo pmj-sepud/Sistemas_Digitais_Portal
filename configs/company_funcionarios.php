@@ -1,3 +1,18 @@
+<?
+session_start();
+require_once("../libs/php/funcoes.php");
+require_once("../libs/php/conn.php");
+
+if(check_perm("1_1","U")){
+?>
+<style>.linkFunc:hover{ cursor: pointer; }</style>
+<script>
+   $(".linkFunc").click(function(){ $('#wrap').load("usuarios/FORM.php?id="+$(this).attr("id"));});
+</script>
+<? }else{ ?>
+<style>.linkFunc:hover{ cursor: not-allowed; }</style>
+<? } ?>
+
 <div class="row">
    <div class="col-md-12">
       <?
@@ -23,11 +38,11 @@
                echo "</thead>";
                echo "<tbody>";
                while($setor = pg_fetch_assoc($res)){
-                  echo "<tr>";
-                     echo "<td class='text-muted'><small>".$setor['id']."</small></td>";
-                     echo "<td>".$setor['name']."</td>";
-                     echo "<td>".$setor['company']."</td>";
-                     echo "<td>".$setor['acron']."</td>";
+                  echo "<tr id='{$setor['id']}' class='linkFunc'>";
+                     echo "<td class='text-muted'><small>{$setor['id']}</small></td>";
+                     echo "<td>{$setor['name']}</td>";
+                     echo "<td>{$setor['company']}</td>";
+                     echo "<td>{$setor['acron']}</td>";
                   echo "</tr>";
                }
                echo "</tbody>";

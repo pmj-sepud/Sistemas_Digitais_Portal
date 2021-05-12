@@ -1027,32 +1027,17 @@
   $res = pg_query($sql)or die("Erro ".__LINE__."SQL: ".$sql);
 ?>
 
-<? if($_SESSION['id']==1){ ?>
-   <section class="panel panel-featured panel-featured-warning">
-     <header class="panel-heading">
-       <h4><span class="text-primary">Fotos <sup>v1</sup>:</h4>
-       <div class="panel-actions">
-          <button type="button" class="btn btn-success loadingfoto" id="bt_foto"><i class="fa fa-camera"></i> <sup><i class="fa fa-plus"></i></sup></button>
-       </div>
-     </header>
-     <div class="panel-body text-center">
-        <input type="file" id="arqimg" accept = "image/*" class="hidden">
-        <canvas id="canvasboxthumb" width="170px" height="128px"  style="background-color:#FFFFF4;display:none"></canvas>
-        <canvas id="canvasbox"      width="170px" height="128px"  style="background-color:#FFFFF0;display:none"></canvas>
-        <br><small class="text-muted" id="statusuploadimg"></small>
-     </div>
-  </section>
-  <hr><hr>
-
-<? } ?>
-
       <section class="panel panel-featured panel-featured-primary">
            <header class="panel-heading">
              <h4><span class="text-primary">Fotos e arquivos:</h4>
              <div class="panel-actions">
-               <button id="bt_upload_imgs" type="button" class="mb-xs mt-xs mr-xs btn  btn-default disable_button"><i class="fa fa-camera"></i> <sup><i class="fa fa-plus"></i></sup></button>
-               <input type="file" id="input_img_files" name="files[]" multiple="multiple" style="display:none" />
+               <button type="button" class="btn btn-success loadingfoto" id="bt_foto"><i class="fa fa-camera"></i> <sup><i class="fa fa-plus"></i></sup></button>
+               <button id="bt_upload_imgs" type="button" class="mb-xs mt-xs mr-xs btn  btn-default disable_button"><i class="fa fa-file-pdf-o"></i> <sup><i class="fa fa-plus"></i></sup></button>
+               <input type="file" id="input_img_files" name="files[]" multiple="multiple" style="display:none"  accept=".pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document;" />
 
+               <input type="file" id="arqimg" accept = "image/*" class="hidden">
+               <canvas id="canvasboxthumb" width="170px" height="128px"  style="background-color:#FFFFF4;display:none"></canvas>
+               <canvas id="canvasbox"      width="170px" height="128px"  style="background-color:#FFFFF0;display:none"></canvas>
                <? if(pg_num_rows($res)){   ?>
                    <button id="bt_ver_imgs" type="button" class="mb-xs mt-xs mr-xs btn  btn-default disable_button" data-toggle='modal' data-target='#modalFotos'><i class="fa fa-image"></i> <sup><i class="fa fa-eye"></i></sup></button>
                <? } ?>
@@ -1071,6 +1056,7 @@
                 {
                   $fotos      .=  "<img src='oct/uploads/{$dirdev}{$id}/{$f['image']}' style='padding:2px; width:100px' data-toggle='modal' data-target='#modalFotos' />";
                   $arqs_imgs[] = "oct/uploads/{$dirdev}{$id}/{$f['image']}";
+                  $arqs_imgs_rev1[$f['id']] = "oct/uploads/{$dirdev}{$id}/{$f['image']}";
                   $qtd_fotos++;
                 }else{
                   $qtd_arqs++;
@@ -1090,7 +1076,6 @@
 
 
         <div class="panel-body">
-
             <?
             if(!pg_num_rows($res)) //Não há nenhum tipo de arquivo
             {
@@ -1099,6 +1084,10 @@
                           <i class='fa fa-camera fa-5x text-muted'></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class='fa fa-file-o fa-5x text-muted'></i>
                       </div>
                     </div>";
+               echo "<div class='row'>
+                     <div class='col-sm-12 text-center'>
+                           <small class='text-muted' id='statusuploadimg'></small>
+                    </div></div>";
             }else{
               //FOTOS
               echo  "<div class='row'>
@@ -1107,6 +1096,11 @@
                             else{ echo "<i class='fa fa-camera fa-5x text-muted'></i>";}
               echo      "</div>
                     </div>";
+
+              echo "<div class='row'>
+                    <div class='col-sm-12 text-center'>
+                          <small class='text-muted' id='statusuploadimg'></small>
+                   </div></div>";
 
              //ARQUIVOS
               echo "<div class='row'>
@@ -1215,6 +1209,7 @@
         <div class="row">
           <div class="col-sm-4" style="">
             <?
+            /*
                 for($i = 0; isset($arqs_imgs) && $i < count($arqs_imgs); $i++)
                 {
                   $aux    = explode(".",$arqs_imgs[$i]);
@@ -1222,6 +1217,14 @@
                   $id_img = ltrim(end($aux),"0");
                   echo  "<img id='".$id_img."' class='loadimage img-responsive img-rounded img-thumbnail' src='".$arqs_imgs[$i]."' style='max-width:100px; max-height:90px' />";
                 }
+            */
+            if(isset($arqs_imgs_rev1))
+            {
+               foreach ($arqs_imgs_rev1 as $id_img => $img) {
+                 echo  "<img id='".$id_img."' class='loadimage img-responsive img-rounded img-thumbnail' src='".$img."' style='max-width:100px; max-height:90px' />";
+               }
+            }
+
             ?>
           </div>
           <div class="col-sm-8">
@@ -1381,7 +1384,7 @@ $(document).ready(function (e) {
            });
 */
 
-$("#bt_upload_imgs").click(function(){ $("#msg").html("Buscando imagens."); $("#input_img_files").trigger("click"); });
+$("#bt_upload_imgs").click(function(){ $("#msg").html("Buscando arquivo."); $("#input_img_files").trigger("click"); });
 $("#input_img_files").change(function(e){
     if(e.target.files.length == 1)
     {
@@ -1553,7 +1556,6 @@ function geocode(){
       return false;
 };
 
-<? if($_SESSION['id']==1){ ?>
 //////// UPLOAD DE FOTOS V1 /////////////
 $("#bt_foto").click(function(){ $("#arqimg").click(); });
 
@@ -1649,5 +1651,5 @@ function sendFile(fileData) {
       }
    });
 }
-<? } ?>
+
 </script>

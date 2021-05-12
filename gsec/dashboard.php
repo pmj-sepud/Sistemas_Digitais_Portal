@@ -13,6 +13,9 @@
     $agora = now();
   }
 
+  $id_company   = ($_POST['id_company']  !=""?$_POST['id_company']  :$_SESSION['id_company']  );
+  $name_company = ($_POST['name_company']!=""?$_POST['name_company']:$_SESSION['company_name']);
+
   $meses[1]['curto'] = "Jan";
   $meses[2]['curto'] = "Fev";
   $meses[3]['curto'] = "Mar";
@@ -43,13 +46,30 @@
 
   logger("Acesso","GSEC", "Dashboard setor");
 
+  $sql = "SELECT
+              G.id,
+              G.date_added,
+              C.name as company,
+              T.type, T.request
+              FROM sepud.gsec_callcenter G
+              LEFT JOIN sepud.gsec_request_type T ON T.id = G.id_subject
+              LEFT JOIN sepud.company C ON C.id = G.id_company
+              WHERE G.id_company = '{$id_company}' AND G.active = 't'
+              ORDER BY G.date_added ASC LIMIT 1";
+  $res = pg_query($sql)or die("SQL Error: ".__LINE__."<br>".$sql);
 
+  if(pg_num_rows($res))
+  {
+        $maisAntigo              = pg_fetch_assoc($res);
+        $aux                     = substr(str_replace("-","",$maisAntigo['date_added']),0,6);
+        $maisAntigo['protocolo'] = $aux.".".str_pad($maisAntigo['id'],4,"0",STR_PAD_LEFT);
+  }
 ?>
 
 </style>
 <section role="main" class="content-body">
   <header class="page-header">
-    <h2>G.SEC - Dashboard</h2>
+    <h2>GSEC - Dashboard</h2>
     <div class="right-wrapper pull-right" style='margin-right:15px;'>
       <ol class="breadcrumbs">
         <li><a href="index_sistema.php"><i class="fa fa-home"></i></a></li>
@@ -63,7 +83,7 @@
     <header class="panel-heading" style="height:70px;">
       <div style="margin-top:-10px">
       <h4>
-            <b><?=$_SESSION['company_name'];?></b>
+            <b><?=$name_company;?></b>
             <br><small><sup>Mês de referência: <b><?=$agora['mes_txt']."/".$agora['ano'];?></b></sup></small>
       </h4>
       </div>
@@ -75,24 +95,7 @@
     </header>
     <div class="panel-body">
 <?
-$sql = "SELECT
-            G.id,
-            G.date_added,
-            C.name as company,
-            T.type, T.request
-            FROM sepud.gsec_callcenter G
-            LEFT JOIN sepud.gsec_request_type T ON T.id = G.id_subject
-            LEFT JOIN sepud.company C ON C.id = G.id_company
-            WHERE G.id_company = '{$_SESSION['id_company']}' AND G.active = 't'
-            ORDER BY G.date_added ASC LIMIT 1";
-$res = pg_query($sql)or die("SQL Error: ".__LINE__."<br>".$sql);
 
-if(pg_num_rows($res))
-{
-      $maisAntigo              = pg_fetch_assoc($res);
-      $aux                     = substr(str_replace("-","",$maisAntigo['date_added']),0,6);
-      $maisAntigo['protocolo'] = $aux.".".str_pad($maisAntigo['id'],4,"0",STR_PAD_LEFT);
-}
 ?>
 
             <div class="row" style="margin-top:10px">
@@ -133,12 +136,39 @@ if(pg_num_rows($res))
                     <div class="col-sm-6">
 
 <?
-   $sql = "SELECT
-            (SELECT count(*) FROM {$schema}gsec_callcenter G WHERE G.id_company = '{$_SESSION['id_company']}' AND G.active = 't') as total_aberto,
-            (SELECT count(*) FROM {$schema}gsec_callcenter G WHERE G.id_company = '{$_SESSION['id_company']}' AND G.active = 'f'
-            AND G.date_closed BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59') as total_fechado_mes";
-   $res = pg_query($sql)or die("SQL Error: ".__LINE__."<br>".$sql);
-   $stat = pg_fetch_assoc($res);
+
+   if($_SESSION['id']==1)
+   {
+      $sql = "SELECT 'aberto' as status, to_char(date_added, 'MM') as mes, count(*) as qtd
+	           FROM {$schema}gsec_callcenter G WHERE G.id_company = '{$id_company}' AND G.active = 't'
+	           GROUP BY to_char(date_added, 'MM')
+		            UNION
+	           SELECT 'fechado', to_char(date_closed, 'MM') as mes, count(*) as qtd
+	           FROM {$schema}gsec_callcenter G WHERE G.id_company = '{$id_company}' AND G.active = 'f' AND G.date_closed BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59'
+              GROUP BY to_char(date_closed, 'MM')";
+              $res = pg_query($sql)or die("SQL Error: ".__LINE__."<br>".$sql);
+
+              while($s = pg_fetch_assoc($res))
+              {
+                 if($s['status']=="aberto"){
+                    if($s['mes']==$agora['mes']){$stats['aberto_mes_atual'] = $s['qtd']; }
+                                            else{ $stats['aberto_meses_anteriores'] += $s['qtd']; }
+                 }else{
+                    $stats['fechado_mes_atual'] = $s['qtd'];
+                 }
+              }
+   }else{
+      $sql = "SELECT
+               (SELECT count(*) FROM {$schema}gsec_callcenter G WHERE G.id_company = '{$id_company}' AND G.active = 't') as total_aberto,
+               (SELECT count(*) FROM {$schema}gsec_callcenter G WHERE G.id_company = '{$id_company}' AND G.active = 'f'
+               AND G.date_closed BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59') as total_fechado_mes";
+      $res = pg_query($sql)or die("SQL Error: ".__LINE__."<br>".$sql);
+      $stat = pg_fetch_assoc($res);
+   }
+
+
+   //print_r_pre($stats);
+
 ?>
                       <section class="panel panel-featured-left panel-featured-tertiary">
 									<div class="panel-body">
@@ -176,7 +206,7 @@ if(pg_num_rows($res))
                $sql = "SELECT
                         count(*) as qtd, date_part('day', date_added) as dia
                         FROM {$schema}gsec_callcenter C
-                        WHERE C.id_company = '{$_SESSION['id_company']}'AND
+                        WHERE C.id_company = '{$id_company}'AND
                               C.date_added BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59'
                         GROUP BY date_part('day', C.date_added)";
                $res = pg_query($sql)or die("SQL Error: ".__LINE__."<br>SQL: {$sql}");
@@ -188,7 +218,7 @@ if(pg_num_rows($res))
                 $evo_mensal_d[] = (int)$evo_mensal_dados[$i];
               }
             ?>
-            <div id="graf_evo_mensal" style="width:100%; height:300px;margin-top:10px"></div>
+            <div id="graf_evo_mensal" class="box_shadow box_radius_10" style="width:100%; height:300px;margin-top:10px"></div>
             <script>
 
             Highcharts.chart('graf_evo_mensal', {
@@ -231,15 +261,6 @@ if(pg_num_rows($res))
       <div class="row">
         <div class="col-md-6">
 <?
-   $sql = "SELECT count(*) as qtd,
-      			   CO.name AS company_name, CO.acron AS company_acron,
-      			   T.type, T.request
-            FROM  {$schema}gsec_callcenter C
-            LEFT JOIN {$schema}company 					CO 	ON CO.id = C.id_company
-            LEFT JOIN {$schema}gsec_request_type T ON T.id = C.id_subject
-            WHERE C.date_added BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59'
-              AND C.id_company = {$_SESSION['id_company']}
-            GROUP BY CO.name, CO.acron, T.type, T.request";
 
    $sql = "SELECT count(*) as qtd,
             	 T.type, T.request,
@@ -248,7 +269,7 @@ if(pg_num_rows($res))
             LEFT JOIN sepud.gsec_request_type T ON T.id = C.id_subject
             LEFT JOIN sepud.neighborhood      N ON N.id = C.id_neighborhood
             WHERE C.date_added BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59'
-            	AND C.id_company = {$_SESSION['id_company']}
+            	AND C.id_company = {$id_company}
             GROUP BY T.type, T.request,N.neighborhood";
 
    $res = pg_query($sql)or die("SQL Error: ".__LINE__."<br>SQL: {$sql}");
@@ -263,7 +284,7 @@ if(pg_num_rows($res))
 ?>
 
 
-            <div id="graf_evo_dem" style="width:100%; height:400px;margin-top:20px"></div>
+            <div id="graf_evo_dem" class="box_shadow box_radius_10" style="width:100%; height:400px;margin-top:20px"></div>
             <script>
             Highcharts.chart('graf_evo_dem', {
           chart: {
@@ -282,7 +303,10 @@ if(pg_num_rows($res))
               }
           },
           yAxis: {
-              min: 0
+              min: 0,
+              title: {
+                  text: null
+              }
           },
           tooltip: {
               valueSuffix: ''
@@ -309,6 +333,7 @@ if(pg_num_rows($res))
               enabled: false
           },
           series: [{
+              showInLegend: false,
               name: 'Quantidade de solicitações',
               data: <?=json_encode($tiposqtd);?>
           }]
@@ -318,17 +343,18 @@ if(pg_num_rows($res))
         <div class="col-md-6">
           <?
             //print_r_pre($setor);
-
-              foreach ($setor as $orgao => $qtd){ $legenda[] = $orgao; $quantitativo[] = $qtd;}
+            foreach ($setor as $orgao => $qtd){ $legenda[] = $orgao; $quantitativo[] = $qtd;}
+            //print_r_pre($quantitativo);
+            //print_r_pre(json_encode($quantitativo));
           ?>
-          <div id="graf_evo_org" style="width:100%; height:400px;margin-top:20px"></div>
+          <div id="graf_evo_org" class="box_shadow box_radius_10" style="width:100%; height:400px;margin-top:20px"></div>
           <script>
           Highcharts.chart('graf_evo_org', {
         chart: {
             type: 'bar'
         },
         title: {
-            text: 'Evolução mensal da demanda por setor'
+            text: 'Evolução mensal de solicitações por bairro'
         },
         subtitle: {
             text: 'Data de referência: <?=$agora['mes_txt']."/".$agora['ano'];?> - <?=$total;?> solicitações'
@@ -340,7 +366,10 @@ if(pg_num_rows($res))
             }
         },
         yAxis: {
-            min: 0
+            min: 0,
+            title: {
+                text: null
+            }
         },
         plotOptions: {
             bar: {
@@ -364,6 +393,7 @@ if(pg_num_rows($res))
             enabled: false
         },
         series: [{
+            showInLegend: false,
             name: 'Quantidade de solicitações',
             data: <?=json_encode($quantitativo);?>
         }]
@@ -373,12 +403,137 @@ if(pg_num_rows($res))
       </div>
 
       <div class="row">
+       <div class="col-md-6">
+            <?
+                  $sql = "SELECT count(*) as y, C.origin_type as name
+                          FROM {$schema}gsec_callcenter C
+                          WHERE C.date_added BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59'
+                          	 AND C.id_company = {$id_company}
+                        GROUP BY C.origin_type";
+                  $res = pg_query($sql)or die("SQL Error: ".__LINE__);
+                  while($d=pg_fetch_assoc($res)){ $porOrigem[] = array( "name" => ($d['name']!=""?$d['name']:"Não informado"), "y" => (int)$d['y']); }
+            ?>
+            <div id="graf_evo_tipoOrg" class="box_shadow box_radius_10" style="width:100%; height:400px;margin-top:20px;"></div>
+           <script>
+           Highcharts.chart('graf_evo_tipoOrg', {
+                      chart: {
+                          plotBackgroundColor: null,
+                          plotBorderWidth: null,
+                          plotShadow: false,
+                          type: 'pie'
+                      },
+                      title: { text: 'Evolução mensal das solicitações por tipo de origem' },
+                      subtitle: {
+                         text: 'Data de referência: <?=$agora['mes_txt']."/".$agora['ano'];?> - <?=$total;?> solicitações'
+                     },
+                      tooltip: { pointFormat: '<b>{point.y}</b> Solicitações<br><b>{point.percentage:.1f}%</b> do total' },
+                      accessibility: {
+                          point: {
+                              valueSuffix: ' solicitações'
+                          }
+                      },
+                      credits: { enabled: false },
+                      plotOptions: {
+                          pie: {
+                              allowPointSelect: true,
+                              cursor: 'pointer',
+                              dataLabels: {
+                                  enabled: true,
+                                  format: '<b>{point.name}</b><br>{point.y} Solicitações - {point.percentage:.1f} %'
+                              }
+                          }
+                      },
+                      series: [{
+                          name: 'Quantidade',
+                          colorByPoint: true,
+                          data: <?=json_encode($porOrigem);?>
+                      }]
+                  });
+           </script>
+       </div>
+       <div class="col-md-6">
+          <?
+
+                     $sql = "SELECT
+                              (SELECT count(*) FROM sepud.gsec_callcenter C
+                                    WHERE C.id_company = '{$id_company}' AND C.date_added  BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59') as abertas,
+                              (SELECT count(*) FROM sepud.gsec_callcenter C
+                                    WHERE C.id_company = '{$id_company}' AND C.date_closed BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59') as fechadas";
+                     $res   = pg_query($sql)or die("SQL Error ".__LINE__);
+                     $stats = pg_fetch_assoc($res);
+
+          ?>
+          <div id="graf_aberto_fechado" class="box_shadow box_radius_10" style="width:100%; height:400px;margin-top:20px;"></div>
+          <script>
+          Highcharts.chart('graf_aberto_fechado', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'Produção mensal de solicitações no mês corrente'
+                    },
+                    subtitle: {
+                        text: 'Data de referência: <?=$agora['mes_txt']."/".$agora['ano'];?>'
+                    },
+                    xAxis: {
+                        categories: ['Abertas no mês', 'Fechadas no mês'],
+                        crosshair: true
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: null
+                        }
+                    },
+                    tooltip: { pointFormat: '<b>{point.y}</b> Solicitações no mês de <?=$agora['mes_txt'];?><br><b>' },
+                    /*
+                    tooltip: {
+                        headerFormat: '<b>{point.y}</b> Solicitações {point.key} no mês de <?=$agora['mes_txt'];?>',
+                        shared: true,
+                        useHTML: true
+                    },
+                    */
+                    credits:{
+                     enabled: false
+                    },
+                    plotOptions: {
+                        column: {
+                           pointPadding: 0.2,
+                           borderWidth: 0,
+                        }
+                    },
+                    series: [{
+                        showInLegend: false,
+                        name: 'Solicitações',
+                        colorByPoint: true,
+                        data: [{y: <?=$stats['abertas'];?>, color:'#17bde0'},
+                              {y: <?=$stats['fechadas'];?>, color:'#f37c6c'}],
+                        dataLabels: {
+                             enabled: true,
+                             color: '#000000',
+                             align: 'center',
+                             style: {
+                                 fontSize: '12px',
+                                 fontFamily: 'helvetica, arial, sans-serif',
+                                 textShadow: false,
+                                 fontWeight: 'bold'
+
+                             }
+                        }
+
+                    }]
+});
+          </script>
+       </div>
+    </div>
+
+      <div class="row">
         <div class="col-md-12">
             <?
-               if($_SESSION['id']==1)
-               {  ksort($stat_tipos);
+
+                ksort($stat_tipos);
                   echo "<h4>Detalhado por tipo no mês de referência:</h4>";
-                  echo "<div class='table-responsive'>";
+                  echo "<div class='table-responsive box_shadow box_radius_10'>";
                   echo "<table class='table table-hover'>";
                   foreach($stat_tipos as $tipos => $subtipos)
                   {
@@ -395,7 +550,7 @@ if(pg_num_rows($res))
                   }
                   echo "</table>";
                   echo "</div>";
-               }
+
             ?>
         </div>
       </div>
@@ -421,7 +576,6 @@ if(pg_num_rows($res))
                   <div class="form-group">
                       <label for="filtro_data">Período:</label>
                           <select id="filtro_data" name="filtro_data" class="form-control">
-
                              <?
                              if(isset($agora['ano']))
                              {
@@ -445,6 +599,31 @@ if(pg_num_rows($res))
                     </div>
                 </div>
               </div>
+
+              <div class="row">
+                  <div class='col-sm-12' style="margin-top:10px">
+                     <label for="id_company">Setor:</label>
+                     <select class="form-control select2" id="id_company" name="id_company">
+                        <?
+                           if(check_perm("9_31")){
+                             $sql = "SELECT id, name, acron, id_father
+                                     FROM {$schema}company
+                                     WHERE active = 't' AND id_father = '{$_SESSION['id_company_father']}'
+                                     ORDER BY name ASC";
+                             $res = pg_query($sql)or die();
+                             while($setores = pg_fetch_assoc($res)){
+                                if($setores['id']==$_SESSION['id_company']){ $sel = "selected"; }else{ $sel=""; }
+                                echo "<option value='{$setores['id']}' {$sel}>{$setores['name']}</option>";
+                             }
+                          }else{
+                             echo "<option value='{$_SESSION['id_company']}'>{$_SESSION['company_name']}</option>";
+                          }
+                        ?>
+                     </select>
+                     <input type="hidden" name="name_company" id="name_company" value='' />
+                  </div>
+              </div>
+
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
@@ -455,6 +634,7 @@ if(pg_num_rows($res))
   </div>
 </div>
 <script>
+$('.select2').select2({ dropdownParent: $('#modal_filtro_gsec_dashboard')});
 $('#bt_submit').click(function(e) {
     e.preventDefault();
      $("#modal_filtro").removeClass("in");
@@ -462,7 +642,7 @@ $('#bt_submit').click(function(e) {
      $('body').removeClass('modal-open');
      $('body').css('padding-right', '');
      $("#modal_filtro").hide();
-
+     $("#name_company").val($("#id_company option:selected").text());
      $("#filtro").submit();
     return false;
 });

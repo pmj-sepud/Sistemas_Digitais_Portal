@@ -41,7 +41,7 @@
 
       $sql  = "SELECT C.id, C.name,
                       C.rg, C.cpf, C.email,
-                  	 C.phone1,C.phone2,C.phone3,
+                  	 C.phone1,C.phone2,C.phone3,C.phone4,
                   	 S.name as street, C.num_residence_address, C.complement_residence_address, N.neighborhood
                FROM {$schema}gsec_citizen C
                LEFT JOIN {$schema}streets S ON S.id = C.id_residence_address
@@ -61,6 +61,7 @@
       if($dC['phone1']!=""){ $contato[]=$dC['phone1'];}
       if($dC['phone2']!=""){ $contato[]=$dC['phone2'];}
       if($dC['phone3']!=""){ $contato[]=$dC['phone3'];}
+      if($dC['phone4']!=""){ $contato[]=$dC['phone4'];}
       if(isset($contato))  { $contato = implode(", ",$contato);}
 
 ?>
@@ -179,12 +180,14 @@
                <label class='control-label' for='call_origin'>Origem:</label>
                <select class='form-control select2' id='call_origin' name='call_origin'>
                   <option value="">- - -</option>
-                  <option value="Telefone"     <?=($d['call_origin']=="Telefone"||$acao=="inserir"?"Selected":"");?>    >Telefone</option>
+                  <option value="Telefone"     <?=($d['call_origin']=="Telefone"||$acao=="inserir"?"Selected":"");?>>Telefone</option>
+                  <option value="Interno"      <?=($d['call_origin']=="Interno"?"Selected":"");?>     >Interno</option>
                   <option value="E-mail"       <?=($d['call_origin']=="E-mail"?"Selected":"");?>      >E-mail</option>
                   <option value="Pessoalmente" <?=($d['call_origin']=="Pessoalmente"?"Selected":"");?>>Pessoalmente</option>
                   <option value="Carta"        <?=($d['call_origin']=="Carta"?"Selected":"");?>       >Carta</option>
                   <option value="Ouvidoria"    <?=($d['call_origin']=="Ouvidoria"?"Selected":"");?>   >Ouvidoria</option>
-                  <option value="Oficio"       <?=($d['call_origin']=="Oficio"?"Selected":"");?>   >Ofício/SEI/Indicação</option>
+                  <option value="Oficio"       <?=($d['call_origin']=="Oficio"?"Selected":"");?>      >Ofício/SEI/Indicação</option>
+                  <option value="Aplicativo"   <?=($d['call_origin']=="Aplicativo"?"Selected":"");?>  >Aplicativo</option>
                </select>
             </div>
          </div>
@@ -195,8 +198,9 @@
                   <option value="">- - -</option>
                   <option value="Cidadão"   <?=($d['origin_type']=="Cidadão"||$acao=="inserir"?"Selected":"");?>  >Cidadão</option>
                   <option value="Vereador"  <?=($d['origin_type']=="Vereador"?"Selected":"");?> >Vereador</option>
-                  <option value="Prefeito"  <?=($d['origin_type']=="Prefeito"?"Selected":"");?> >Prefeito</option>
+                  <!--<option value="Prefeito"  <?=($d['origin_type']=="Prefeito"?"Selected":"");?> >Prefeito</option>-->
                   <option value="Órgão PMJ" <?=($d['origin_type']=="Órgão PMJ"?"Selected":"");?>>Órgão PMJ</option>
+                  <option value="CAJ" <?=($d['origin_type']=="CAJ"?"Selected":"");?>>CAJ</option>
                </select>
             </div>
          </div>
@@ -301,6 +305,8 @@
             <div class='form-group'>
                <label class='control-label' for='id_subject'>Solicitação:</label>
                <?
+
+               if($_SESSION['id']!=1){
                      $sql = "SELECT * FROM {$schema}gsec_request_type
                              WHERE id_company = '{$_SESSION['id_company']}' OR id_company_father = '{$_SESSION['id_company_father']}'
                              ORDER BY type DESC, request ASC";
@@ -308,6 +314,23 @@
                      while($t = pg_fetch_assoc($res)){
                         $opttype[$t['type']][$t['request']] = $t['id'];
                      }
+               }else
+               {
+                  $sql = "SELECT * FROM {$schema}gsec_request_type
+                          WHERE id_company = '{$_SESSION['id_company']}'
+                          ORDER BY type DESC, request ASC";
+                  $res = pg_query($sql)or die("<div class='text-center text-danger'>Error: ".__LINE__."<br>SQL {$sql}</div>");
+                  if(pg_num_rows($res))
+                  {
+                     while($t = pg_fetch_assoc($res)){ $opttype[$t['type']][$t['request']] = $t['id'];}
+                  }else{
+                     $sql = "SELECT * FROM {$schema}gsec_request_type
+                             WHERE id_company_father = '{$_SESSION['id_company_father']}'
+                             ORDER BY type DESC, request ASC";
+                     $res = pg_query($sql)or die("<div class='text-center text-danger'>Error: ".__LINE__."<br>SQL {$sql}</div>");
+                     while($t = pg_fetch_assoc($res)){ $opttype[$t['type']][$t['request']] = $t['id']; }
+                  }
+               }
                ?>
                <select class='form-control select2' id='id_subject' name='id_subject' required>
                   <option value="">- - -</option>
@@ -383,6 +406,20 @@
                </select>
             </div>
          </div>
+
+         <div class='col-md-3'>
+            <div class='form-group'>
+               <label class='control-label' for='date_added'>Data de abertura:</label>
+                  <input type='datetime-local' class='form-control' id='date_added' name='date_added' placeholder='' value='<?=($acao=="atualizar"?str_replace(" ","T",substr($d['date_added'],0,16)):str_replace(" ","T",substr($agora['datatimesrv'],0,16)));?>' >
+            </div>
+         </div>
+         <div class='col-md-3'>
+            <div class='form-group'>
+               <label class='control-label' for='date_added'>Data de fechamento:</label>
+                  <input type='datetime-local' class='form-control' id='date_closed' name='date_closed' placeholder='' value='<?=($acao=="atualizar"?str_replace(" ","T",substr($d['date_closed'],0,16)):"");?>' >
+            </div>
+         </div>
+
       </div>
 
       <div class='row'>
@@ -406,9 +443,13 @@
                   <input type="hidden" id="tabret"     name="tabret"  value="">
                   <input type='hidden' id='id'         name='id'         value='<?=$d['id'];?>' >
                   <button id="bt_atualizar" type='submit' class='btn btn-primary loading'>Atualizar</button>
-         <? }else{ ?>
-                  <button type='submit' class='btn btn-success loading'>Inserir</button>
-         <? } ?>
+         <? }else{
+               if(check_perm("9_28","C")){
+                  echo "<button type='submit' class='btn btn-success loading'>Inserir</button>";
+               }else {
+                  echo "<button type='button' class='btn btn-success disabled'>Inserir</button>";
+               }
+            } ?>
       </div>
 </form>
 
@@ -504,7 +545,7 @@
 
                   pin = new Microsoft.Maps.Pushpin(map.getCenter(), {
                   title: <?=($d['type']!=""?"'{$d['type']}:{$d['request']}'":"'Localização do evento'");?>,
-                  subTitle: <?=($d['coords_formattedaddress']!=""?"'".$d['coords_formattedaddress']."'":"'Joinville - Santa Catarina'");?>,
+                  //subTitle: <?=($d['coords_formattedaddress']!=""?"'".$d['coords_formattedaddress']."'":"'Joinville - Santa Catarina'");?>,
                   text: '',
                   color: defaultColor,
                   draggable: true

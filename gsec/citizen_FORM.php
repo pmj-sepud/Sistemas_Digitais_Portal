@@ -70,7 +70,11 @@
                   <div class="panel-actions" style="margin-top:5px">
                   <?
                      if($acao=="atualizar"){
-                        echo "<a href='gsec/callcenter_FORM.php?id_user_request={$_GET['id']}'><button type='button' class='btn btn-success'><i class='fa fa-laptop'></i><sup><i class='fa fa-plus'></i></sup> Novo atendimento</button></a>";
+                        if(check_perm("9_28","C")){
+                           echo "<a href='gsec/callcenter_FORM.php?id_user_request={$_GET['id']}'><button type='button' class='btn btn-success'><i class='fa fa-laptop'></i><sup><i class='fa fa-plus'></i></sup> Novo atendimento</button></a>";
+                        }else {
+                           echo "<button type='button' class='btn btn-success disabled'><i class='fa fa-laptop'></i><sup><i class='fa fa-plus'></i></sup> Novo atendimento</button>";
+                        }
                         //echo " <a href='gsec/citizen.php'><button type='button' class='btn btn-primary'><i class='fa fa-user-plus'></i> Novo cidadão</button></a>";
                      }
                   ?>
@@ -108,12 +112,19 @@
       </div>
    </div>
 
-   <div class='col-md-6'>
+   <div class='col-md-3'>
          <div class='form-group'>
-            <label class='control-label' for='phone1'>Telefone Principal:</label>
+            <label class='control-label' for='phone1'>Telefone <b>CELULAR</b>:</label>
             <input type='text' class='form-control' id='phone1' name='phone1' placeholder='(DDD) Telefone celular' value='<?=$d['phone1'];?>'>
          </div>
       </div>
+
+      <div class='col-md-3'>
+            <div class='form-group'>
+               <label class='control-label' for='phone1'>Telefone <b>FIXO</b>:</label>
+               <input type='text' class='form-control' id='phone4' name='phone4' placeholder='(DDD) Telefone fixo' value='<?=$d['phone4'];?>'>
+            </div>
+         </div>
 </div>
 
 <div class='row'>
@@ -392,8 +403,10 @@ $('#cpf').mask('000.000.000-00', {reverse: true});
 
 
 $("#phone1").mask("(00) 0 0000-0000");
-$("#phone2").mask("(00) 0 0000-0000");
-$("#phone3").mask("(00) 0 0000-0000");
+$("#phone4").mask("(00) 0000-0000");
+
+
+
 
 $('.select2').select2();
 $(".loading").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> Aguarde");});

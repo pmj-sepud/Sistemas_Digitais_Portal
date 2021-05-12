@@ -21,6 +21,16 @@
 .link:hover{
    cursor: pointer;
 }
+/*
+.dataTables_filter {
+   width: 50%;
+   float: right;
+   text-align: right;
+}
+.dataTables_wrapper .dt-buttons {
+  float:right;
+}
+*/
 </style>
 <section role="main" class="content-body">
       <header class="page-header">
@@ -121,41 +131,46 @@ $(".link").click(function(){
 })
 
 $(document).ready( function () {
-    $('#tabela').DataTable({
+   var table = $('#tabela').DataTable({
       mark: true,
       responsive: true,
-      language: {
-        processing:     "Pesquisando...",
-        search:         "Pesquisar:",
-        lengthMenu:     "_MENU_ &nbsp;Registros por página.",
-        info:           "Mostrando _START_ a _END_ de um total de  _TOTAL_ registros.",
-        infoEmpty:      "0 registros encontrado.",
-        infoFiltered:   "(_MAX_ registros pesquisados)",
-        infoPostFix:    "",
-        loadingRecords: "Carregando registros...",
-        zeroRecords:    "Nenhum registro encontrado com essa característica.",
-        emptyTable:     "Nenhuma informação nesta tabela de dados.",
-        paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-        },
-        aria: {
-            sortAscending:  ": Ordem ascendente.",
-            sortDescending: ": Ordem decrescente."
-        }
-    },
-    "columnDefs": [ {
-            "searchable": false,
-            "orderable": false,
-            "targets": 0
-        } ],
-        "order": [[ 1, 'asc' ]]
-
+      language:{
+                 processing:     "Pesquisando...",
+                 search:         "Pesquisar:",
+                 lengthMenu:     "_MENU_ &nbsp;Registros por página.",
+                 info:           "Mostrando _START_ a _END_ de um total de  _TOTAL_ registros.",
+                 infoEmpty:      "0 registros encontrado.",
+                 infoFiltered:   "(_MAX_ registros pesquisados)",
+                 infoPostFix:    "",
+                 loadingRecords: "Carregando registros...",
+                 zeroRecords:    "Nenhum registro encontrado com essa característica.",
+                 emptyTable:     "Nenhuma informação nesta tabela de dados.",
+                 paginate: {
+                     first:      "Primeiro",
+                     previous:   "Anterior",
+                     next:       "Próximo",
+                     last:       "Último"
+                 },
+                 aria: {
+                     sortAscending:  ": Ordem ascendente.",
+                     sortDescending: ": Ordem decrescente."
+                 }
+               },
+    "columnDefs": [{"searchable": false, "orderable": false,"targets": 0}],
+    "order": [[ 1, 'asc' ]],
+/*
+    dom: 'Bflrtip',
+    buttons: [
+         { extend: 'copyHtml5', text: 'Copiar'},
+         'excelHtml5',
+         'csvHtml5',
+         'pdfHtml5',
+     ]
+     */
     });
-});
 
+
+});
 
 
 

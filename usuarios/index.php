@@ -5,10 +5,8 @@
   logger("Acesso","Usuários");
   $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
-?>
-
-<?
 if(check_perm("1_1","U")){
+
 ?>
 <style>.link:hover{ cursor: pointer; }</style>
 <script>
@@ -16,6 +14,7 @@ if(check_perm("1_1","U")){
 </script>
 <? }else{ ?>
 <style>.link:hover{ cursor: not-allowed; }</style>
+
 <? } ?>
 
 <section role="main" class="content-body">

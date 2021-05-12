@@ -86,6 +86,10 @@
 			  -moz-box-shadow: 10px 10px 56px -12px rgba(0,0,0,0.3);
 			  box-shadow: 10px 10px 56px -12px rgba(0,0,0,0.3);
 			}
+			.box_radius_10
+			{
+				-webkit-border-radius: 10px;-moz-border-radius: 10px;border-radius: 10px;
+			}
 		</style>
 	</head>
 	<body>
@@ -172,10 +176,22 @@
 		<script src="assets/vendor/jquery-datatables-bs3/assets/js/datatables.js"></script>
 -->
 
-		<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.print.min.js"></script>
+
+
+		<!--<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>-->
 		<script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/g/mark.js(jquery.mark.min.js)"></script>
 		<script src="https://cdn.datatables.net/plug-ins/1.10.13/features/mark.js/datatables.mark.js"></script>
+
+
 
 <!--
 		<script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.html5.min.js"></script>

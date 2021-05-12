@@ -100,16 +100,16 @@ require_once("libs/php/conn.php");
                      <a><span>GSEC</span></a>
                      <ul class="nav nav-children">
                               <?
-                                 if(check_perm("9_28","CRUD")){ echo "<li><a href='gsec/callcenter.php' menuautoclose='true'>Atendimento</a></li>"; }
+                                 if(check_perm("9_28","CRUD")){ echo "<li><a href='gsec/callcenter.php?callbackFilterReset=true' menuautoclose='true'>Atendimento</a></li>"; }
                                                          else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Atendimentos</a></li>"; }
                               ?>
                               <li class="nav-parent">
                                    <a><span>Relatórios</span></a>
                                    <ul class="nav nav-children">
                                       <?
-                                        if(check_perm("9_30")){ echo "<li><a href='gsec/dashboard.php' menuautoclose='true'>Dashboard</a></li>"; }
-                                                          else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Dashboard</a></li>"; }
-                                       if($_SESSION['id']==1){ echo "<li><a href='gsec/dashboard_geral.php' menuautoclose='true'>Dashboard - Todos</a></li>"; }
+                                          if(check_perm("9_30")){ echo "<li><a href='gsec/dashboard.php' menuautoclose='true'>Dashboard</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Dashboard</a></li>"; }
+                                          if(check_perm("9_33")){ echo "<li><a href='gsec/dashboard_geral.php' menuautoclose='true'>Dashboard geral</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Dashboard geral</a></li>"; }
+                                          if(check_perm("9_32")){ echo "<li><a href='gsec/mapa_reginal.php' menuautoclose='true'>Mapa da regional</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Mapa da regional</a></li>"; }
                                       ?>
                                    </ul>
                               </li>

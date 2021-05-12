@@ -11,7 +11,7 @@ if($_POST['acao']=="atualizar")
   $tab = $_POST['tabret'];
   unset($_POST['acao'],$_POST['tabret']);
   $agora = now();
-  if($_POST['active']=='f'){ $_POST['date_closed'] = $agora['datatimesrv']; }
+  if($_POST['active']=='f' && $_POST['date_closed']==""){ $_POST['date_closed'] = $agora['datatimesrv']; }
   cleanString();
   logger("Atualização","CALLCENTER", "Callcenter - Atualização de atendimento: ".print_r($_POST, true));
   $sql = makeSql("{$schema}gsec_callcenter",$_POST,"upd","id");
@@ -23,7 +23,10 @@ if($_POST['acao']=="inserir")
 {
   unset($_POST['acao']);
   $agora                      = now();
-  $_POST['date_added']        = $agora['datatimesrv'];
+  if(!isset($_POST['date_added']))
+  {
+   $_POST['date_added']        = $agora['datatimesrv'];
+  }
   $_POST['id_company']        = $_SESSION['id_company'];
   $_POST['id_company_father'] = $_SESSION['id_company_father'];
   $_POST['id_user_added']     = $_SESSION['id'];

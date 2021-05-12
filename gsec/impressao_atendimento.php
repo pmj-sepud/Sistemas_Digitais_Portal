@@ -200,7 +200,7 @@
 
                              pin = new Microsoft.Maps.Pushpin(map.getCenter(), {
                              title: <?=($d['type']!=""?"'{$d['type']}:{$d['request']}'":"'Localização do evento'");?>,
-                             subTitle: <?=($d['coords_formattedaddress']!=""?"'".$d['coords_formattedaddress']."'":"'Joinville - Santa Catarina'");?>,
+                             //subTitle: <?=($d['coords_formattedaddress']!=""?"'".$d['coords_formattedaddress']."'":"'Joinville - Santa Catarina'");?>,
                              text: '',
                              color: defaultColor
                           });
