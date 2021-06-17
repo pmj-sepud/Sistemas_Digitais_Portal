@@ -8,7 +8,7 @@ extract($_POST);
 $_SESSION['auth'] = "false";
 
 if($modulo=="devops"){
-	$schema_session =  trim(getenv('SCHEMA_DEV'));
+	$schema_session  =  trim(getenv('SCHEMA_DEV'));
 	$schema 				= (getenv('SCHEMA_DEV')?trim(getenv('SCHEMA_DEV')).".":"");
 }else{
 	$schema_session = trim(getenv('SCHEMA'));
@@ -78,24 +78,19 @@ if($_SESSION['auth']=="true"){
 					$_SESSION["error"] = "Sem permissão de acesso para módulo de operação do SERP.<br>Em caso de dúvida contate o administrador do sistema.";
 					header("Location: ../index.php");
 			}
+		}elseif($modulo=="PNCD"){
+			if(check_perm("8_26"))
+			{
+				header("Location: ../index_pncd.php?modulo=".$modulo);
+			}else{
+				$_SESSION["error"] = "Sem permissão de acesso para módulo de operação em campo do PNCD - Combate a Dengue.<br>Em caso de dúvida contate o administrador do sistema.";
+				header("Location: ../index.php");
+			}
 		}else{
 
 			header("Location: ../index_sistema.php?modulo=".$modulo);
 
-/*
-			if($modulo!="devops")
-			{
-					header("Location: ../index_sistema.php?modulo=".$modulo);
-			}else{
-				if($_SESSION['id']==1)
-				{
-						header("Location: ../index_sistema.php?modulo=".$modulo);
-				}else {
-						$_SESSION["error"] = "Sem permissão de acesso para módulo de treinamento e testes de sistema.<br>Aguarde, em fase de implantação.<br>Em caso de dúvida contate o administrador do sistema.";
-						header("Location: ../index.php");
-				}
-			}
-*/
+
 		}
 }else{
 		header("Location: ../index.php");

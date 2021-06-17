@@ -120,7 +120,9 @@
                                                     }
 
 
-
+                                                    if($_POST['id_company']=='todos'){
+                                                       echo "<th class='text-muted'><small><i>Setor</i></small></th>";
+                                                    }
                                                     echo "<th class='text-muted text-center'><small><i>Coords</i></small></th>
                                                     <th class='text-muted text-center'><i class='fa fa-camera'></i></th>
                                                   </thead></tr>";
@@ -159,6 +161,10 @@
                                                    if($filtroativo=='f') //Fechados
                                                    {
                                                       echo "<td nowrap>".substr(formataData($d['date_closed'],1),0,-3)."<br><small class='text-muted'><i>".humanTiming($d['date_closed'])." atrás</i></small></td>";
+                                                   }
+                                                   if($_POST['id_company']=='todos')
+                                                   {
+                                                      echo "<td>{$d['company_acron']}</td>";
                                                    }
                                                    echo "<td class='text-center'>".($d['coords']!=""?"<i class='fa fa-check text-success'></i>":"<i class='fa fa-exclamation-triangle text-danger'></i>")."</td>";
                                                    echo "<td class='text-center'>".($d['qtd_foto']==0?"<span class='text-muted'>-</span>":"<span class='badge bg-info'>{$d['qtd_foto']}</span>")."</td>";

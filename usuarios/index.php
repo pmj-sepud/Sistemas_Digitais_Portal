@@ -150,7 +150,9 @@ if(check_perm("1_1","U")){
 //$(".loading").click(function(event){ $(this).addClass("disabled").html("<i class=\"fa fa-spinner fa-spin\"></i> <small>Aguarde</small>");});
 $(document).ready( function () {
     $('#tabela_dinamica').DataTable({
+      mark: true,
       responsive: true,
+      stateSave: true,
       language: {
         processing:     "Pesquisando...",
         search:         "Pesquisar:",
@@ -174,5 +176,6 @@ $(document).ready( function () {
         }
     }
     });
+    $('.dataTables_filter input').click(function () { $(this).val('');});
 });
 </script>

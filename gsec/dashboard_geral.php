@@ -126,6 +126,7 @@ if(pg_num_rows($res))
                   												</div>
                   											</div>
                   										</div>
+                                                <small class='text-muted pull-right'>* Filtro de data não se aplica a este campo.</small>
                   									</div>
                   								</section>
 
@@ -134,12 +135,9 @@ if(pg_num_rows($res))
                     <div class="col-sm-6">
 
 <?
-   $sql = "SELECT
-            (SELECT count(*) FROM {$schema}gsec_callcenter G WHERE G.id_company_father = '{$_SESSION['id_company_father']}' AND G.active = 't') as total_aberto,
-            (SELECT count(*) FROM {$schema}gsec_callcenter G WHERE G.id_company_father = '{$_SESSION['id_company_father']}' AND G.active = 'f'
-            AND G.date_closed BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59') as total_fechado_mes";
-   $res = pg_query($sql)or die("SQL Error: ".__LINE__."<br>".$sql);
-   $stat = pg_fetch_assoc($res);
+$sql = "SELECT count(*) as qtd FROM {$schema}gsec_callcenter G WHERE G.active='t'";
+$res = pg_query($sql)or die("SQL Error: ".__LINE__."<br>".$sql);
+$stats['totalaberto'] = pg_fetch_assoc($res);
 ?>
                       <section class="panel panel-featured-left panel-featured-tertiary">
 									<div class="panel-body">
@@ -151,14 +149,20 @@ if(pg_num_rows($res))
 											</div>
 											<div class="widget-summary-col">
 												<div class="summary">
-                          <h5 class="title">Estatísticas:</h5>
+                          <h5 class="title">Estatísticas - Solicitações em aberto:</h5>
                           <div style="font-size:18px;margin-top:15px">
-                            <b><?=$stat['total_aberto'];?></b> solicitações em aberto.<br>
-                            <b><?=$stat['total_fechado_mes'];?></b> solicitações finalizadas no mês atual.<br>
+                             <table class='table table-condensed'>
+                              <tbody>
+                                  <tr><td><b><?=number_format($stats['totalaberto']['qtd'],0,'','.');?></b> <small>Solicitações em aberto</small></td></tr>
+                                  <!--<tr><td><b><?=$stats['mes_corrente'];?></b></td><td><small>Neste mês</small></td></tr>-->
+                                  <!--<tr><td><b><?=round(($stats_mes_corrente['Baixadas']*100/$stats_mes_corrente['Geradas']),1);?>%</b></td><td><small>Executado neste mês</small></td></tr>-->
+                              </tbody>
+                           </table>
                           </div>
 												</div>
 											</div>
 										</div>
+                              <small class='text-muted pull-right'>* Filtro de data não se aplica a este campo.</small>
 									</div>
 								</section>
 
@@ -181,7 +185,11 @@ if(pg_num_rows($res))
                               C.date_added BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59'
                         GROUP BY date_part('day', C.date_added)";
                $res = pg_query($sql)or die("SQL Error: ".__LINE__."<br>SQL: {$sql}");
-               while($d = pg_fetch_assoc($res)){ $evo_mensal_dados[$d['dia']] = $d['qtd']; }
+               while($d = pg_fetch_assoc($res)){
+                     $evo_mensal_dados[$d['dia']] = $d['qtd'];
+                     $media['total'] += $d['qtd'];
+                     $media['dias']++;
+               }
 
 
               for($i=1;$i<=count($evo_mensal_dados);$i++)
@@ -208,7 +216,18 @@ if(pg_num_rows($res))
     yAxis: {
         title: {
             text: 'Quantidade'
-        }
+        },
+   plotLines: [{
+      color: 'orange',
+      value: '<?=ceil($media['total']/$media['dias']);?>', // Insert your average here
+      width: '1',
+      zIndex: 4, // To not get stuck below the regular plot lines or series
+      label: {
+                text: '<span style="color:#CCCCCC">Média diária&nbsp;&nbsp;<br><?=ceil($media['total']/$media['dias']);?> solicitações</span>',
+                align: 'right',
+                x:-10
+            }
+  }]
     },
     plotOptions: {
         line: {
@@ -312,8 +331,6 @@ if(pg_num_rows($res))
         </div>
         <div class="col-md-6">
           <?
-            //print_r_pre($setor);
-
               foreach ($setor as $orgao => $qtd){ $legenda[] = $orgao; $quantitativo[] = $qtd;}
           ?>
           <div id="graf_evo_org" class="box_shadow box_radius_10" style="width:100%; height:400px;margin-top:20px"></div>
@@ -424,13 +441,14 @@ if(pg_num_rows($res))
           <?
                      $sql = "SELECT
                               (SELECT count(*) FROM sepud.gsec_callcenter C
-                                 WHERE C.id_company_father = '{$_SESSION['id_company_father']}' AND C.date_added  BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59') as abertas,
+                                 WHERE C.id_company_father = '{$_SESSION['id_company_father']}' AND C.date_added  BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59') as geradas,
                               (SELECT count(*) FROM sepud.gsec_callcenter C
-                                 WHERE C.id_company_father = '{$_SESSION['id_company_father']}' AND C.date_closed BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59') as fechadas";
+                                 WHERE C.id_company_father = '{$_SESSION['id_company_father']}' AND C.date_closed BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59') as baixadas";
                      $res   = pg_query($sql)or die("SQL Error ".__LINE__);
                      $stats = pg_fetch_assoc($res);
+                     $percentualExecutado = number_format(round(($stats['baixadas']*100/$stats['geradas']),1),1,',','');
           ?>
-          <div id="graf_aberto_fechado" class="box_shadow box_radius_10" style="width:100%; height:400px;margin-top:20px;"></div>
+          <div id="graf_aberto_fechado" class="box_shadow box_radius_10" style="width:100%; height:300px;margin-top:20px;"></div>
           <script>
           Highcharts.chart('graf_aberto_fechado', {
                     chart: {
@@ -473,8 +491,8 @@ if(pg_num_rows($res))
                         showInLegend: false,
                         name: 'Solicitações',
                         colorByPoint: true,
-                        data: [{y: <?=$stats['abertas'];?>, color:'#17bde0'},
-                               {y: <?=$stats['fechadas'];?>, color:'#f37c6c'}],
+                        data: [{y: <?=$stats['geradas'];?>, color:'#17bde0'},
+                               {y: <?=$stats['baixadas'];?>, color:'#f37c6c'}],
                         dataLabels: {
                              enabled: true,
                              color: '#000000',
@@ -491,13 +509,87 @@ if(pg_num_rows($res))
                     }]
 });
           </script>
+          <?
+            $bg = "alert-danger";
+                if($percentualExecutado > 30 && $percentualExecutado < 50 ){$bg="alert-warning"; }
+            elseif($percentualExecutado >=50 && $percentualExecutado < 70 ){$bg="alert-info";    }
+            elseif($percentualExecutado > 70)                              {$bg="alert-success"; }
+          ?>
+          <div id="statusPercentual" class="box_shadow box_radius_10 text-center <?=$bg;?>" style="width:100%; height:80px;margin-top:3px;">
+             <h2><small>Percentual de execução: <sup>*</sup></small><br><b><?=$percentualExecutado;?> %</b></h2><small class='text-muted'>* Percentual de solicitações baixadas em relação as solicitações que foram abertas no mês.</small>
+          </div>
        </div>
     </div>
 
       <div class="row">
-       <div class="col-md-12">
-
+       <div class="col-md-12" style="margin-top:20px">
             <?
+               $dataAtual = now();
+               $sql = "SELECT 'Aberto' as status, count(*) as qtd, T.type, T.request
+                           FROM sepud.gsec_callcenter C
+                           LEFT JOIN sepud.gsec_request_type T ON T.id = C.id_subject
+                           WHERE C.date_added BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59' AND C.id_company_father = '{$_SESSION['id_company_father']}'
+                           GROUP BY T.type, T.request
+                     UNION
+                     SELECT 'Fechado' as status, count(*) as qtd, T.type, T.request
+                           FROM sepud.gsec_callcenter C
+                           LEFT JOIN sepud.gsec_request_type T ON T.id = C.id_subject
+                           WHERE C.date_closed BETWEEN '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND '".$agora['ano']."-".$agora['mes']."-".$agora['ultimo_dia']." 23:59:59' AND C.id_company_father = '{$_SESSION['id_company_father']}'
+                           GROUP BY T.type, T.request
+                     UNION
+                     SELECT 'Saldo anterior' as status, count(*) as qtd, T.type, T.request
+                           FROM sepud.gsec_callcenter C
+                           LEFT JOIN sepud.gsec_request_type T ON T.id = C.id_subject
+                           WHERE C.date_added < '".$agora['ano']."-".$agora['mes']."-01 00:00:00' AND active='t' AND C.id_company_father = '{$_SESSION['id_company_father']}'
+                           GROUP BY T.type, T.request";
+               $res = pg_query($sql)or die("SQL Error");
+               while($d = pg_fetch_assoc($res))
+               {
+                  $detalhado[$d['type']][$d['request']][$d['status']] = $d['qtd'];
+                  $totalstats[$d['status']] += $d['qtd'];
+               }
+               ksort($detalhado);
+
+               echo "<div class='table-responsive box_shadow box_radius_10'>";
+               echo "<table class='table table-hover'>";
+               echo "<thead><tr><th colspan='4' class='text-center'><h3>Extrato mensal detalhado por grupo/subgrupo<br><small>Mês de referência: <b>{$agora['mes_txt']}/{$agora['ano']}</b> *<br><sup>* O saldo anterior se altera a medida que as solicitaçãos antigas são fechadas.</sup></small></h3></th></tr></thead>";
+               foreach ($detalhado as $tipo => $dados) {
+                  echo "<thead><tr class=''><td rowspan='2' style='vertical-align:middle;background-color:#EEEEFF'><h4><b>{$tipo}</b></h4></td>
+                                           <td colspan='3' class='text-center info'>Solicitações</td>
+                                           <td nowrap class='text-center warning' rowspan='2' style='vertical-align:bottom;'>Baixadas</td>
+                        </tr><tr class='info'>
+                                           <td nowrap class='text-center'>Saldo anterior<br><small>Em aberto</small></td>
+                                           <td nowrap class='text-center'>Mês atual<br><small>Total gerado</small></td>
+                                           <td nowrap class='text-center' style='vertical-align:middle;'>Total</td>
+                                           </tr></thead>";
+                  foreach ($dados as $requisicao => $vals) {
+                     $calcs['saldoant']+=$vals['Saldo anterior'];
+                     $calcs['aberto']  +=$vals['Aberto'];
+                     $calcs['fechado'] +=$vals['Fechado'];
+                     echo "<tr>";
+                     echo "<td>{$requisicao}</td>";
+                     echo "<td width='1px' class='text-center'>".($vals['Saldo anterior']!=""?$vals['Saldo anterior']:"<span style='color:#CCCCCC'>0</span>")."</td>";
+                     echo "<td width='1px' class='text-center'>".($vals['Aberto']!=""?$vals['Aberto']:"<span style='color:#CCCCCC'>0</span>")."</td>";
+                     echo "<td width='1px' class='text-center'>".($vals['Aberto']+$vals['Saldo anterior'])."</td>";
+                     echo "<td width='1px' class='text-center'>".($vals['Fechado']!=""?$vals['Fechado']:"<span style='color:#CCCCCC'>0</span>")."</td>";
+                     echo "</tr>";
+                  }
+                  echo "<tr><td class='text-muted text-right'><i>Subtotal:</i></td>
+                            <td class='text-center'>{$calcs['saldoant']}</td>
+                            <td class='text-center'>{$calcs['aberto']}</td>
+                            <td class='text-center'>".($calcs['aberto']+$calcs['saldoant'])."</td>
+                            <td class='text-center'>{$calcs['fechado']}</td></tr>";
+                  unset($calcs);
+
+               }
+               echo "<tr class='warning'><td class='text-right'>Total geral:</td>
+                     <td class='text-center'>{$totalstats['Saldo anterior']}</td>
+                     <td class='text-center'>{$totalstats['Aberto']}</td>
+                     <td class='text-center'>".($totalstats['Aberto']+$totalstats['Saldo anterior'])."</td>
+                     <td class='text-center'>{$totalstats['Fechado']}</td></tr>";
+               echo "<tr><td colspan='5' class='text-right text-muted'><i>Relatório gerado em <b>{$dataAtual['dthm']}</b></i></td></tr>";
+               echo "</table>";
+/*
                  ksort($stat_tipos);
                   echo "<h4 style='page-break-before:always'>Detalhado por tipo no mês de referência:</h4>";
                   echo "<div class='table-responsive box_shadow box_radius_10'>";
@@ -517,7 +609,7 @@ if(pg_num_rows($res))
                   }
                   echo "</table>";
                   echo "</div>";
-
+*/
             ?>
        </div>
       </div>

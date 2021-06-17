@@ -110,9 +110,30 @@ require_once("libs/php/conn.php");
                                           if(check_perm("9_30")){ echo "<li><a href='gsec/dashboard.php' menuautoclose='true'>Dashboard</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Dashboard</a></li>"; }
                                           if(check_perm("9_33")){ echo "<li><a href='gsec/dashboard_geral.php' menuautoclose='true'>Dashboard geral</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Dashboard geral</a></li>"; }
                                           if(check_perm("9_32")){ echo "<li><a href='gsec/mapa_reginal.php' menuautoclose='true'>Mapa da regional</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Mapa da regional</a></li>"; }
+                                          if(check_perm("9_34")||check_perm("9_35")){ echo "<li><a href='gsec/rel_indicacoes.php' menuautoclose='true'>Indicações Políticas</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Indicações Políticas</a></li>"; }
+
                                       ?>
                                    </ul>
                               </li>
+                              <li class="nav-parent">
+                                   <a><span>Gestão</span></a>
+                                   <ul class="nav nav-children">
+                                      <?
+                                        if(check_perm("9_38", "CRUD")){ echo "<li><a href='gsec/stock_company.php' menuautoclose='true'>Controle de estoque</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'> Controle de estoque</a></li>"; }
+                                        if(check_perm("9_36", "CRUD")){ echo "<li><a href='gsec/workteam.php' menuautoclose='true'>Equipes de trabalho</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Equipes de trabalho</a></li>"; }
+                                      ?>
+                                   </ul>
+                              </li>
+
+
+                                 <li class="nav-parent">
+                                      <a><span>Configurações</span></a>
+                                      <ul class="nav nav-children">
+                                         <?
+                                          if(check_perm("9_38", "CRUD")){ echo "<li><a href='gsec/stock_products.php' menuautoclose='true'>Cadastros de produtos</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true' class='not-allowed'> Cadastros de produtos</a></li>"; }
+                                         ?>
+                                      </ul>
+                                 </li>
 
                         <? if($_SESSION['id']==1){ ?>
 <!--
@@ -353,12 +374,18 @@ $("#linkfulls").attr('title','Tela cheia');
                   if(check_perm("1_1","R")){ echo "<li><a href='usuarios/index.php' menuautoclose='true'>Usuários</a></li>"; }else{ echo "<li><a href='#' menuautoclose='true'  class='not-allowed'><i class='fa fa-lock'></i> Usuários</a></li>"; }
                   if(check_perm("2_20","R")){ echo "<li><a href='configs/company.php' menuautoclose='true'>Órgãos</a></li>";}else{echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Órgãos</a></li>"; }
                   if(check_perm("2_3"))    { echo "<li><a href='sistema/logviewer.php' menuautoclose='true'>Logs do sistema</a></li>";}else{echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Logs do sistema</a></li>"; }
-                  if(check_perm("2_5"))    { echo "<li><a href='sistema/teste.php' menuautoclose='true'>Desenvolvimento</a></li>";}else{echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Desenvolvimento</a></li>"; }
-                  if(check_perm("2_5"))    { echo "<li><a href='sistema/fotos.php' menuautoclose='true'>Upload fotos</a></li>";}else{echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Upload fotos</a></li>"; }
                   if(check_perm("2_27"))    { echo "<li><a href='sistema/backups.php' menuautoclose='true'>Backups</a></li>";}else{echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Backups</a></li>"; }
-
-
               ?>
+              <li class="nav-parent">
+                   <a><span>Desenvolvimentos</span></a>
+                   <ul class="nav nav-children">
+                      <?
+                      if(check_perm("2_5"))    { echo "<li><a href='sistema/apikey.php' menuautoclose='true'>Gerador API Key</a></li>";}else{echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Gerador API Key</a></li>"; }
+                      if(check_perm("2_5"))    { echo "<li><a href='sistema/teste.php' menuautoclose='true'>Testes</a></li>";}else{echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Testes</a></li>"; }
+                      if(check_perm("2_5"))    { echo "<li><a href='sistema/fotos.php' menuautoclose='true'>Upload fotos</a></li>";}else{echo "<li><a href='#' menuautoclose='true' class='not-allowed'><i class='fa fa-lock'></i> Upload fotos</a></li>"; }
+                      ?>
+                   </ul>
+              </li>
             </ul>
           </li>
 

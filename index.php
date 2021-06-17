@@ -143,12 +143,16 @@ margin-top: 50px;
 				<div class="row" style="min-height:600px">
 						<div class="col-sm">
 								<h4 class="titulo">Aplicações</h4>
-								<a href="index2.php?param=rot" class="btn btn-success btn-lg btn-block">Sistema ROTSS</a>
-								<a href="index2.php?param=serp" class="btn btn-warning btn-lg btn-block"><span style="color:white">Sistema de Estacionamento Rotativo Público - SERP</span></a>
-								<!--<a href="index2.php?param=smart" class="btn btn-success btn-lg btn-block">Smart Mobility</a>-->
-								<a href="index2.php?param=portal" class="btn btn-primary btn-lg btn-block">Portal de gestão</a>
-								<a href="index2.php?param=dev" class="btn btn-info btn-lg btn-block">Área de treinamento</a>
+								<!--<a href="index2.php?param=rot" class="btn btn-success btn-lg btn-block">Sistema ROTSS</a>-->
+								<a href="index2.php?param=portal" class="btn btn-primary btn-lg btn-block">PORTAL DE GESTÃO<br><small>GSEC, ROTSS, SAS.BEV, SES.PNCD(Gestão)</small></a>
+								<a href="index2.php?param=serp" class="btn btn-warning btn-lg btn-block"><span style="color:white">SERP - MOBILE<br><small>Sistema de Estacionamento Rotativo Público</small></span></a>
 
+								<a href="index2.php?param=pncd" class="btn btn-info btn-lg btn-block"><span style="color:white">PNCD - Combate a Dengue em campo - MOBILE<br><small>Sistema de registro para combate a Dengue</small></span></a>
+
+								<!--<a href="index2.php?param=smart" class="btn btn-success btn-lg btn-block">Smart Mobility</a>-->
+								<!--<a href="index2.php?param=portal" class="btn btn-primary btn-lg btn-block">Portal de gestão</a>
+								<a href="index2.php?param=dev" class="btn btn-info btn-lg btn-block">Área de treinamento</a>
+								-->
 								<? if($_GET['modulo']=="mobile"){ ?>
 										<a href="mobile/" class="btn btn-danger btn-lg btn-block">ROTSS - Mobile</a>
 								<? } ?>

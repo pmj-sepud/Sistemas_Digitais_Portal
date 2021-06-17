@@ -24,7 +24,7 @@
 
     $sql = "SELECT
                 E.id as ocorrência,
-                E.requester AS solicitante, E.requester_phone as contato,
+                E.requester AS solicitante, E.requester_origin as origem, E.requester_phone as contato,
                 E.description as relato, ET.name as enquadramento,
                 TO_CHAR(E.date::date, 'dd/mm/yyyy') as data_de_abertura,  E.date::time as hora,
                 E.arrival::time as chegada, E.closure::time as fechamento,
@@ -49,7 +49,7 @@
         {
 
               $a['relato'] = nl2br($a['relato']);
-              
+
               if($c==0){ $cabecalho = array_keys($a); }
               unset($linha,$veic, $pess, $abordagens, $conduzidos);
 
@@ -138,7 +138,7 @@
 
               $sql = "SELECT
                           E.id as ocorrência,
-                          E.requester AS solicitante, E.requester_phone as contato,
+                          E.requester AS solicitante, E.requester_origin as origem, E.requester_phone as contato,
                           E.description as relato, ET.name as enquadramento,
                           TO_CHAR(E.date::date, 'dd/mm/yyyy') as data_de_abertura,  E.date::time as hora,
                           E.arrival::time as chegada, E.closure::time as fechamento,

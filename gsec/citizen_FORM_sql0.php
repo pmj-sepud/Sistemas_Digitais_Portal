@@ -23,29 +23,11 @@ if($_POST['acao']=="atualizar")
   cleanString();
   logger("Atualização","CALLCENTER", "Callcenter - Cadastro Cidadão: ".print_r($_POST, true));
 
-
-  if($_POST['cpf']!=""){
-    $sql = "SELECT cpf FROM {$schema}gsec_citizen C WHERE C.cpf = '{$_POST['cpf']}' AND C.id <> '{$_POST['id']}'";
-    $res = pg_query($sql)or die("Error ".__LINE__);
-       if(pg_num_rows($res))
-       {
-         $cpf_exist = true;
-       }else{
-         $cpf_exist = false;
-       }
-  }else{ $cpf_exist = false; }
-
-
-if(!$cpf_exist)
-{
   $info = array("status"=>"Atualizou os dados cadastrais", "dados"=>$_POST);
   loggerGsec($_POST['id'], "gsec_citizen", json_encode($info));
+
   $sql = makeSql("{$schema}gsec_citizen",$_POST,"upd","id");
   pg_query($sql)or die("Error ".__LINE__." - Query:{$sql}");
-}else {
-   $_SESSION['error'] = "CPF já registrado, Os dados cadastrais não foram atualizados.";
-}
-
   header("Location: citizen_FORM.php?id={$_POST['id']}");
 }
 
@@ -53,40 +35,19 @@ if($_POST['acao']=="inserir")
 {
      unset($_POST['acao']);
      $agora                  = now();
-     $returnvars             = $_POST;
      $_POST['date_added']    = $agora['datatimesrv'];
      $_POST['id_company']    = $_SESSION['id_company'];
      $_POST['id_user_added'] = $_SESSION['id'];
      cleanString();
+     logger("Inserção","CALLCENTER", "Callcenter - Cadastro Cidadão: ".print_r($_POST, true));
+     $sql = makeSql("{$schema}gsec_citizen",$_POST,"ins","id");
+     $res = pg_query($sql)or die("<div class='text-center text-danger'>Error: ".__LINE__."<br>SQL {$sql}</div>");
+     $aux = pg_fetch_assoc($res);
 
-     if($_POST['cpf']!="")
-     {
-       $sql = "SELECT cpf FROM {$schema}gsec_citizen C WHERE C.cpf = '{$_POST['cpf']}'";
-       $res = pg_query($sql)or die("Error ".__LINE__);
-          if(pg_num_rows($res))
-          {
-            $cpf_exist = true;
-          }else{
-            $cpf_exist = false;
-          }
-     }else{ $cpf_exist = false; }
+     $info = array("status"=>"Cadastrou o cidadão", "dados"=>$_POST);
+     loggerGsec($aux['id'], "gsec_citizen", json_encode($info));
 
-
-     if(!$cpf_exist)
-     {
-           logger("Inserção","CALLCENTER", "Callcenter - Cadastro Cidadão: ".print_r($_POST, true));
-           $sql = makeSql("{$schema}gsec_citizen",$_POST,"ins","id");
-           $res = pg_query($sql)or die("<div class='text-center text-danger'>Error: ".__LINE__."<br>SQL {$sql}</div>");
-           $aux = pg_fetch_assoc($res);
-
-           $info = array("status"=>"Cadastrou o cidadão", "dados"=>$_POST);
-           loggerGsec($aux['id'], "gsec_citizen", json_encode($info));
-           header("Location: citizen_FORM.php?id={$aux['id']}");
-      }else{
-         $_SESSION['error']        = "CPF já registrado, Os dados cadastrais não foram inseridos.";
-         $_SESSION['error_return'] = $returnvars;
-         header("Location: citizen_FORM.php");
-      }
+     header("Location: citizen_FORM.php?id={$aux['id']}");
 }
 
 if($_GET['acao']=="remover")

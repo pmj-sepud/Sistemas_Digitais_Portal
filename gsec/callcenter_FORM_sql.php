@@ -5,14 +5,31 @@ require_once("../libs/php/conn.php");
 $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 $agora = now();
 
+function loggerGsec($id_orgin, $table, $info)
+{
+  $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
+  $id_user = $_SESSION['id'];
+  $agora = now();
+  $sql = "INSERT INTO {$schema}gsec_logs(id_origin, table_origin, date_added, id_user, info)
+			 VALUES ('{$id_orgin}', '{$table}', '{$agora['datatimesrv']}', '{$id_user}', '{$info}')";
+  pg_query($sql)or die("Erro ".__LINE__."<hr>".pg_last_error()."<hr>".$sql);
+}
 
 if($_POST['acao']=="atualizar")
 {
   $tab = $_POST['tabret'];
   unset($_POST['acao'],$_POST['tabret']);
   $agora = now();
-  if($_POST['active']=='f' && $_POST['date_closed']==""){ $_POST['date_closed'] = $agora['datatimesrv']; }
+
   cleanString();
+  if($_POST['active']=='f' && $_POST['date_closed']==""){
+     $_POST['date_closed'] = $agora['datatimesrv'];
+     $info = array("status"=>"<b>Finalizou o atendimento</b>", "dados"=>$_POST);
+     loggerGsec($_POST['id'], "gsec_callcenter", json_encode($info));
+  }else{
+     $info = array("status"=>"Atualizou o atendimento", "dados"=>$_POST);
+     loggerGsec($_POST['id'], "gsec_callcenter", json_encode($info));
+  }
   logger("Atualização","CALLCENTER", "Callcenter - Atualização de atendimento: ".print_r($_POST, true));
   $sql = makeSql("{$schema}gsec_callcenter",$_POST,"upd","id");
   pg_query($sql)or die("Error ".__LINE__." - Query:{$sql}");
@@ -35,6 +52,9 @@ if($_POST['acao']=="inserir")
   $sql = makeSql("{$schema}gsec_callcenter",$_POST,"ins","id");
   $res = pg_query($sql)or die("<div class='text-center text-danger'>Error: ".__LINE__."<br>SQL {$sql}</div>");
   $aux = pg_fetch_assoc($res);
+
+  $info = array("status"=>"Inseriu o atendimento");
+  loggerGsec($aux['id'], "gsec_callcenter", json_encode($info));
   header("Location: callcenter_FORM.php?id={$aux['id']}");
 }
 

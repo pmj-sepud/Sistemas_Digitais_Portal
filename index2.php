@@ -41,8 +41,14 @@
 					$subtitulo = "e testes de sistemas";
 					$modulo    = "devops";
 					break;
+			case "pncd":
+					$param 	  = "pncd";
+					$titulo    = "PNCD";
+					$subtitulo = "Combate a Dengue";
+					$modulo    = "PNCD";
+					break;
 			default:
-				header("Location: index3.php");
+				header("Location: index.php");
 				break;
 
 	}

@@ -17,14 +17,19 @@
                   	C.*,
                      T.type, T.request,
                   	CO.name as company_name, CO.acron as company_acron,
-                  	U.name  as user_added_name
+                  	U.name  as user_added_name,
+                     STC.id  as street_corner_id, STC.name as street_corner_name,
+                     MST.id  as main_street_id, MST.name as main_street_name
                   FROM {$schema}gsec_callcenter        C
-                  LEFT JOIN {$schema}company           CO ON CO.id = C.id_company
-                  LEFT JOIN {$schema}users             U  ON U.id  = C.id_user_added
-                  LEFT JOIN {$schema}gsec_request_type T  ON T.id = C.id_subject
+                  LEFT JOIN {$schema}company           CO ON  CO.id = C.id_company
+                  LEFT JOIN {$schema}users             U  ON   U.id = C.id_user_added
+                  LEFT JOIN {$schema}gsec_request_type T  ON   T.id = C.id_subject
+                  LEFT JOIN {$schema}streets          STC ON STC.id = C.id_address_corner
+                  LEFT JOIN {$schema}streets          MST ON MST.id = C.id_address
                   WHERE C.id = '{$_GET['id']}'";
       $res  = pg_query($sql)or die("<div class='text-center text-danger'>Error: ".__LINE__."<br>SQL {$sql}</div>");
       $d    = pg_fetch_assoc($res);
+      $enderecoMapa[] = $d['main_street_name'];
       logger("Acesso","GSEC - CALLCENTER", "Cadastro de atendimento - Visualização detalhada ID: {$_GET['id']}");
 
       //Fotos
@@ -42,7 +47,9 @@
       $sql  = "SELECT C.id, C.name,
                       C.rg, C.cpf, C.email,
                   	 C.phone1,C.phone2,C.phone3,C.phone4,
-                  	 S.name as street, C.num_residence_address, C.complement_residence_address, N.neighborhood
+                      C.id_residence_address, C.id_neighborhood, C.num_residence_address, C.complement_residence_address,
+                      N.neighborhood,
+                      S.name as street
                FROM {$schema}gsec_citizen C
                LEFT JOIN {$schema}streets S ON S.id = C.id_residence_address
                LEFT JOIN {$schema}neighborhood N ON N.id = C.id_neighborhood
@@ -50,8 +57,14 @@
       $resC = pg_query($sql)or die("SQL Error: ".__LINE__);
       $dC   = pg_fetch_assoc($resC);
 
+
+      if($acao == "inserir" && $dC['id_residence_address']!= "")       { $d['main_street_id']     = $dC['id_residence_address'];$d['main_street_name'] = $dC['street']; }
+      if($acao == "inserir" && $dC['id_neighborhood']!= "")            { $d['id_neighborhood']    = $dC['id_neighborhood']; }
+      if($acao == "inserir" && $dC['num_residence_address']!= "")      { $d['address_num']        = $dC['num_residence_address']; }
+      if($acao == "inserir" && $dC['complement_residence_address']!=""){ $d['address_complement'] = $dC['complement_residence_address']; }
+
       if($dC['num_residence_address']!= "")      { $dC['street'] .= ", ".$dC['num_residence_address'];  }
-      if($dC['complement_residence_address']!=""){ $dC['street'] .= " (<small class='text-muted'><i>".$dC['complement_residence_address']."</i></small>)";;}
+      if($dC['complement_residence_address']!=""){ $dC['street'] .= " (<small class='text-muted'><i>".$dC['complement_residence_address']."</i></small>)"; }
 
       if($dC['rg']  !=""){ $dPess[]="RG: ".$dC['rg'];    }
       if($dC['cpf'] !=""){ $dPess[]="CPF: ".$dC['cpf'];  }
@@ -138,6 +151,7 @@
    <? if($acao=="atualizar"){ ?>
       <li class="<?=$tab['mapa'];?>"><a href="#mapa" data-toggle="tab" ajax="false"><i class="fa fa-map-marker"></i> Mapa</a></li>
       <li class="<?=$tab['fotos'];?>"><a href="#fotos" data-toggle="tab" ajax="false"><i class="fa fa-camera"></i> Fotos <?=($qtd_fotos!=0?"<sup><span class='badge bg-success'>{$qtd_fotos}</span></sup>":"<sup class='text-muted'>(0)</sup>");?></a></li>
+      <li class="<?=$tab['historico'];?>"><a href="#historico" data-toggle="tab" ajax="false"><i class="fa fa-file-o"></i> Histórico</a></li>
    <? } ?>
 </ul>
 <div class="tab-content">
@@ -151,8 +165,17 @@
          <div class="col-md-12">
             <section class="panel box_shadow">
                <header class="panel-heading">
-                  <p class="panel-subtitle text-muted"><i>Solicitante:</i></p>
+                  <p class="panel-subtitle text-muted"><i>Requisitante:</i></p>
                   <h5 class="panel-title text-muted"><b><?=$dC['name'];?></b></h5>
+
+                  <div class='pull-right' style="margin-top:-35px">
+                     <? if(check_perm("9_37")){ ?>
+                        <button type="button" class='btn btn-sm btn-warning' data-toggle='modal' data-target='#modalFiltroTitularidade'><i class='fa fa-exchange'></i> Transferir Titularidade</button>
+                     <? }else{ ?>
+                        <button type="button" class='btn btn-sm btn-warning disabled'><i class='fa fa-exchange'></i> Transferir Titularidade</button>
+                     <? } ?>
+                  </div>
+
                   </header>
                   <div class="panel-body" style="background-color:white">
                         <div class="table-responsive">
@@ -201,6 +224,7 @@
                   <!--<option value="Prefeito"  <?=($d['origin_type']=="Prefeito"?"Selected":"");?> >Prefeito</option>-->
                   <option value="Órgão PMJ" <?=($d['origin_type']=="Órgão PMJ"?"Selected":"");?>>Órgão PMJ</option>
                   <option value="CAJ" <?=($d['origin_type']=="CAJ"?"Selected":"");?>>CAJ</option>
+                  <option value="Empresa" <?=($d['origin_type']=="Empresa"?"Selected":"");?>>Empresa</option>
                </select>
             </div>
          </div>
@@ -224,21 +248,13 @@
 
       <div class='row'>
             <div class='col-md-4'>
+
                <div class='form-group'>
                   <label class='control-label' for='id_address'>Endereço:</label>
-                  <select id="id_address" name="id_address" class="form-control select2" style="width: 100%; height:100%">
+                  <select id="id_address" name="id_address" class="form-control select2SearchStreet" style="width: 100%; height:100%">
                   <option value="">- - -</option>
                   <?
-                     $sql = "SELECT * FROM ".$schema."streets ORDER BY name ASC";
-                     $res = pg_query($sql)or die();
-                     while($s = pg_fetch_assoc($res))
-                     {
-                       if($d["id_address"] == $s["id"]){ $sel = "selected";  $enderecoMapa[] = $s['name']; }else{$sel="";}
-                       echo "<option value='".$s['id']."' ".$sel.">".$s['name']."</option>";
-
-                       if($d["id_address_corner"] == $s["id"]){ $selC = "selected";}else{$selC="";}
-                       $optCorner .= "<option value='".$s['id']."' ".$selC.">".$s['name']."</option>";
-                     }
+                     if($d['main_street_id'] != "" && $d['main_street_name']!=""){ echo "<option value='{$d['main_street_id']}' selected>{$d['main_street_name']}</option>"; }
                   ?>
                   </select>
                </div>
@@ -283,11 +299,12 @@
          <div class='col-md-4'>
             <div class='form-group'>
                <label class='control-label' for='id_address_corner'>Esquina com:</label>
-               <select id="id_address_corner" name="id_address_corner" class="form-control select2" style="width: 100%; height:100%">
-                <option value="">- - -</option>
-                <?
-                  echo $optCorner;
-                ?>
+               <select id="id_address_corner" name="id_address_corner" class="form-control select2SearchStreet" style="width: 100%; height:100%">
+                   <option value="">- - -</option>
+                   <?
+                     if($d['street_corner_id'] != "" && $d['street_corner_name'] != ""){ echo "<option value='{$d['street_corner_id']}' selected>{$d['street_corner_name']}</option>"; }
+                     //echo $optCorner;
+                   ?>
                </select>
 
             </div>
@@ -305,32 +322,34 @@
             <div class='form-group'>
                <label class='control-label' for='id_subject'>Solicitação:</label>
                <?
-
-               if($_SESSION['id']!=1){
-                     $sql = "SELECT * FROM {$schema}gsec_request_type
-                             WHERE id_company = '{$_SESSION['id_company']}' OR id_company_father = '{$_SESSION['id_company_father']}'
-                             ORDER BY type DESC, request ASC";
-                     $res = pg_query($sql)or die("<div class='text-center text-danger'>Error: ".__LINE__."<br>SQL {$sql}</div>");
-                     while($t = pg_fetch_assoc($res)){
-                        $opttype[$t['type']][$t['request']] = $t['id'];
+                     if($acao == "inserir"){
+                           $sql = "SELECT * FROM {$schema}gsec_request_type
+                                   WHERE id_company = '{$_SESSION['id_company']}' OR id_company_father = '{$_SESSION['id_company_father']}'
+                                   ORDER BY type DESC, request ASC";
+                           $res = pg_query($sql)or die("<div class='text-center text-danger'>Error: ".__LINE__."<br>SQL {$sql}</div>");
+                           while($t = pg_fetch_assoc($res)){ $opttype[$t['type']][$t['request']] = $t['id']; }
+                     }else{
+                           //id_company or id_company_father da solicitação original
+                           $sql = "SELECT id_company, id_company_father
+                                   FROM {$schema}gsec_request_type
+                                   WHERE id = '{$d['id_subject']}'";
+                           $res = pg_query($sql)or die("Query error ".__LINE__);
+                           $aux = pg_fetch_assoc($res);
+                           if($aux['id_company']!="")
+                           {
+                              $sql = "SELECT * FROM {$schema}gsec_request_type
+                                       WHERE id_company = '{$aux['id_company']}'
+                                       ORDER BY type DESC, request ASC";
+                           }else{
+                              $sql = "SELECT * FROM {$schema}gsec_request_type
+                                       WHERE id_company_father = '{$aux['id_company_father']}'
+                                       ORDER BY type DESC, request ASC";
+                           }
+                           $res = pg_query($sql)or die("<div class='text-center text-danger'>Error: ".__LINE__."<br>SQL {$sql}</div>");
+                           while($t = pg_fetch_assoc($res)){ $opttype[$t['type']][$t['request']] = $t['id']; }
                      }
-               }else
-               {
-                  $sql = "SELECT * FROM {$schema}gsec_request_type
-                          WHERE id_company = '{$_SESSION['id_company']}'
-                          ORDER BY type DESC, request ASC";
-                  $res = pg_query($sql)or die("<div class='text-center text-danger'>Error: ".__LINE__."<br>SQL {$sql}</div>");
-                  if(pg_num_rows($res))
-                  {
-                     while($t = pg_fetch_assoc($res)){ $opttype[$t['type']][$t['request']] = $t['id'];}
-                  }else{
-                     $sql = "SELECT * FROM {$schema}gsec_request_type
-                             WHERE id_company_father = '{$_SESSION['id_company_father']}'
-                             ORDER BY type DESC, request ASC";
-                     $res = pg_query($sql)or die("<div class='text-center text-danger'>Error: ".__LINE__."<br>SQL {$sql}</div>");
-                     while($t = pg_fetch_assoc($res)){ $opttype[$t['type']][$t['request']] = $t['id']; }
-                  }
-               }
+
+
                ?>
                <select class='form-control select2' id='id_subject' name='id_subject' required>
                   <option value="">- - -</option>
@@ -377,6 +396,7 @@
                   <option value="Em execução" <?=($d['status']=="Em execução"?"Selected":"");?>                  >Em execução</option>
                </optgroup>
                <optgroup label="Fechado">
+                  <option value="Não procede" <?=($d['status']=="Não procede"?"Selected":"");?>>Não procede</option>
                   <option value="Executado"   <?=($d['status']=="Executado"?"Selected":"");?>  >Executado</option>
                   <option value="Respondido"  <?=($d['status']=="Respondido"?"Selected":"");?> >Respondido</option>
                   <option value="Encaminhado" <?=($d['status']=="Encaminhado"?"Selected":"");?>>Encaminhado</option>
@@ -427,7 +447,7 @@
             <?
             if($acao == "atualizar")
             {
-               echo "<i class='text-muted'>Inserido por</i> <b>{$d['user_added_name']}</b>";
+               echo "<i class='text-muted'>Inserido por</i> <b>{$d['user_added_name']}</b><br><small>{$d['company_acron']} - {$d['company_name']}</small>";
             }
             ?>
          </div>
@@ -451,6 +471,36 @@
                }
             } ?>
       </div>
+      <script>
+      $('.select2').select2({
+        language: {
+              noResults: function() {
+                return 'Nenhum resultado encontrado.';
+              }
+            }
+      });
+
+      $('.select2SearchStreet').select2({
+        language: "pt-BR",
+        minimumInputLength: 3,
+        cache: true,
+        allowClear: true,
+        placeholder: "Pesquisar logradouro",
+        ajax: {
+          url: 'gsec/searchstreet.php',
+          dataType: 'json',
+          delay: 250,
+          data: function (params) { return { searchTerm: params.term }; },
+          processResults: function (data, params) {
+             return {
+                results: data.results
+            };
+          }
+      }
+      });
+
+
+      </script>
 </form>
 
    </div>
@@ -606,6 +656,7 @@
             </div>
             <div class="row" style="margin-top:10px">
                <div class="col-md-12 text-center">
+                     <a href='gsec/callcenter.php'><button type='button' class='btn btn-default loading'>Voltar</button></a>
                      <button type='button' class='btn btn-primary loading' onclick="$('#tabret').val('mapa');$('#bt_atualizar').click();">Atualizar coordenadas</button>
                </div>
             </div>
@@ -613,6 +664,51 @@
       </div>
 <!---------------------------------------------------------------------->
 <!---------------------------------------------------------------------->
+   </div>
+   <div id="historico" class="tab-pane <?=$tab['historico'];?>">
+   <!---------------------------------------------------------------------->
+   <!---------------------------------------------------------------------->
+   <?
+         $sql = "SELECT U.name, C.acron as company_acron, L.date_added, L.info->'status' as status
+                 FROM {$schema}gsec_logs L
+                 JOIN {$schema}users U ON U.id = L.id_user
+                 JOIN {$schema}company C ON C.id = U.id_company
+                 WHERE L.table_origin = 'gsec_callcenter' AND L.id_origin = {$_GET['id']}
+                 ORDER BY L.date_added ASC";
+         $res = pg_query($sql)or die("SQL Error: ".__LINE__."<br>Query: {$sql}");
+         $c=1;
+         if(pg_num_rows($res))
+         {
+            echo "<table class='table table-striped table-condensed'>";
+            echo "<thead><tr>";
+            echo "<th>#</th>";
+            echo "<th>Data</th>";
+            echo "<th>Nome</th>";
+            echo "<th>Setor</th>";
+            echo "<th>Ação</th>";
+            echo "<th>Dados</th>";
+            echo "</tr></thead>";
+            echo "<tbody>";
+            while($hist = pg_fetch_assoc($res))
+            {
+               echo "<tr>";
+                  echo "<td>".$c++."</td>";
+                  echo "<td>".formataData($hist['date_added'],1)."</td>";
+                  echo "<td>{$hist['name']}</td>";
+                  echo "<td>{$hist['company_acron']}</td>";
+                  echo "<td>".json_decode($hist['status'])."</td>";
+                  echo "<td><i class='fa fa-search'></i></td>";
+               echo "</tr>";
+            }
+            echo "</tbody>";
+            echo "</table>";
+         }else{
+            echo "<div class='alert alert-info'>Nenhuma informação de histórico registrado para este atendimento.</div>";
+         }
+
+   ?>
+   <!---------------------------------------------------------------------->
+   <!---------------------------------------------------------------------->
    </div>
 </div>
 </div>
@@ -627,7 +723,53 @@
 </section>
 
 
+<div class="modal fade"  id="modalFiltroTitularidade" z-index="-1" role="dialog" aria-labelledby="modalFiltroTitularidade" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+   <div class="modal-content">
+      <div class="modal-header">
+       <h5 class="modal-title" id="exampleModalLabel">Filtros de pesquisa:</h5>
+       <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top:-20px">
+          <span aria-hidden="true">&times;</span>
+       </button>
+      </div>
+      <form id="form_filtro_troca_titularidade" action="gsec/change_owner.php" method="post">
+      <div class="modal-body">
+         <select class="form-control" id="id_new_citizen" name="id_new_citizen">
+         </select>
+         <input type='hidden' name="id_callcenter_change_new_citizen" id="id_callcenter_change_new_citizen" value='<?=$_GET['id'];?>' />
+      </div>
+
+
+      <div class="modal-footer">
+       <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+       <button type="button" class="btn btn-danger disabled" id="bt_submit_modal">Trocar Titularidade</button>
+      </div>
+      </form>
+      <script>
+      $('#id_new_citizen').change(function(){
+         $('#bt_submit_modal').removeClass('disabled');
+      })
+      $("#bt_submit_modal").click(function(){
+          $('#modalFiltroTitularidade').modal('hide');
+          $('body').removeClass('modal-open');
+          $('.modal-backdrop').remove();
+          $("#form_filtro_troca_titularidade").submit();
+      });
+      </script>
+   </div>
+  </div>
+</div>
+
+
+
+
 <script>
+
+
+
+//$('#id_new_citizen').select2({ dropdownParent: $('#modalFiltroTitularidade')});
+
+
 
    $("#bt_foto").click(function(){ $("#arqimg").click(); });
 
@@ -728,6 +870,25 @@
 <script>
 
 $(document).ready( function () {
+
+$('#id_new_citizen').select2({
+ language: "pt-BR",
+ minimumInputLength: 3,
+ cache: true,
+ allowClear: true,
+ placeholder: "Pesquise pelo nome do cidadão ou da empresa.",
+ ajax: {
+    url: '../gsec/search_citizen.php',
+    dataType: 'json',
+    delay: 250,
+    data: function (params) { return { searchTerm: params.term }; },
+    processResults: function (data, params) {
+      return {
+          results: data.results
+      };
+    }
+}
+});
 
 var imgsrc;
 
@@ -835,60 +996,17 @@ $("#bt_localizar").click(function(){
             sortAscending:  ": Ordem ascendente.",
             sortDescending: ": Ordem decrescente."
         }
-    }
+      }
     });
+
 });
 
-
 $('#cpf').mask('000.000.000-00', {reverse: true});
-//$("#rg").mask('99.999.99-[9|S]');
 $("#phone1").mask("(00) 00000-0000");
 $("#phone2").mask("(00) 0 0000-0000");
 $("#phone3").mask("(00) 0 0000-0000");
 
 
-
- function matchStart(params, data) {
-   if($.trim(params.term) === ''){ return data;}
-   if (typeof data.children === 'undefined'){ return null;}
-   var filteredChildren = [];
-   $.each(data.children, function (idx, child) {
-     if (child.text.toUpperCase().indexOf(params.term.toUpperCase()) == 0){ filteredChildren.push(child); }
-   });
-   if (filteredChildren.length) {
-     var modifiedData = $.extend({}, data, true);
-     modifiedData.children = filteredChildren;
-     return modifiedData;
-   }
-   return null;
- }
-
-$('.select2optgroup').select2({ matcher: matchStart});
-
-
-$('.select2').select2({
-  language: {
-        noResults: function() {
-          return 'Nenhum resultado encontrado.';
-        }
-      }
-});
-//$('.select2').select2();
-
-//$('#id_citizen').on("select2-highlight", function(e) { //$("#bt_cadastrar").addClass("disabled");});
-
-/*
-$('#id_citizen').select2({
-      placeholder: 'Pesquise por um nome, rg, cpf, cnpj ou email, se não encontrar, o botão para adicionar um novo será liberado.',
-      tag:true,
-      language: {
-		       noResults: function() {
-                //$("#bt_cadastrar").removeClass("disabled");
-               return "Não encontrado, efetue o cadastro.";
-	        }
-      }
-});
-*/
 $(".loading").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> Aguarde");});
 $(".loading3").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> Aguarde, pesquisando localização").addClass("disabled");});
 $(".loadingfoto").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> Enviando...").addClass("disabled");});

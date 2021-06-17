@@ -6,12 +6,11 @@ $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
 
 if(isset($_GET["searchTerm"]))
 {
-   $sql = "SELECT id, name as text FROM {$schema}streets WHERE name ilike '%{$_GET['searchTerm']}%' ORDER BY name ASC LIMIT 30";
+   $sql = "SELECT id, name as text FROM {$schema}gsec_citizen WHERE name ilike '%{$_GET['searchTerm']}%' ORDER BY name ASC";
    $res = pg_query($sql)or die();
    while($d = pg_fetch_assoc($res)){ $return[] = $d; }
 }else{
-   $return[] = array("text"=>"Digite alguma coisa para iniciar a pesquisa");
+   $return[] = array("text"=>"Digite algo para iniciar a pesquisa.");
 }
-
 echo json_encode(array("results" => $return));
 ?>

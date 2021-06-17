@@ -148,7 +148,7 @@
 
 
 											</fieldset>
-
+<!--
 											<hr class="dotted tall">
 											<h4 class="mb-xlg">Informações de acesso</h4>
 											<fieldset class="mb-xl">
@@ -173,20 +173,19 @@
 
 
 											</fieldset>
-
+-->
 
 											<div class="panel-footer" style="height:60px">
 												<div class="row pull-right">
 														<div class="col-md-12"  style="margin-bottom:20px">
-                            <input type="hidden" name="acao" value="inserir" />
-                            <a href="usuarios/index.php"><button type="button" class="btn btn-default loading">Voltar</button></a>
-
-                            <?
-                                if(check_perm("1_1","C")){
-                                  echo "<button type='submit' class='btn btn-primary loading'>Inserir</button>";
-                                }
-                            ?>
-
+                                              <input type="hidden" name="acao" value="inserir" />
+                                              <input type="hidden" name="active" value="true" />
+                                              <a href="usuarios/index.php"><button type="button" class="btn btn-default loading">Voltar</button></a>
+                                              <?
+                                                  if(check_perm("1_1","C")){
+                                                    echo "<button type='submit' class='btn btn-primary loading'>Inserir</button>";
+                                                  }
+                                              ?>
 													</div>
 												</div>
 											</div>

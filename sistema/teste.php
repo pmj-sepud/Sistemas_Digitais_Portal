@@ -24,6 +24,35 @@ $agora  = now();
 
   <div class="row">
       <div class="col-md-12">
+
+<?
+   print_r_pre("Remote Addreess: ".$_SERVER['REMOTE_ADDR']);
+   $arr = json_encode(array("Name"=>"Jonathan Canfield Sniecikoski", "authip"=>"10.45.145.37"));
+   print_r_pre($arr);
+   $arr = codificar($arr,'c');
+   print_r_pre($arr);
+
+
+
+
+   echo "<hr>";
+?>
+
+
+         </select>
+      </div>
+</div>
+
+  <div class="row">
+      <div class="col-md-6">
+         <select class="js-data-example-ajax">
+         <option value="2393">MAX COLIN</option>
+         </select>
+      </div>
+</div>
+
+  <div class="row">
+      <div class="col-md-12">
          <table id="tabela" class="table table-hover table-condensed" style="width:100%">
                  <thead>
                      <tr>
@@ -566,38 +595,42 @@ echo "<code>&lt;div class='col-md-12'&gt;
 
 </section>
 <script>
-$(document).ready(function() {
-    var printCounter = 0;
 
-    // Append a caption to the table before the DataTables initialisation
-    $('#tabela').append('<caption style="caption-side: bottom">A fictional company\'s staff table.</caption>');
+$(document).ready(function() {
+
+
+
+
+
+   $('.js-data-example-ajax').select2({
+     language: "pt-BR",
+     minimumInputLength: 3,
+     allowClear: true,
+     placeholder: "Pesquisar logradouro",
+     ajax: {
+       url: 'sistema/debug.php',
+       dataType: 'json',
+       delay: 250,
+       data: function (params) { return { searchTerm: params.term }; },
+       processResults: function (data, params) {
+          return {
+             results: data.results
+         };
+       }
+    }
+    });
 
     $('#tabela').DataTable( {
         dom: 'Bfrtip',
         buttons: [
-            'copy',
-            {
-                extend: 'excel',
-                messageTop: 'The information in this table is copyright to Sirius Cybernetics Corp.'
-            },
-            {
-                extend: 'pdf',
-                messageBottom: null
-            },
-            {
-                extend: 'print',
-                messageTop: function () {
-                    printCounter++;
+           {
+             extend: 'copyHtml5',
+             text: 'Copiar'
+           },
+            'excelHtml5',
+            'csvHtml5',
+            'pdfHtml5',
 
-                    if ( printCounter === 1 ) {
-                        return 'This is the first time you have printed this document.';
-                    }
-                    else {
-                        return 'You have printed this document '+printCounter+' times';
-                    }
-                },
-                messageBottom: null
-            }
         ]
     } );
 } );

@@ -80,7 +80,13 @@
   //print_r_pre($vet);
 
 ?>
+<style>
+#myMap{
+min-height: 700px;
 
+/*height: calc(100% - 10px) !important;*/
+}
+</style>
 <section role="main" class="content-body">
   <header class="page-header">
     <h2>Mapa da Reginal</h2>
@@ -114,7 +120,7 @@
                   <?
 
                   ?>
-                     <div id="myMap" style='position:relative;width:100%;height:800px;'></div>
+                     <div id="myMap" style='position:relative;width:100%;'></div>
                </div>
             </div>
          </div>

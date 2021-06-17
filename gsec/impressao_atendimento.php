@@ -150,7 +150,7 @@
           </div>
           <div class='row'>
             <div class='col-md-12 text-center'>
-               <h3><small>Protocolo nº: </small><b><?=$protocolo;?></b> - <?=$d['type']." : ".$d['request'];?><br><small><?=formataData($d['date_added'],1);?></small></h3>
+               <h3><small>Protocolo nº: </small><b><?=$protocolo;?></b> - <?=$d['type']." : ".$d['request'];?><br><b><?=formataData($d['date_added'],1);?></b></h3>
             </div>
           </div>
           <div class="panel-body">

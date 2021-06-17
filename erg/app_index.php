@@ -107,33 +107,28 @@
         <a href='auth/logout.php' ajax="false"><button type="button" class="btn btn-default">Sair</button></a>
     </div>
   </header>
-								<section class="panel box_shadow">
+								<section class="panel box_shadow" style='position: absolute;top: 18px;right: 10px;'>
 
 									<div class="panel-body">
-                    <div class="row" style="margin-bottom:10px">
+                              <div class="row" style="margin-bottom:10px">
+                                 <div class="col-xs-12 text-center">
+                                    <button id="bt_refresh" style='' type='button' class='btn btn-lg btn-primary'><i id="bt_refresh_icon" class='fa fa-refresh'></i></button>
+                                      <? if($_GET['filtro']=="todos"){
+                                              echo "<a href='erg/app_index.php'>
+                                                    <button  style='' type='button' class='btn btn-lg btn-info loading'><i class='fa fa-search'></i> Ativos</button>
+                                                    </a>";
+                                         }else{
+                                              echo "<a href='erg/app_index.php?filtro=todos'>
+                                                    <button  style='' type='button' class='btn btn-lg btn-info loading'><i class='fa fa-search'></i> Todos</button>
+                                                    </a>";
+                                         }
+                                      ?>
+                                      <a href="erg/app_FORM.php">
+                                          <button  style="" type="button" class="btn btn-lg btn-success">Novo</button>
+                                      </a>
+                                   </div>
+                               </div>
 
-                        <div class="col-xs-12 text-center">
-
-                          <button id="bt_refresh" style='' type='button' class='btn btn-lg btn-primary'><i id="bt_refresh_icon" class='fa fa-refresh'></i></button>
-
-                          <? if($_GET['filtro']=="todos"){
-                                  echo "<a href='erg/app_index.php'>
-                                        <button  style='' type='button' class='btn btn-lg btn-info loading'><i class='fa fa-search'></i> Ativos</button>
-                                        </a>";
-                             }else{
-                                  echo "<a href='erg/app_index.php?filtro=todos'>
-                                        <button  style='' type='button' class='btn btn-lg btn-info loading'><i class='fa fa-search'></i> Todos</button>
-                                        </a>";
-                             }
-                          ?>
-
-                          <a href="erg/app_FORM.php">
-                              <button  style="" type="button" class="btn btn-lg btn-success">Novo</button>
-                          </a>
-                      </div>
-
-
-                    </div>
                     <div class='row'>
 
                       <div class="col-xs-6">

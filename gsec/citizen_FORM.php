@@ -11,10 +11,12 @@
       $sql  = "SELECT
                   	C.*,
                   	CO.name as company_name, CO.acron as company_acron,
-                  	U.name  as user_added_name
+                  	U.name  as user_added_name,
+                     L.username as app_username, L.status as app_status, L.enable_login as app_enable_login
                   FROM {$schema}gsec_citizen C
                   LEFT JOIN {$schema}company CO  ON CO.id = C.id_company
                   LEFT JOIN {$schema}users U     ON U.id  = C.id_user_added
+                  LEFT JOIN {$schema}gsec_citizen_login L ON L.id_citizen = C.id
                   WHERE C.id = '{$_GET['id']}'";
       $res  = pg_query($sql)or die("<div class='text-center text-danger'>Error: ".__LINE__."<br>SQL {$sql}</div>");
       $d    = pg_fetch_assoc($res);
@@ -45,7 +47,14 @@
   }else{
       $acao = "inserir";
       logger("Acesso","GSEC - CALLCENTER", "Cadastro de cidadão - Novo cadastro");
+      if(isset($_SESSION['error_return']))
+      {
+         $d = $_SESSION['error_return'];
+         unset($_SESSION['error_return']);
+      }
   }
+
+if($_GET['nav']!=""){ $nav[$_GET['nav']] = "active"; }else{$nav['cadastro']="active";}
 
 ?>
 
@@ -90,17 +99,23 @@
 						<div class="col-md-12">
 							<div class="tabs">
 								<ul class="nav nav-tabs">
-									<li class="active">
+									<li class="<?=$nav['cadastro'];?>">
 										<a href="#cadastro" data-toggle="tab" ajax="false"><i class="fa fa-user"></i> Dados Cadastrais</a>
 									</li>
                            <? if($acao=="atualizar"){ ?>
 									<li>
 										<a href="#solicitacoes" data-toggle="tab" ajax="false"><i class="fa fa-file-text-o"></i><?=($qtdSolicitacoes!=0?" <sup class='text-success'><b>({$qtdSolicitacoes})</b></sup>":"");?> Solicitações</a>
 									</li>
+                           <li class="<?=$nav['login'];?>">
+										<a href="#login" data-toggle="tab" ajax="false"><i class="fa fa-sign-in"></i> Acesso APP</a>
+									</li>
+                           <li class="<?=$nav['historico'];?>">
+										<a href="#historico" data-toggle="tab" ajax="false"><i class="fa fa-file-o"></i> Histórico</a>
+									</li>
                            <? } ?>
 								</ul>
 								<div class="tab-content">
-									<div id="cadastro" class="tab-pane active">
+									<div id="cadastro" class="tab-pane <?=$nav['cadastro'];?>">
 <!------------------------------------------------------------------------------------------------------------>
 <!------------------------------------------------------------------------------------------------------------>
 <form action="gsec/citizen_FORM_sql.php" method="post">
@@ -178,7 +193,7 @@
    <div class='col-md-4'>
       <div class='form-group'>
          <label class='control-label' for='id_residence_address'>Endereço Residêncial:</label>
-         <select id="id_residence_address" name="id_residence_address" class="form-control select2" style="width: 100%; height:100%">
+         <select id="id_residence_address" name="id_residence_address" class="form-control" style="width: 100%; height:100%">
           <option value="">- - -</option>
           <?
              $sql = "SELECT * FROM ".$schema."streets ORDER BY name ASC";
@@ -239,7 +254,8 @@
       <?
             if($acao=="atualizar"){
                echo "Inserido em ".formataData($d['date_added'],1);
-               echo "<br>Por {$d['user_added_name']}<br>Setor: {$d['company_name']}";
+               if($d['origin']=="Sistema"){ echo "<br>Por {$d['user_added_name']}<br>Setor: {$d['company_name']}"; }
+               else{ echo "<br><b>Autocadastro via APLICATIVO</b>"; }
             }
       ?>
    </div>
@@ -257,7 +273,6 @@
                echo " <button type='submit' class='btn btn-primary loading'>Atualizar</button>";
             }else{
                echo " <button type='submit' class='btn btn-success loading'>Inserir</button>";
-               echo "<input type='hidden' id='date_added' name='date_added' value='{$agora['datatimesrv']}'>";
             }
          ?>
    </div>
@@ -333,6 +348,117 @@
 <!------------------------------------------------------------------------------------------------------------>
 <!------------------------------------------------------------------------------------------------------------>
 									</div>
+<!------------------------------------------------------------------------------------------------------------>
+<!------------------------------------------------------------------------------------------------------------>
+<div id="login" class="tab-pane <?=$nav['login'];?>">
+   <? if($_SESSION['id']==1){ ?>
+<form action="gsec/citizen_FORM_login_sql.php" method="post" autocomplete="off" id="login-form">
+
+
+      <div class="row">
+         <div class='col-md-4'>
+            <div class='form-group'>
+               <label class='control-label' for='username'>Login:</label>
+               <input type='text' class='form-control' name='username' id='username' placeholder='Endereço de e-mail' value='<?=$d['app_username'];?>'  autocomplete="off"
+                      readonly
+                      onfocus="if(this.hasAttribute('readonly')){this.removeAttribute('readonly');this.blur();this.focus();}"
+                      onmouseover="this.style.cursor='pointer'"
+               >
+            </div>
+         </div>
+         <div class='col-md-4'>
+            <div class='form-group'>
+               <label class='control-label' for='password'>Senha:</label>
+               <input type='password' class='form-control' name='password' id='password' value='' autocomplete="off" autocomplete="new-password"
+                      readonly
+                      onfocus="if(this.hasAttribute('readonly')){this.removeAttribute('readonly');this.blur();this.focus();}"
+                      onmouseover="this.style.cursor='pointer'">
+            </div>
+         </div>
+      </div>
+      <div class="row">
+         <div class='col-md-4'>
+            <div class='form-group'>
+               <label class='control-label' for='status'>Status:</label>
+                  <select id="status" name="status" class="form-control select2" style="width: 100%; height:100%">
+                      <option value="Solicitado" <?=($d['app_status']=="Solicitado"?"selected":"");?>>Acesso solicitado</option>
+                      <option value="Concedido"  <?=($d['app_status']=="Concedido"?"selected":"");?> >Acesso concedido</option>
+                      <option value="Bloqueado"  <?=($d['app_status']=="Bloqueado"?"selected":"");?> >Acesso bloqueado</option>
+                  </select>
+            </div>
+         </div>
+
+      </div>
+
+      <div class="row" style="margin-top:10px">
+         <div class='col-md-4'>
+            <div class='form-group'>
+               <a href='gsec/citizen.php'><button type='button' class='btn btn-default loading'>Voltar</button></a>
+               <button type='submit' class='btn btn-primary loading'>Atualizar</button>
+                <input type='hidden' name='id_citizen'         value='<?=$d['id'];?>'>
+               <input type='hidden' name='novoacesso' value='<?=($d['app_username']==""?"sim":"nao");?>'>
+            </div>
+         </div>
+      </div>
+
+</form>
+<script>
+
+</script>
+      <div class="row">
+            <div class='col-md-12'>
+               <h5><i><b>Observações:</b> Esta área é para configuração e liberação do acesso via aplicativo de zeladoria de Joinville.</i></h6>
+            </div>
+      </div>
+   <? }else{
+      echo "<div class='alert alert-info'>Auguarde, em desenvolvimento.</div>";
+   }?>
+</div>
+<!------------------------------------------------------------------------------------------------------------>
+<!------------------------------------------------------------------------------------------------------------>
+<div id="historico" class="tab-pane <?=$nav['historico'];?>">
+   <?
+         $sql = "SELECT U.name, C.acron as company_acron, L.date_added, L.info->'status' as status
+                 FROM {$schema}gsec_logs L
+                 JOIN {$schema}users U ON U.id = L.id_user
+                 JOIN {$schema}company C ON C.id = U.id_company
+                 WHERE L.table_origin = 'gsec_citizen' AND L.id_origin = {$_GET['id']}
+                 ORDER BY L.date_added ASC";
+         $res = pg_query($sql)or die("SQL Error: ".__LINE__."<br>Query: {$sql}");
+         $c=1;
+         if(pg_num_rows($res))
+         {
+            echo "<table class='table table-striped table-condensed'>";
+            echo "<thead><tr>";
+            echo "<th>#</th>";
+            echo "<th>Data</th>";
+            echo "<th>Nome</th>";
+            echo "<th>Setor</th>";
+            echo "<th>Ação</th>";
+            echo "<th>Dados</th>";
+            echo "</tr></thead>";
+            echo "<tbody>";
+            while($hist = pg_fetch_assoc($res))
+            {
+               echo "<tr>";
+                  echo "<td>".$c++."</td>";
+                  echo "<td>".formataData($hist['date_added'],1)."</td>";
+                  echo "<td>{$hist['name']}</td>";
+                  echo "<td>{$hist['company_acron']}</td>";
+                  echo "<td>".json_decode($hist['status'])."</td>";
+                  echo "<td><i class='fa fa-search'></i></td>";
+               echo "</tr>";
+            }
+            echo "</tbody>";
+            echo "</table>";
+         }else{
+            echo "<div class='alert alert-info'>Nenhuma informação de histórico registrado para este atendimento.</div>";
+         }
+
+   ?>
+</div>
+<!------------------------------------------------------------------------------------------------------------>
+<!------------------------------------------------------------------------------------------------------------>
 <? } ?>
 								</div>
 							</div>
@@ -408,7 +534,7 @@ $("#phone4").mask("(00) 0000-0000");
 
 
 
-$('.select2').select2();
+$('#id_residence_address').select2();
 $(".loading").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> Aguarde");});
 $(".loading3").click(function(){ $(this).html("<i class=\"fa fa-spinner fa-spin\"></i> Aguarde").addClass("disabled");});
 </script>

@@ -5,41 +5,29 @@
   $schema = ($_SESSION['schema']?$_SESSION['schema'].".":"");
   $agora = now();
 
-  logger("Acesso","GSEC - CALLCENTER", "Cidadão - Visualização geral");
+  logger("Acesso","GSEC - EQUIPES", "Equipes - Visualização geral");
 
    $sql  = "SELECT
-                C.*,
-                CO.name as company_name, CO.acron as company_acron,
-                U.name  as user_added_name
-             FROM {$schema}gsec_citizen C
-             LEFT JOIN {$schema}company CO  ON CO.id = C.id_company
-             LEFT JOIN {$schema}users U     ON U.id  = C.id_user_added
-             ORDER BY C.name ASC";
+                W.*,
+                (SELECT count(*) FROM sepud.gsec_workteam_members M WHERE M.id_workteam = W.id) as qtd_members
+             FROM {$schema}gsec_workteam W
+             WHERE W.id_company = '{$_SESSION['id_company']}'
+             ORDER BY W.name ASC";
   $res = pg_query($sql)or die("<div class='text-center'>SQL error ".__LINE__."<br>SQL: ".$sql."</div>");
 ?>
 <style>
 .link:hover{
    cursor: pointer;
 }
-/*
-.dataTables_filter {
-   width: 50%;
-   float: right;
-   text-align: right;
-}
-.dataTables_wrapper .dt-buttons {
-  float:right;
-}
-*/
+
 </style>
 <section role="main" class="content-body">
       <header class="page-header">
-       <h2>Cadastro do cidadão</h2>
+       <h2>Equipes de trabalho</h2>
        <div class="right-wrapper pull-right" style='margin-right:15px;'>
          <ol class="breadcrumbs">
            <li><a href="index_sistema.php"><i class="fa fa-home"></i></a></li>
-           <li><span class='gsec/callcenter_index.php'>Central de atendimentos</span></li>
-           <li><span class='#'>Cidadão</span></li>
+           <li><span class='#'>Equipes de trabalho</span></li>
          </ol>
        </div>
       </header>
@@ -52,7 +40,7 @@
                   <?
                   //echo "<a href='gsec/callcenter_FORM.php'><button type='button' class='btn btn-success'><i class='fa fa-laptop'></i><sup><i class='fa fa-plus'></i></sup> Novo atendimento</button></a>";
                   //echo " <a href='gsec/citizen.php'><button type='button' class='btn btn-primary'><i class='fa fa-user-plus'></i> Novo cidadão</button></a>";
-                     echo " <a href='gsec/citizen_FORM.php'><button type='button' class='btn btn-success'><i class='fa fa-user-plus'></i> Novo cidadão</button></a>";
+                     echo " <a href='gsec/workteam_FORM.php'><button type='button' class='btn btn-success'><i class='fa fa-users'></i><sup><i class='fa fa-plus'></i></sup> Novo time de trabalho</button></a>";
                   ?>
                   </div>
                </header>
@@ -62,15 +50,15 @@
                   <div class="row">
                      <div class="col-md-12">
                         <?
-                           if(pg_num_rows($res))
+                           if(isset($res) && pg_num_rows($res))
                            {
                               echo "<table class='table table-hover' id='tabela'>";
                               echo "<thead class='thead-light'><tr>";
-                                 echo "<th>#</th>";
-                                 echo "<th>Cidadão</th>";
-                                 echo "<th>RG/CPF/CNPJ</th>";
-                                 echo "<th>Origem</th>";
-                                 echo "<th>Cadastrado em</th>";
+                                 echo "<th width='10px'>#</th>";
+                                 echo "<th>Time</th>";
+                                 echo "<th>Tipo</th>";
+                                 echo "<th>Descrição</th>";
+                                 echo "<th>Membros/Equipamentos</th>";
                               echo "</tr></thead>";
                               echo "<tbody>";
                               while($d = pg_fetch_assoc($res))
@@ -79,42 +67,15 @@
                                  echo "<tr class='link' id='{$d['id']}'>";
                                        echo "<td class='text-muted'><small>{$d['id']}</small></td>";
                                        echo "<td>{$d['name']}</td>";
-                                       echo "<td>";
-                                             if($d['rg']   !=""){ $str[]="<sup class='text-muted'>RG:</sup>".str_replace(".","",str_replace("-","",$d['rg'])); }
-                                             if($d['cpf']  !=""){ $str[]="<sup class='text-muted'>CPF:</sup>".str_replace(".","",str_replace("-","",$d['cpf'])); }
-                                             if($d['cnpj'] !=""){ $str[]="<sup class='text-muted'>CNPJ:</sup>".str_replace(".","",str_replace("/","",$d['cnpj'])); }
-                                             if(isset($str)){ echo implode(", ", $str); }
-                                       echo "</td>";
-                                       if($d['origin']=="Sistema"){ echo "<td>{$d['company_acron']}</td>";               }
-                                                              else{ echo "<td class='text-warning'><b>{$d['origin']}</b></td>"; }
-
-                                       echo "<td>".formataData($d['date_added'],1);
-                                       echo " <sup>(".humanTiming($d['date_added']).")</sup></td>";
+                                       echo "<td>{$d['type']}</td>";
+                                       echo "<td>{$d['description']}</td>";
+                                       echo "<td>{$d['qtd_members']}</td>";
                                  echo "</tr>";
                               }
                               echo "</tbody>";
                               echo "</table>";
-                              /*
-                              Array
-(
- [id] => 1
- [name] => Jonathan Sniecikoski
- [phone1] => 991876457
- [phone2] =>
- [phone3] =>
- [id_residence_address] =>
- [num_residence_address] =>
- [complement_residence_address] =>
- [cpf] =>
- [rg] =>
- [date_added] => 2021-03-15 15:44:33
- [cnpj] =>
- [observations] =>
- [email] =>
-)
-                              */
                            }else{
-                              echo "<div class='alert alert-warning'>Nenhum cidadão cadastrado.</div>";
+                              echo "<div class='alert alert-warning'>Nenhum time de trabalho cadastrado cadastrado.</div>";
                            }
                         ?>
                      </div>
@@ -129,7 +90,7 @@
 
 $(".link").click(function(){
    var id = $(this).attr("id");
-   $('#wrap').load("gsec/citizen_FORM.php?id="+id);
+   $('#wrap').load("gsec/workteam_FORM.php?id="+id);
 })
 
 $(document).ready( function () {

@@ -45,15 +45,15 @@ logger("Acesso","Logs");
 <table class="table table-striped" id="tabela_dinamica">
 	<thead>
 		<tr>
-			<th width="300px"><span class="text-weight-normal text-sm">Usuário</span></th>
-			<th width="180px"><span class="text-weight-normal text-sm">Data</span></th>
+			<th>Usuário</th>
+			<th>Data</th>
 	<!--		<th><span class="text-weight-normal text-sm">IP</span></th>-->
-			<th width="180px"><span class="text-weight-normal text-sm">Módulo</span></th>
-			<th width="250px"><span class="text-weight-normal text-sm">Ação</span></th>
-			<th><span class="text-weight-normal text-sm">Detalhamento</span></th>
+			<th>Módulo</th>
+			<th>Ação</th>
+			<th>Detalhamento</th>
 		</tr>
 	</thead>
-	<tbody class="log-viewer">
+	<tbody class="">
 	  <?
 						for($i=0;$i<count($d);$i++)
 						{
@@ -74,12 +74,14 @@ logger("Acesso","Logs");
 								default:
 										$icon = "";
 							}
+							unset($data);
+							$data = explode(" ",formataData($d[$i]['timestamp'],1));
 							echo "<tr>";
-								echo "<td>".$d[$i]['name']."</td>";
-								echo "<td>".formataData($d[$i]['timestamp'],1)."</td>";
+								echo "<td nowrap>".$d[$i]['name']."</td>";
+								echo "<td>{$data[0]}<br><small>{$data[1]}</small></td>";
 							//	echo "<td>".$d[$i]['ip']."</td>";
-								echo "<td>".$d[$i]['module']."</td>";
-								echo "<td>".$d[$i]['action']."</td>";
+								echo "<td nowrap>".$d[$i]['module']."</td>";
+								echo "<td nowrap>".$d[$i]['action']."</td>";
 								echo "<td>".($d[$i]['obs']!="Null"?$d[$i]['obs']:"")."</td>";
 							echo "</tr>";
 						}

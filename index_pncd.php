@@ -11,9 +11,13 @@
 		<meta charset="UTF-8">
 
 		<title>SISTEMAS DIGITAIS</title>
+		<meta http-equiv="Pragma" content="no-cache">
+		<meta http-equiv="Expires" content="-1">
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="keywords" content="GESTÃO CONTROLE CONVÊNIO" />
 		<meta name="description" content="SISTEMA DE GESTÃO INTERNO">
-		<meta name="author" content="">
+		<meta name="author" content="PMJ-SEPUD">
 
 		<!-- Mobile Metas -->
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -47,7 +51,7 @@
 				integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
 				crossorigin=""></script>
 
-		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
 
 		<!-- Theme CSS -->
 		<link rel="stylesheet" href="assets/stylesheets/theme.css" />
@@ -63,56 +67,24 @@
 
 
 		<link  href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
-		<link  href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css" rel="stylesheet" />
-
-		<link rel='stylesheet' type='text/css' href='https://api.tomtom.com/maps-sdk-for-web/cdn/5.x/5.36.1/maps/maps.css'>
-
-
-		<link rel='stylesheet' type='text/css' href='https://cdn.jsdelivr.net/datatables.mark.js/2.0.0/datatables.mark.min.css'>
-
-
 
 
 		<style>
-			.select2-container { width: 100% !important;}
-
 			.select2-selection__rendered {line-height: 32px !important;	}
 			.select2-selection 					 {height: 34px !important;		  }
-
-
 			.box_shadow
 			{
 			  -webkit-box-shadow: 10px 10px 56px -12px rgba(0,0,0,0.3);
 			  -moz-box-shadow: 10px 10px 56px -12px rgba(0,0,0,0.3);
 			  box-shadow: 10px 10px 56px -12px rgba(0,0,0,0.3);
 			}
-			.box_radius_10
-			{
-				-webkit-border-radius: 10px;-moz-border-radius: 10px;border-radius: 10px;
-			}
 		</style>
 	</head>
 	<body>
+		<div id="wrap">
+   		Aguarde, Carregando aplicativo...
+		</div>
 
-		<section class="body">
-					<? require_once("sistema/menu_top.php"); ?>
-					<div class="inner-wrapper">
-								  <?
-										 if($_SESSION['origem'] != "devops"){ require_once("sistema/menu_esq.php");}
-										 														    else{ require_once("sistema/menu_esq_dev.php");}
-									?>
-								<div id="wrap">
-									<?
-									 if($_SESSION['origem'] != "devops")
-									 {
-												require_once("sistema/conteudo.php");
-									 }else{
-												require_once("sistema/conteudo_dev.php");
-										}
-									?>
-								</div>
-					</div>
-		</section>
 		<!-- Vendor -->
 		<script src="assets/vendor/jquery/jquery.js"></script>
 		<script src="assets/vendor/jquery-browser-mobile/jquery.browser.mobile.js"></script>
@@ -133,9 +105,9 @@
 		<script src="assets/vendor/flot/jquery.flot.pie.js"></script>
 		<script src="assets/vendor/flot/jquery.flot.categories.js"></script>
 		<script src="assets/vendor/flot/jquery.flot.resize.js"></script>
-		<script src="assets/vendor/jquery-sparkline/jquery.sparkline.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
 		<script src="assets/vendor/gauge/gauge.js"></script>
 		<script src="assets/vendor/snap-svg/snap.svg.js"></script>
 		<script src="assets/vendor/liquid-meter/liquid.meter.js"></script>
@@ -151,10 +123,9 @@
 		<script src="assets/vendor/pnotify/pnotify.custom.js"></script>
 		<script src="assets/vendor/intercooler/intercooler-0.4.8.js"></script>
 		<script src="assets/vendor/jquery-mockjax/jquery.mockjax.js"></script>
+		<script src="assets/vendor/gauge/gauge.js"></script>
 
-
-		<!--<script src="https://oss.maxcdn.com/jquery.form/3.50/jquery.form.min.js"></script>-->
-		<script src="https://cdn.jsdelivr.net/gh/jquery-form/form@4.3.0/dist/jquery.form.min.js" integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn" crossorigin="anonymous"></script>
+	<!--	<script src="https://oss.maxcdn.com/jquery.form/3.50/jquery.form.min.js"></script> -->
 
 
 
@@ -169,106 +140,56 @@
 
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/i18n/pt-BR.min.js" integrity="sha512-H1yBoUnrE7X+NeWpeZvBuy2RvrbvLEAEjX/Mu8L2ggUBja62g1z49fAboGidE5YEQyIVMCWJC9krY4/KEqkgag==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<!--
-		<script src="assets/vendor/jquery-datatables/media/js/jquery.dataTables.js"></script>
-		<script src="assets/vendor/jquery-datatables/extras/TableTools/js/dataTables.tableTools.min.js"></script>
-		<script src="assets/vendor/jquery-datatables-bs3/assets/js/datatables.js"></script>
--->
-
-<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.bootstrap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.print.min.js"></script>
 
 
-		<!--<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>-->
-		<script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/g/mark.js(jquery.mark.min.js)"></script>
-		<script src="https://cdn.datatables.net/plug-ins/1.10.13/features/mark.js/datatables.mark.js"></script>
+		<script src="assets/javascripts/jquery.mask.min.js"></script>
 
 
-
-<!--
-		<script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.html5.min.js"></script>
-
+		<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+		<script src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"></script>
+		<script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.bootstrap.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-
--->
-
-
+		<script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.html5.min.js"></script>
+		<script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.print.min.js"></script>
 
 
-		<!--<script src="assets/javascripts/jquery-html5-uploader/jquery.html5uploader.js"></script>-->
+				<!--<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>-->
+				<script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
+				<script src="https://cdn.jsdelivr.net/g/mark.js(jquery.mark.min.js)"></script>
+				<script src="https://cdn.datatables.net/plug-ins/1.10.13/features/mark.js/datatables.mark.js"></script>
 
-		<script src="https://api.tomtom.com/maps-sdk-for-web/cdn/5.x/5.36.1/maps/maps-web.min.js"></script>
-		<script src="https://api.tomtom.com/maps-sdk-for-web/cdn/5.x/5.36.1/services/services-web.min.js"></script>
 
 		<!-- Examples -->
 		<!--<script src="assets/javascripts/dashboard/examples.dashboard.js"></script>-->
-		<script src="assets/javascripts/jquery.mask.min.js"></script>
-
-		<script src="https://code.highcharts.com/highcharts.js"></script>
-
-
-
 
 
 
 <script>
-		(function( $ ) {
-			'use strict';
-
-			var stack_bar_top = {"dir1": "down", "dir2": "right", "push": "top", "spacing1": 0, "spacing2": 0};
-		<? if( $_SESSION['system_messages']['titulo'] != ""){ ?>
-					var notice = new PNotify({
-						title: '<?=$_SESSION['system_messages']['titulo']?>',
-						text: '<?=$_SESSION['system_messages']['texto'];?>',
-						type: '<?=$_SESSION['system_messages']['tipo'];?>',
-						addclass: 'stack-bar-top',
-						stack: stack_bar_top,
-						width: "100%",
-						shadow: true,
-						hide: true,
-						delay: 1000,
-						closer: true
-					});
-		<? } ?>
-		}).apply( this, [ jQuery ]);
 
 
-		<?
-				if($_GET['url'])
-				{
-						echo  "$('#wrap').load('".base64_decode($_GET['url'])."');";
-				}
-		?>
+		$('#wrap').load('ses/mobile_rds.php');
+
 
 
 		$(document.body).on('click', 'a' ,function(event)
 		{
-			var url           = $(this).attr('href');
-			var ajax          = $(this).attr('ajax');
-			var alvo          = $(this).attr('alvo');
-			var menuautoclose = $(this).attr('menuautoclose');
+			var url    = $(this).attr('href');
+			var ajax   = $(this).attr('ajax');
+			var alvo   = $(this).attr('alvo');
 
-			if(url != "#" && (typeof ajax === "undefined") && (typeof url !== "undefined"))
+			if(url != "#" && (typeof ajax === "undefined"))
 			{
-				//$('#wrap').load(url);
-				//$('#wrap').load(url,function(){}).hide().fadeIn();
-				//Fechar o menu quando estiver no dispositivo móvel ou de pequena resolução
-				//if( $("#menu_bt_top").is(":visible")){ $("#menu_bt_top").click(); }
-				if(menuautoclose == "true" && $("#menu_bt_top").is(":visible")){ $("#menu_bt_top").click(); }
 				$('#wrap').load(url);
 				return false;
 			}
 		});
+
+
+
+
+
 
 		var inProgress = false;
 		$(document.body).on('submit', 'form', function(event)
@@ -306,6 +227,7 @@
 				return false;
 				}
 		});
+
 
 </script>
 
